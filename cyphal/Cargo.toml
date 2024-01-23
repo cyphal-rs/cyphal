@@ -1,0 +1,6 @@
+[package]
+name = "cyphal"
+version = "0.0.1"
+edition = "2021"
+description = "Open Cyphal Rust Implementation"
+license = "AGPL-3.0-or-later"

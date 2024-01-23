@@ -4,7 +4,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Unit tests",
+            "name": "Test Cyphal",
             "cargo": {
                 "args": [
                     "test",
@@ -18,7 +18,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/cyphal"
         }
     ]
 }

@@ -1,0 +1,26 @@
+name: Continuous Integration
+on: [push, pull_request]
+
+jobs:
+  ci:
+    name: Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy, rustfmt
+
+    - name: Build
+      run: cargo build
+
+    - name: Run tests
+      run: cargo test
+  
+    - name: Analyze your code
+      run: cargo clippy -- --deny=warnings
+
+    - name: Verify formatting
+      run: cargo fmt --check
