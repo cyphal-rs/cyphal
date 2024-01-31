@@ -6,8 +6,8 @@ pub enum TransferKind {
 }
 
 pub trait Transfer {
-    fn priority(self) -> Priority;
-    fn id(self) -> TransferId;
-    fn source(self) -> NodeId;
-    fn kind(self) -> TransferKind;
+    fn priority(&self) -> Priority;
+    fn id(&self) -> TransferId;
+    fn source(&self) -> NodeId;
+    fn kind(&self) -> TransferKind;
 }

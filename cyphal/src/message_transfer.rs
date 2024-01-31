@@ -8,25 +8,25 @@ pub struct MessageTransfer {
 }
 
 impl MessageTransfer {
-    pub fn subject(self) -> SubjectId {
+    pub fn subject(&self) -> SubjectId {
         self.subject
     }
 }
 
 impl Transfer for MessageTransfer {
-    fn priority(self) -> Priority {
+    fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn id(self) -> TransferId {
+    fn id(&self) -> TransferId {
         self.id
     }
 
-    fn source(self) -> NodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 
-    fn kind(self) -> TransferKind {
+    fn kind(&self) -> TransferKind {
         TransferKind::Message
     }
 }

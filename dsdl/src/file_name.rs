@@ -96,22 +96,22 @@ impl FileName {
         })
     }
 
-    pub fn port_id(self) -> Result<u32> {
+    pub fn port_id(&self) -> Result<u32> {
         match self.port_id {
             0 => Err(DsdlError::NotDefined),
             _ => Ok(self.port_id),
         }
     }
 
-    pub fn short_name(self) -> String {
-        self.short_name
+    pub fn short_name(&self) -> String {
+        self.short_name.clone()
     }
 
-    pub fn minor_version(self) -> u32 {
+    pub fn minor_version(&self) -> u32 {
         self.minor_version
     }
 
-    pub fn major_version(self) -> u32 {
+    pub fn major_version(&self) -> u32 {
         self.major_version
     }
 }

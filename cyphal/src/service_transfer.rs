@@ -8,25 +8,25 @@ pub struct ServiceTransfer {
 }
 
 impl ServiceTransfer {
-    pub fn service(self) -> NodeId {
+    pub fn service(&self) -> NodeId {
         self.service
     }
 }
 
 impl Transfer for ServiceTransfer {
-    fn priority(self) -> Priority {
+    fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn id(self) -> TransferId {
+    fn id(&self) -> TransferId {
         self.id
     }
 
-    fn source(self) -> NodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 
-    fn kind(self) -> TransferKind {
+    fn kind(&self) -> TransferKind {
         TransferKind::Service
     }
 }

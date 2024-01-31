@@ -13,6 +13,9 @@ pub use message_transfer::MessageTransfer;
 mod priority;
 pub use priority::Priority;
 
+mod node;
+pub use node::Node;
+
 mod service_transfer;
 pub use service_transfer::ServiceTransfer;
 
