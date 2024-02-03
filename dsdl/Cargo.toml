@@ -1,9 +1,11 @@
 [package]
 name = "dsdl"
-version = "0.0.1"
-edition = "2021"
 description = "Open Cyphal DSDL Rust Implementation"
-license = "AGPL-3.0-or-later"
+edition = "2021"
+readme = "README.md"
+repository = "https://github.com/sigmasystems/cyphal"
+license = "MIT OR Apache-2.0"
+version = "0.0.1"
 
 [dependencies]
 

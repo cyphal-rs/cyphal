@@ -1,4 +1,4 @@
-# Open Cyphal Rust implementation
+# Open Cyphal DSDL Rust implementation
 
 ## License
 
