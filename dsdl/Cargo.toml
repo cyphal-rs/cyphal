@@ -5,7 +5,7 @@ edition = "2021"
 readme = "README.md"
 repository = "https://github.com/sigmasystems/cyphal"
 license = "MIT OR Apache-2.0"
-version = "0.0.1"
+version = "0.0.2"
 
 [dependencies]
 cyphal = { version = "0.0.2", path = "../cyphal" }
