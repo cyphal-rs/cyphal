@@ -44,12 +44,11 @@ impl FileName {
             .collect();
 
         // mnake sure the number of components is correct
-        let has_port: bool;
-        match pieces.len() {
-            5 => has_port = true,
-            4 => has_port = false,
+        let has_port = match pieces.len() {
+            5 => true,
+            4 => false,
             _ => return Err(DsdlError::FileName(ERROR_FORMAT.to_string())),
-        }
+        };
 
         let mut position = 0;
 
@@ -59,7 +58,7 @@ impl FileName {
             match pieces[position].parse::<u32>() {
                 Ok(value) => {
                     port_id = value;
-                    position = position + 1;
+                    position += 1;
                 }
                 Err(_) => return Err(DsdlError::FileName(ERROR_PORT_ID.to_string())),
             }
@@ -67,26 +66,23 @@ impl FileName {
 
         // get short name
         let short_name = pieces[position].to_string();
-        position = position + 1;
+        position += 1;
 
         // get major version
         let major_version: u32;
         match pieces[position].parse::<u32>() {
             Ok(value) => {
                 major_version = value;
-                position = position + 1;
+                position += 1;
             }
             Err(_) => return Err(DsdlError::FileName(ERROR_MAJOR_VERSION.to_string())),
         }
 
         // get minor version
-        let minor_version: u32;
-        match pieces[position].parse::<u32>() {
-            Ok(value) => {
-                minor_version = value;
-            }
+        let minor_version: u32 = match pieces[position].parse::<u32>() {
+            Ok(value) => value,
             Err(_) => return Err(DsdlError::FileName(ERROR_MINOR_VERSION.to_string())),
-        }
+        };
 
         Ok(FileName {
             port_id,

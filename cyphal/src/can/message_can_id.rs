@@ -54,14 +54,14 @@ impl CanId for MessageCanId {
 
         // set anonymous bit 24
         if self.anonymous {
-            result = result | 1 << 24;
+            result |= 1 << 24;
         }
 
         // set reserved bits 21 and 22
-        result = result | 0x3 << 21;
+        result |= 0x3 << 21;
 
         // set subject id bits 8 to 20
-        result = result | (self.subject_id as u32) << 8;
+        result |= (self.subject_id as u32) << 8;
 
         // set source node id bits 0 to 7
         result | (self.source as u32)
