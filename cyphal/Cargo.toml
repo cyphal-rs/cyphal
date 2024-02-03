@@ -2,7 +2,7 @@
 name = "cyphal"
 description = "Open Cyphal Rust Implementation"
 categories = ["embedded", "hardware-support", "no-std"]
-keywords = ["CAN", "Drone", "UAV", "UAVCAN", OpenCyphal]
+keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/sigmasystems/cyphal"
