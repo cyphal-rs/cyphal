@@ -4,12 +4,13 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Test Cyphal",
+            "name": "cyphal",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
+                    "--all-features",
                     "--package=cyphal"
                 ],
                 "filter": {
@@ -19,6 +20,26 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}/cyphal"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "dsdl",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--all-features",
+                    "--package=dsdl"
+                ],
+                "filter": {
+                    "name": "dsdl",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/dsdl"
         }
     ]
 }

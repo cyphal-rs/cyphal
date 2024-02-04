@@ -14,13 +14,13 @@ jobs:
         components: clippy, rustfmt
 
     - name: Build
-      run: cargo build
+      run: cargo build --all-features
 
     - name: Run tests
-      run: cargo test
+      run: cargo test --all-features
   
     - name: Analyze your code
-      run: cargo clippy -- --deny=warnings
+      run: cargo clippy --all-features -- --deny=warnings
 
     - name: Verify formatting
-      run: cargo fmt --check
+      run: cargo fmt --all --check

@@ -1,7 +1,12 @@
 #![no_std]
 
+#[cfg(feature = "can")]
 pub mod can;
+
+#[cfg(feature = "serial")]
 pub mod serial;
+
+#[cfg(feature = "udp")]
 pub mod udp;
 
 mod error;

@@ -1,5 +1,11 @@
 # Open Cyphal Rust implementation
 
+## Optional Cargo features
+
+- **`can`**: Enables the CAN (controller area network) features
+- **`serial`**: Enables the Serial features
+- **`udp`**: Enables the UDP (user datagram protocol) features
+
 ## License
 
 Licensed under either of

@@ -8,3 +8,8 @@ readme = "README.md"
 repository = "https://github.com/sigmasystems/cyphal"
 license = "MIT OR Apache-2.0"
 version = "0.0.2"
+
+[features]
+can = []
+serial = []
+udp = []
