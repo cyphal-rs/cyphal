@@ -70,11 +70,10 @@ impl CanId for MessageCanId {
 
 #[cfg(test)]
 mod test {
-    use crate::{can::CanId, Priority};
+    extern crate std;
 
     use super::MessageCanId;
-
-    extern crate std;
+    use crate::{can::CanId, Priority};
 
     #[test]
     #[allow(non_snake_case)]
