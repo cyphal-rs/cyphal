@@ -41,27 +41,27 @@ fn main() {
         BufWriter::new(file)
     };
 
-    write!(file, "pub(crate) const CRC_TABLE: CrcTable = CrcTable([\n")
+    writeln!(file, "pub(crate) const CRC_TABLE: CrcTable = CrcTable([")
         .expect("Unable to write crc table");
 
     for row in table {
         write!(file, "[").expect("Unable to write crc table");
 
         for (i, element) in row.iter().enumerate() {
-            write!(file, "{}", element.to_string()).expect("Unable to write crc table");
+            write!(file, "{}", element).expect("Unable to write crc table");
 
             if i == row.len() - 1 {
-                write!(file, "\n").expect("Unable to write crc table");
+                writeln!(file).expect("Unable to write crc table");
             } else if (i + 1) % 6 == 0 {
-                write!(file, ",\n").expect("Unable to write crc table");
+                writeln!(file, ",").expect("Unable to write crc table");
             } else {
                 write!(file, ", ").expect("Unable to write crc table");
             }
         }
-        write!(file, "],\n").expect("Unable to write crc table");
+        writeln!(file, "],").expect("Unable to write crc table");
     }
 
-    write!(file, "]);\n").expect("Unable to write crc table");
+    writeln!(file, "]);").expect("Unable to write crc table");
 
     println!("cargo:rerun-if-changed=build.rs");
 }
