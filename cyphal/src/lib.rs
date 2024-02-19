@@ -3,6 +3,9 @@
 #[cfg(feature = "can")]
 pub mod can;
 
+#[cfg(any(feature = "serial", feature = "udp"))]
+pub mod crc;
+
 #[cfg(feature = "serial")]
 pub mod serial;
 
