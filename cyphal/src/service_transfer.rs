@@ -1,10 +1,14 @@
-use crate::{NodeId, Priority, Transfer, TransferId, TransferKind};
+extern crate alloc;
+use alloc::boxed::Box;
+
+use crate::{crc::crc32c, NodeId, Priority, Transfer, TransferId, TransferKind};
 
 pub struct ServiceTransfer {
     priority: Priority,
     service: NodeId,
     id: TransferId,
     source: NodeId,
+    payload: Box<[u8]>,
 }
 
 impl ServiceTransfer {
@@ -26,7 +30,18 @@ impl Transfer for ServiceTransfer {
         self.id
     }
 
+    fn crc(&self) -> Option<u32> {
+        #[cfg(any(feature = "serial", feature = "udp"))]
+        crc32c(&self.payload);
+
+        None
+    }
+
     fn kind(&self) -> TransferKind {
         TransferKind::Service
+    }
+
+    fn payload(&self) -> &[u8] {
+        &self.payload
     }
 }

@@ -8,11 +8,11 @@ use core::ptr::NonNull;
 use core::{cmp, slice};
 
 #[inline]
-pub fn crc32c(data: &[u8]) -> u32 {
+pub(crate) fn crc32c(data: &[u8]) -> u32 {
     crc32c_append(0, data)
 }
 
-pub fn crc32c_append(crc: u32, buffer: &[u8]) -> u32 {
+pub(crate) fn crc32c_append(crc: u32, buffer: &[u8]) -> u32 {
     let mut crc = u64::from(!crc);
 
     let (start, mid, end) = split(buffer);
