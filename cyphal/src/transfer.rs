@@ -1,4 +1,4 @@
-use crate::{NodeId, Priority, TransferId};
+use crate::{Priority, TransferId};
 
 pub enum TransferKind {
     Message,
@@ -8,6 +8,5 @@ pub enum TransferKind {
 pub trait Transfer {
     fn priority(&self) -> Priority;
     fn id(&self) -> TransferId;
-    fn source(&self) -> NodeId;
     fn kind(&self) -> TransferKind;
 }

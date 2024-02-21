@@ -11,6 +11,10 @@ impl ServiceTransfer {
     pub fn service(&self) -> NodeId {
         self.service
     }
+
+    pub fn source(&self) -> NodeId {
+        self.source
+    }
 }
 
 impl Transfer for ServiceTransfer {
@@ -20,10 +24,6 @@ impl Transfer for ServiceTransfer {
 
     fn id(&self) -> TransferId {
         self.id
-    }
-
-    fn source(&self) -> NodeId {
-        self.source
     }
 
     fn kind(&self) -> TransferKind {

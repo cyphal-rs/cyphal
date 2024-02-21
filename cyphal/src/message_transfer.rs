@@ -4,10 +4,14 @@ pub struct MessageTransfer {
     priority: Priority,
     subject: u64,
     id: TransferId,
-    source: NodeId,
+    source: Option<NodeId>,
 }
 
 impl MessageTransfer {
+    pub fn source(&self) -> Option<NodeId> {
+        self.source
+    }
+
     pub fn subject(&self) -> SubjectId {
         self.subject
     }
@@ -20,10 +24,6 @@ impl Transfer for MessageTransfer {
 
     fn id(&self) -> TransferId {
         self.id
-    }
-
-    fn source(&self) -> NodeId {
-        self.source
     }
 
     fn kind(&self) -> TransferKind {
