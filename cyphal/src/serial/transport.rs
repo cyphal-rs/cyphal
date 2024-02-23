@@ -1,13 +1,15 @@
-use crate::{MessageTransfer, Transfer};
+use crate::{Box, MessageTransfer, NodeId, Priority, SubjectId};
 
 pub struct Transport {}
 
 impl crate::Transport for Transport {
-    fn new_message_transfer(&self) -> MessageTransfer {
-        todo!()
-    }
-
-    fn send(&self, _: &dyn Transfer) -> &dyn Transfer {
+    fn send_message(
+        &mut self,
+        _: Priority,
+        _: SubjectId,
+        _: Option<NodeId>,
+        _: Box<[u8]>,
+    ) -> MessageTransfer {
         todo!()
     }
 }

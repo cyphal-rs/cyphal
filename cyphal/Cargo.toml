@@ -17,3 +17,6 @@ udp = []
 [dependencies]
 embedded-can = "0.4.1"
 embedded-io = "0.6.1"
+
+[dev-dependencies]
+socketcan = { version = "3.3.0", features = ["tokio"] }

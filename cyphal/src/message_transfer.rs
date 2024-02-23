@@ -12,6 +12,22 @@ pub struct MessageTransfer {
 }
 
 impl MessageTransfer {
+    pub(crate) fn new(
+        priority: Priority,
+        subject: SubjectId,
+        id: TransferId,
+        source: Option<NodeId>,
+        payload: Box<[u8]>,
+    ) -> MessageTransfer {
+        MessageTransfer {
+            priority,
+            subject,
+            id,
+            source,
+            payload,
+        }
+    }
+
     pub fn source(&self) -> Option<NodeId> {
         self.source
     }
@@ -31,10 +47,7 @@ impl Transfer for MessageTransfer {
     }
 
     fn crc(&self) -> Option<u32> {
-        #[cfg(any(feature = "serial", feature = "udp"))]
-        crc32c(&self.payload);
-
-        None
+        Some(crc32c(&self.payload))
     }
 
     fn kind(&self) -> TransferKind {
