@@ -1,2 +1,2 @@
 mod transport;
-pub use transport::Transport;
+pub use transport::SerialTransport;

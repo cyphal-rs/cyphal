@@ -1,8 +1,8 @@
 use crate::{Box, MessageTransfer, NodeId, Priority, SubjectId};
 
-pub struct Transport {}
+pub struct UdpTransport {}
 
-impl crate::Transport for Transport {
+impl crate::Transport for UdpTransport {
     fn send_message(
         &mut self,
         _: Priority,

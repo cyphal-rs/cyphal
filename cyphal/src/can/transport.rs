@@ -1,12 +1,12 @@
 use crate::{Box, MessageTransfer, NodeId, Priority, Result, SubjectId, TransferId};
 use embedded_can::nb::Can;
 
-pub struct Transport {
+pub struct CanTransport {
     next_transfer_id: TransferId,
 }
 
-impl Transport {
-    pub fn new<C: Can>(_: C) -> Result<Transport> {
+impl CanTransport {
+    pub fn new<C: Can>(_: C) -> Result<CanTransport> {
         todo!()
     }
 
@@ -19,7 +19,7 @@ impl Transport {
     }
 }
 
-impl crate::Transport for Transport {
+impl crate::Transport for CanTransport {
     fn send_message(
         &mut self,
         priority: Priority,
@@ -34,6 +34,7 @@ impl crate::Transport for Transport {
 
 #[cfg(test)]
 mod test {
+    use super::CanTransport;
     use crate::{Box, Priority, Transport};
 
     extern crate socketcan;
@@ -43,7 +44,7 @@ mod test {
     #[ignore = "not implemented"]
     fn create_transport() {
         let can = CanSocket::open("vcan0").expect("Could not open can socket");
-        let mut transport = super::Transport::new(can).expect("Could not create transport");
+        let mut transport = CanTransport::new(can).expect("Could not create transport");
         let _ = transport.send_message(Priority::Nominal, 1, Some(2), Box::new([]));
     }
 }
