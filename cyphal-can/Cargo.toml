@@ -1,5 +1,5 @@
 [package]
-name = "cyphal"
+name = "cyphal-can"
 description = "Open Cyphal Rust Implementation"
 categories = ["embedded", "hardware-support", "no-std"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
@@ -10,6 +10,7 @@ license = "MIT OR Apache-2.0"
 version = "0.0.2"
 
 [features]
-crc = []
 
 [dependencies]
+cyphal = { version = "0.0.2", path = "../cyphal" }
+embedded-can = "0.4.1"

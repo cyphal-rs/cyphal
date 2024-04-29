@@ -1,41 +1,62 @@
-use crate::{Box, MessageTransfer, NodeId, Priority};
+use crate::{MessageTransfer, NodeId, Priority, Result, SubjectId};
 
 pub trait Transport {
-    fn send_message(
-        &mut self,
+    fn new_message_transfer<'a, const PAYLOAD_SIZE: usize, T, M>(
+        &self,
         priority: Priority,
-        subject: u64,
+        subject: SubjectId,
         source: Option<NodeId>,
-        payload: Box<[u8]>,
-    ) -> MessageTransfer;
+        payload: [u8; PAYLOAD_SIZE],
+    ) -> Result<M>
+    where
+        T: Transport,
+        M: MessageTransfer<'a, PAYLOAD_SIZE, T>;
+
+    fn transmit_message<'a, const PAYLOAD_SIZE: usize, T, M>(&self, message: &M) -> Result<()>
+    where
+        T: Transport,
+        M: MessageTransfer<'a, PAYLOAD_SIZE, T>;
 }
 
 #[cfg(test)]
-mod test {
-    extern crate alloc;
-    use alloc::boxed::Box;
+pub(crate) mod test {
+    use crate::{MessageTransfer, TransferId, Transport};
 
-    use crate::{MessageTransfer, NodeId, Priority, TransferId, Transport};
-
-    struct FakeTransport {
+    pub struct FakeTransport {
         transfer_id: TransferId,
     }
 
-    impl Transport for FakeTransport {
-        fn send_message(
-            &mut self,
-            priority: Priority,
-            subject: u64,
-            source: Option<NodeId>,
-            payload: Box<[u8]>,
-        ) -> crate::MessageTransfer {
-            MessageTransfer::new(priority, subject, self.transfer_id, source, payload)
+    impl FakeTransport {
+        pub fn new() -> Self {
+            FakeTransport { transfer_id: 0 }
         }
     }
 
-    #[test]
-    fn send() {
-        let mut transport = FakeTransport { transfer_id: 1 };
-        let _ = transport.send_message(Priority::Nominal, 1, None, Box::new([]));
+    impl Transport for FakeTransport {
+        fn new_message_transfer<'a, const PAYLOAD_SIZE: usize, T, M>(
+            &self,
+            priority: crate::Priority,
+            subject: crate::SubjectId,
+            source: Option<crate::NodeId>,
+            payload: [u8; PAYLOAD_SIZE],
+        ) -> crate::Result<M>
+        where
+            T: Transport,
+            M: MessageTransfer<'a, PAYLOAD_SIZE, T>,
+        {
+            todo!()
+        }
+
+        fn transmit_message<'a, const PAYLOAD_SIZE: usize, T, M>(
+            &self,
+            message: &M,
+        ) -> crate::Result<()>
+        where
+            T: Transport,
+            M: MessageTransfer<'a, PAYLOAD_SIZE, T>,
+        {
+            let _ = message.payload();
+            Ok(())
+        }
     }
 }

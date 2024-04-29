@@ -1,7 +1,5 @@
 {
     "rust-analyzer.cargo.features": [
-        "can",
-        "serial",
-        "udp"
+        "crc"
     ]
 }

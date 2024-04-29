@@ -1,47 +1,71 @@
-extern crate alloc;
-use alloc::boxed::Box;
+// // #[cfg(feature = "crc")]
+// // use crate::crc::crc32c;
 
-use crate::{crc::crc32c, NodeId, Priority, Transfer, TransferId, TransferKind};
+// use crate::{NodeId, Priority, TransferId};
 
-pub struct ServiceTransfer {
-    priority: Priority,
-    service: NodeId,
-    id: TransferId,
-    source: NodeId,
-    payload: Box<[u8]>,
-}
+// pub trait ServiceTransfer {
+//     fn service(&self) -> NodeId;
 
-impl ServiceTransfer {
-    pub fn service(&self) -> NodeId {
-        self.service
-    }
+//     fn source(&self) -> NodeId;
 
-    pub fn source(&self) -> NodeId {
-        self.source
-    }
-}
+//     fn priority(&self) -> Priority;
 
-impl Transfer for ServiceTransfer {
-    fn priority(&self) -> Priority {
-        self.priority
-    }
+//     fn id(&self) -> TransferId;
 
-    fn id(&self) -> TransferId {
-        self.id
-    }
+//     fn payload(&self) -> &[u8];
+// }
 
-    fn crc(&self) -> Option<u32> {
-        #[cfg(any(feature = "serial", feature = "udp"))]
-        crc32c(&self.payload);
+// #[cfg(test)]
+// mod test {
+//     use crate::{NodeId, Priority, TransferId};
 
-        None
-    }
+//     pub struct MockServiceTransfer {
+//         priority: Priority,
+//         service: NodeId,
+//         id: TransferId,
+//         source: NodeId,
+//         payload: [u8; 1],
+//     }
 
-    fn kind(&self) -> TransferKind {
-        TransferKind::Service
-    }
+//     impl MockServiceTransfer {
+//         pub fn new(
+//             priority: Priority,
+//             service: NodeId,
+//             source: NodeId,
+//             payload: &[u8; 1],
+//         ) -> MockServiceTransfer {
+//             MockServiceTransfer {
+//                 priority,
+//                 service,
+//                 id: 0,
+//                 source,
+//                 payload: *payload,
+//             }
+//         }
 
-    fn payload(&self) -> &[u8] {
-        &self.payload
-    }
-}
+//         pub fn service(&self) -> NodeId {
+//             self.service
+//         }
+
+//         pub fn source(&self) -> NodeId {
+//             self.source
+//         }
+
+//         pub fn priority(&self) -> Priority {
+//             self.priority
+//         }
+
+//         pub fn id(&self) -> TransferId {
+//             self.id
+//         }
+
+//         // #[cfg(feature = "crc")]
+//         // fn crc(&self) -> u32 {
+//         //     crc32c(&self.payload)
+//         // }
+
+//         pub fn payload(&self) -> &[u8] {
+//             &self.payload
+//         }
+//     }
+// }

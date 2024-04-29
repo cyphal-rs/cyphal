@@ -1,12 +1,9 @@
 #![no_std]
 
-extern crate alloc;
-use alloc::boxed::Box;
-
 #[cfg(feature = "can")]
 pub mod can;
 
-#[cfg(any(feature = "serial", feature = "udp"))]
+#[cfg(feature = "crc")]
 pub mod crc;
 
 #[cfg(feature = "serial")]
@@ -27,11 +24,8 @@ pub use priority::Priority;
 mod node;
 pub use node::Node;
 
-mod service_transfer;
-pub use service_transfer::ServiceTransfer;
-
-mod transfer;
-pub use transfer::{Transfer, TransferKind};
+// mod service_transfer;
+// pub use service_transfer::ServiceTransfer;
 
 mod transport;
 pub use transport::Transport;
