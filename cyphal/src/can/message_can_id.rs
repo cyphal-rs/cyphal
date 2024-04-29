@@ -1,5 +1,4 @@
-use crate::CanId;
-use cyphal::{Priority, Result};
+use crate::{can::CanId, Priority, Result};
 
 pub struct MessageCanId {
     anonymous: bool,
@@ -73,8 +72,10 @@ impl CanId for MessageCanId {
 mod test {
     extern crate std;
 
-    use crate::{CanId, MessageCanId};
-    use cyphal::Priority;
+    use crate::{
+        can::{CanId, MessageCanId},
+        Priority,
+    };
 
     #[test]
     #[allow(non_snake_case)]

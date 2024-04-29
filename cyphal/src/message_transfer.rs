@@ -1,17 +1,12 @@
-// #[cfg(feature = "crc")]
-// use crate::crc::crc32c;
+use crate::{NodeId, Priority, Result, SubjectId};
 
-use crate::{NodeId, Priority, Result, SubjectId, TransferId, Transport};
-
-pub trait MessageTransfer<'a, const PAYLOAD_SIZE: usize, T: Transport> {
+pub trait MessageTransfer<const PAYLOAD_SIZE: usize>: Sized {
     fn new(
-        transport: &'a T,
-        id: TransferId,
         priority: Priority,
         subject: SubjectId,
         source: Option<NodeId>,
         payload: [u8; PAYLOAD_SIZE],
-    ) -> Self;
+    ) -> Result<Self>;
 
     fn source(&self) -> Option<NodeId>;
 
@@ -19,48 +14,38 @@ pub trait MessageTransfer<'a, const PAYLOAD_SIZE: usize, T: Transport> {
 
     fn priority(&self) -> Priority;
 
-    fn id(&self) -> TransferId;
-
     fn payload(&self) -> &[u8];
-
-    fn transmit(&self) -> Result<()>;
 }
 
 #[cfg(test)]
 pub(crate) mod test {
     use crate::{
-        transport::test::FakeTransport, MessageTransfer, NodeId, Priority, SubjectId, TransferId,
+        transport::test::FakeTransport, MessageTransfer, NodeId, Priority, Result, SubjectId,
         Transport,
     };
 
-    pub struct MockMessageTransfer<'a, const PAYLOAD_SIZE: usize, T: Transport> {
-        transport: &'a T,
-        id: TransferId,
+    pub struct MockMessageTransfer<const PAYLOAD_SIZE: usize> {
         priority: Priority,
         subject: u64,
         source: Option<NodeId>,
         payload: [u8; PAYLOAD_SIZE],
     }
 
-    impl<'a, const PAYLOAD_SIZE: usize, T: Transport> MessageTransfer<'a, PAYLOAD_SIZE, T>
-        for MockMessageTransfer<'a, PAYLOAD_SIZE, T>
+    impl<const PAYLOAD_SIZE: usize> MessageTransfer<PAYLOAD_SIZE>
+        for MockMessageTransfer<PAYLOAD_SIZE>
     {
         fn new(
-            transport: &'a T,
-            id: TransferId,
             priority: Priority,
             subject: SubjectId,
             source: Option<NodeId>,
             payload: [u8; PAYLOAD_SIZE],
-        ) -> Self {
-            Self {
-                transport,
-                id,
+        ) -> Result<Self> {
+            Ok(Self {
                 priority,
                 subject,
                 source,
                 payload,
-            }
+            })
         }
 
         fn source(&self) -> Option<NodeId> {
@@ -75,29 +60,18 @@ pub(crate) mod test {
             self.priority
         }
 
-        fn id(&self) -> TransferId {
-            self.id
-        }
-
-        // #[cfg(feature = "crc")]
-        // fn crc(&self) -> u32 {
-        //     crc32c(&self.payload)
-        // }
-
         fn payload(&self) -> &[u8] {
             &self.payload
-        }
-
-        fn transmit(&self) -> crate::Result<()> {
-            self.transport.transmit_message(self)
         }
     }
 
     #[test]
     fn new() {
-        let transport = FakeTransport::new();
-        let transfer = MockMessageTransfer::new(&transport, 1, Priority::Nominal, 1, None, [0]);
-
+        let transfer = MockMessageTransfer::new(Priority::Nominal, 1, None, [0]).unwrap();
         assert_eq!(transfer.payload().len(), 1);
+
+        let mut transport = FakeTransport::new();
+        let id = transport.transmit_message(&transfer).unwrap();
+        assert_eq!(id, 1);
     }
 }

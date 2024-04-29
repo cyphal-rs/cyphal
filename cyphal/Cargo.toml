@@ -10,6 +10,8 @@ license = "MIT OR Apache-2.0"
 version = "0.0.2"
 
 [features]
+can = []
 crc = []
 
 [dependencies]
+embedded-can = "0.4.1"

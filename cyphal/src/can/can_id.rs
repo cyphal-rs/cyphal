@@ -1,4 +1,4 @@
-use cyphal::Priority;
+use crate::Priority;
 
 pub trait CanId {
     fn as_raw(&self) -> u32;

@@ -6,12 +6,6 @@ pub mod can;
 #[cfg(feature = "crc")]
 pub mod crc;
 
-#[cfg(feature = "serial")]
-pub mod serial;
-
-#[cfg(feature = "udp")]
-pub mod udp;
-
 mod error;
 pub use error::{CyphalError, Result};
 

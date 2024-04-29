@@ -1,8 +1,7 @@
-use crate::Can;
-use cyphal::{Result, TransferId, Transport};
+use crate::{can::Can, MessageTransfer, Result, TransferId, Transport};
 
 pub struct CanTransport<C: Can> {
-    next_transfer_id: TransferId,
+    transfer_id: TransferId,
     can: C,
 }
 
@@ -12,17 +11,15 @@ where
 {
     pub fn new(can: C) -> Result<CanTransport<C>> {
         Ok(CanTransport {
-            next_transfer_id: 0,
+            transfer_id: 0,
             can,
         })
     }
 
     fn next_transfer_id(&mut self) -> TransferId {
-        let transfer_id = self.next_transfer_id;
+        self.transfer_id += 1;
 
-        self.next_transfer_id += 1;
-
-        transfer_id
+        self.transfer_id
     }
 }
 
@@ -30,32 +27,22 @@ impl<C> Transport for CanTransport<C>
 where
     C: Can,
 {
-    fn new_message_transfer<'a, const PAYLOAD_SIZE: usize, T, M>(
-        &self,
-        priority: cyphal::Priority,
-        subject: cyphal::SubjectId,
-        source: Option<cyphal::NodeId>,
-        payload: [u8; PAYLOAD_SIZE],
-    ) -> Result<M>
+    fn transmit_message<const PAYLOAD_SIZE: usize, M>(&mut self, message: &M) -> Result<TransferId>
     where
-        T: Transport,
-        M: cyphal::MessageTransfer<'a, PAYLOAD_SIZE, T>,
+        M: MessageTransfer<PAYLOAD_SIZE>,
     {
-        todo!()
-    }
+        let id = self.next_transfer_id();
 
-    fn transmit_message<'a, const PAYLOAD_SIZE: usize, T, M>(&self, message: &M) -> Result<()>
-    where
-        T: Transport,
-        M: cyphal::MessageTransfer<'a, PAYLOAD_SIZE, T>,
-    {
-        todo!()
+        //TODO: send payload
+        let _ = message.payload();
+
+        Ok(id)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::Can;
+    use crate::can::Can;
 
     struct FakeFrame {}
     impl embedded_can::Frame for FakeFrame {

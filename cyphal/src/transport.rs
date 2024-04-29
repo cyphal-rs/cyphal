@@ -1,26 +1,14 @@
-use crate::{MessageTransfer, NodeId, Priority, Result, SubjectId};
+use crate::{MessageTransfer, Result, TransferId};
 
 pub trait Transport {
-    fn new_message_transfer<'a, const PAYLOAD_SIZE: usize, T, M>(
-        &self,
-        priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
-        payload: [u8; PAYLOAD_SIZE],
-    ) -> Result<M>
+    fn transmit_message<const PAYLOAD_SIZE: usize, M>(&mut self, message: &M) -> Result<TransferId>
     where
-        T: Transport,
-        M: MessageTransfer<'a, PAYLOAD_SIZE, T>;
-
-    fn transmit_message<'a, const PAYLOAD_SIZE: usize, T, M>(&self, message: &M) -> Result<()>
-    where
-        T: Transport,
-        M: MessageTransfer<'a, PAYLOAD_SIZE, T>;
+        M: MessageTransfer<PAYLOAD_SIZE>;
 }
 
 #[cfg(test)]
 pub(crate) mod test {
-    use crate::{MessageTransfer, TransferId, Transport};
+    use crate::{MessageTransfer, Result, TransferId, Transport};
 
     pub struct FakeTransport {
         transfer_id: TransferId,
@@ -30,33 +18,25 @@ pub(crate) mod test {
         pub fn new() -> Self {
             FakeTransport { transfer_id: 0 }
         }
+
+        fn next_transfer_id(&mut self) -> TransferId {
+            self.transfer_id += 1;
+
+            self.transfer_id
+        }
     }
 
     impl Transport for FakeTransport {
-        fn new_message_transfer<'a, const PAYLOAD_SIZE: usize, T, M>(
-            &self,
-            priority: crate::Priority,
-            subject: crate::SubjectId,
-            source: Option<crate::NodeId>,
-            payload: [u8; PAYLOAD_SIZE],
-        ) -> crate::Result<M>
-        where
-            T: Transport,
-            M: MessageTransfer<'a, PAYLOAD_SIZE, T>,
-        {
-            todo!()
-        }
-
-        fn transmit_message<'a, const PAYLOAD_SIZE: usize, T, M>(
-            &self,
+        fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+            &mut self,
             message: &M,
-        ) -> crate::Result<()>
+        ) -> Result<TransferId>
         where
-            T: Transport,
-            M: MessageTransfer<'a, PAYLOAD_SIZE, T>,
+            M: MessageTransfer<PAYLOAD_SIZE>,
         {
             let _ = message.payload();
-            Ok(())
+
+            Ok(self.next_transfer_id())
         }
     }
 }

@@ -1,5 +1,4 @@
-use crate::CanId;
-use cyphal::Priority;
+use crate::{can::CanId, Priority};
 
 pub struct ServiceCanId {
     anonymous: bool,
