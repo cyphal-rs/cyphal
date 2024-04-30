@@ -3,14 +3,15 @@ on: [push, pull_request]
 
 jobs:
   ci:
-    name: Pipeline
+    name: CI
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - uses: dtolnay/rust-toolchain@1.75
+    - uses: dtolnay/rust-toolchain@stable
       with:
+        toolchain: 1.75.0
         components: clippy, rustfmt
 
     - name: Check with no features
@@ -33,3 +34,7 @@ jobs:
 
     - name: Verify formatting
       run: cargo fmt --package cyphal --check
+
+    - name: Publish package
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      run: cargo publish --package cyphal --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
