@@ -1,6 +1,13 @@
+![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
+
 # Open Cyphal DSDL Rust implementation
 
 Rust library for manipulating OpenCyphal DSDL (data structure description language) files
+
+## Minimum Supported Rust Version (MSRV)
+
+This crate is guaranteed to compile on stable Rust 1.75 and up. It *might*
+compile with older versions but that may change in any new patch release.
 
 ## License
 

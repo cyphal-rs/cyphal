@@ -1,10 +1,19 @@
-# Open Cyphal Rust implementation
+![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
+
+# Cyphal
+
+Open Cyphal Rust Implementation
 
 ## Optional Cargo features
 
-- **`can`**: Enables the CAN (controller area network) features
-- **`serial`**: Enables the Serial features
-- **`udp`**: Enables the UDP (user datagram protocol) features
+- **`can`**: Enables the CAN (controller area network) feature
+- **`socketcan`**: Enables the Socketcan feature which in turn enables the `can` feature
+- **`crc`**: Enables the CRC feature
+
+## Minimum Supported Rust Version (MSRV)
+
+This crate is guaranteed to compile on stable Rust 1.75 and up. It *might*
+compile with older versions but that may change in any new patch release.
 
 ## License
 
