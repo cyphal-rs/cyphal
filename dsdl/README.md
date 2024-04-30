@@ -1,5 +1,3 @@
-![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
-
 # Open Cyphal DSDL Rust implementation
 
 Rust library for manipulating OpenCyphal DSDL (data structure description language) files

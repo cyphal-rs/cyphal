@@ -1,4 +1,5 @@
-![CI](https://github.com/cyphal-rs/cyphal/workflows/Cyphal%20CI/badge.svg)
+![CI](https://github.com/cyphal-rs/cyphal/workflows/CI/badge.svg?branch=master)
+![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
 
 # Cyphal
 
@@ -6,10 +7,10 @@ Open Cyphal Rust Implementation
 
 ## Crates
 
-| Source | Build | crates.io | Docs | Description |
+| Source | crates.io | Docs | Description |
 |-|-|-|-|-|
-| [cyphal](./cyphal) | ![CI](https://github.com/cyphal-rs/cyphal/workflows/Cyphal%20CI/badge.svg) | [![crates.io](https://img.shields.io/crates/v/cyphal.svg)](https://crates.io/crates/cyphal) | [![Documentation](https://docs.rs/cyphal/badge.svg)](https://docs.rs/cyphal) | OpenCyphal Rust Implementation |
-| [dsdl](./dsdl) | ![CI](https://github.com/cyphal-rs/cyphal/workflows/DSDL%20CI/badge.svg) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | [![Documentation](https://docs.rs/dsdl/badge.svg)](https://docs.rs/dsdl) | OpenCyphal DSDL Rust Implementation |
+| [cyphal](./cyphal) | [![crates.io](https://img.shields.io/crates/v/cyphal.svg)](https://crates.io/crates/cyphal) | [![Documentation](https://docs.rs/cyphal/badge.svg)](https://docs.rs/cyphal) | OpenCyphal Rust Implementation |
+| [dsdl](./dsdl) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | [![Documentation](https://docs.rs/dsdl/badge.svg)](https://docs.rs/dsdl) | OpenCyphal DSDL Rust Implementation |
 
 ## License
 

@@ -1,5 +1,3 @@
-![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
-
 # Cyphal
 
 Open Cyphal Rust Implementation
