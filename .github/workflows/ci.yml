@@ -13,8 +13,17 @@ jobs:
       with:
         components: clippy, rustfmt
 
-    - name: Build
-      run: cargo build --all-features
+    - name: Check with no features
+      run: cargo check
+
+    - name: Check with can feature
+      run: cargo check --features "can"
+
+    - name: Check with socketcan feature
+      run: cargo check --features "socketcan"
+
+    - name: Check with socketcan crc
+      run: cargo check --features "crc"
 
     - name: Run tests
       run: cargo test --all-features
