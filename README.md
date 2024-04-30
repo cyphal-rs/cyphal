@@ -8,7 +8,7 @@ Open Cyphal Rust Implementation
 ## Crates
 
 | Source | crates.io | Docs | Description |
-|-|-|-|-|-|
+|-|-|-|-|
 | [cyphal](./cyphal) | [![crates.io](https://img.shields.io/crates/v/cyphal.svg)](https://crates.io/crates/cyphal) | [![Documentation](https://docs.rs/cyphal/badge.svg)](https://docs.rs/cyphal) | OpenCyphal Rust Implementation |
 | [dsdl](./dsdl) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | [![Documentation](https://docs.rs/dsdl/badge.svg)](https://docs.rs/dsdl) | OpenCyphal DSDL Rust Implementation |
 
