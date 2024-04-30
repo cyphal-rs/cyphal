@@ -1,4 +1,4 @@
-name: Cyphay CI
+name: Cyphal CI
 on: [push, pull_request]
 
 jobs:
