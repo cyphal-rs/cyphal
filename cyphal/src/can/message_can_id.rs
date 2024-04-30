@@ -1,4 +1,4 @@
-use crate::{can::CanId, Priority, Result};
+use crate::{can::CanId, CyphalResult, Priority};
 
 pub struct MessageCanId {
     anonymous: bool,
@@ -8,7 +8,7 @@ pub struct MessageCanId {
 }
 
 impl MessageCanId {
-    pub fn new(priority: Priority, source: u8, subject_id: u16) -> Result<Self> {
+    pub fn new(priority: Priority, source: u8, subject_id: u16) -> CyphalResult<Self> {
         Ok(MessageCanId {
             anonymous: false,
             priority,
@@ -17,7 +17,7 @@ impl MessageCanId {
         })
     }
 
-    pub fn new_anonymous(priority: Priority, source: u8, subject_id: u16) -> Result<Self> {
+    pub fn new_anonymous(priority: Priority, source: u8, subject_id: u16) -> CyphalResult<Self> {
         Ok(MessageCanId {
             anonymous: true,
             priority,

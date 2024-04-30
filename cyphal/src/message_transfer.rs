@@ -1,4 +1,4 @@
-use crate::{NodeId, Priority, Result, SubjectId};
+use crate::{CyphalResult, NodeId, Priority, SubjectId};
 
 pub trait MessageTransfer<const PAYLOAD_SIZE: usize>: Sized {
     fn new(
@@ -6,7 +6,7 @@ pub trait MessageTransfer<const PAYLOAD_SIZE: usize>: Sized {
         subject: SubjectId,
         source: Option<NodeId>,
         payload: [u8; PAYLOAD_SIZE],
-    ) -> Result<Self>;
+    ) -> CyphalResult<Self>;
 
     fn source(&self) -> Option<NodeId>;
 
@@ -20,11 +20,11 @@ pub trait MessageTransfer<const PAYLOAD_SIZE: usize>: Sized {
 #[cfg(test)]
 pub(crate) mod test {
     use crate::{
-        transport::test::FakeTransport, MessageTransfer, NodeId, Priority, Result, SubjectId,
+        transport::test::FakeTransport, CyphalResult, MessageTransfer, NodeId, Priority, SubjectId,
         Transport,
     };
 
-    pub struct MockMessageTransfer<const PAYLOAD_SIZE: usize> {
+    pub struct FakeMessageTransfer<const PAYLOAD_SIZE: usize> {
         priority: Priority,
         subject: u64,
         source: Option<NodeId>,
@@ -32,14 +32,14 @@ pub(crate) mod test {
     }
 
     impl<const PAYLOAD_SIZE: usize> MessageTransfer<PAYLOAD_SIZE>
-        for MockMessageTransfer<PAYLOAD_SIZE>
+        for FakeMessageTransfer<PAYLOAD_SIZE>
     {
         fn new(
             priority: Priority,
             subject: SubjectId,
             source: Option<NodeId>,
             payload: [u8; PAYLOAD_SIZE],
-        ) -> Result<Self> {
+        ) -> CyphalResult<Self> {
             Ok(Self {
                 priority,
                 subject,
@@ -67,7 +67,7 @@ pub(crate) mod test {
 
     #[test]
     fn new() {
-        let transfer = MockMessageTransfer::new(Priority::Nominal, 1, None, [0]).unwrap();
+        let transfer = FakeMessageTransfer::new(Priority::Nominal, 1, None, [0]).unwrap();
         assert_eq!(transfer.payload().len(), 1);
 
         let mut transport = FakeTransport::new();

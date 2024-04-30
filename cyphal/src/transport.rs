@@ -1,14 +1,17 @@
-use crate::{MessageTransfer, Result, TransferId};
+use crate::{CyphalResult, MessageTransfer, TransferId};
 
 pub trait Transport {
-    fn transmit_message<const PAYLOAD_SIZE: usize, M>(&mut self, message: &M) -> Result<TransferId>
+    fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+        &mut self,
+        message: &M,
+    ) -> CyphalResult<TransferId>
     where
         M: MessageTransfer<PAYLOAD_SIZE>;
 }
 
 #[cfg(test)]
 pub(crate) mod test {
-    use crate::{MessageTransfer, Result, TransferId, Transport};
+    use crate::{CyphalResult, MessageTransfer, TransferId, Transport};
 
     pub struct FakeTransport {
         transfer_id: TransferId,
@@ -30,7 +33,7 @@ pub(crate) mod test {
         fn transmit_message<const PAYLOAD_SIZE: usize, M>(
             &mut self,
             message: &M,
-        ) -> Result<TransferId>
+        ) -> CyphalResult<TransferId>
         where
             M: MessageTransfer<PAYLOAD_SIZE>,
         {

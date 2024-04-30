@@ -1,4 +1,15 @@
+use embedded_can::{Error as EmbeddedError, ErrorKind};
+
+#[derive(Debug)]
 pub enum CanError {
-    InvalidSource,
-    InvalidSubjectId,
+    #[cfg(feature = "socketcan")]
+    Socketcan(),
 }
+
+impl EmbeddedError for CanError {
+    fn kind(&self) -> ErrorKind {
+        todo!()
+    }
+}
+
+pub type CanResult<T> = core::result::Result<T, CanError>;

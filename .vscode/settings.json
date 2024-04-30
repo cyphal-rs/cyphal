@@ -1,6 +1,7 @@
 {
     "rust-analyzer.cargo.features": [
         "can",
-        "crc"
+        "crc",
+        "socketcan"
     ]
 }

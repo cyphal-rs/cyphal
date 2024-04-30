@@ -1,4 +1,5 @@
-use crate::{can::Can, MessageTransfer, Result, TransferId, Transport};
+use crate::{can::Can, CyphalError, CyphalResult, MessageTransfer, TransferId, Transport};
+use embedded_can::{ExtendedId, Frame};
 
 pub struct CanTransport<C: Can> {
     transfer_id: TransferId,
@@ -9,7 +10,7 @@ impl<C> CanTransport<C>
 where
     C: Can,
 {
-    pub fn new(can: C) -> Result<CanTransport<C>> {
+    pub fn new(can: C) -> CyphalResult<CanTransport<C>> {
         Ok(CanTransport {
             transfer_id: 0,
             can,
@@ -27,14 +28,39 @@ impl<C> Transport for CanTransport<C>
 where
     C: Can,
 {
-    fn transmit_message<const PAYLOAD_SIZE: usize, M>(&mut self, message: &M) -> Result<TransferId>
+    fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+        &mut self,
+        message: &M,
+    ) -> CyphalResult<TransferId>
     where
         M: MessageTransfer<PAYLOAD_SIZE>,
     {
         let id = self.next_transfer_id();
 
         //TODO: send payload
-        let _ = message.payload();
+        let mut payload = message.payload();
+        while payload.len() > 64 {
+            let pieces = payload.split_at(64);
+            payload = pieces.1;
+
+            let option = ExtendedId::new(0);
+            match option {
+                Some(id) => {
+                    let option = Frame::new(id, pieces.0);
+                    match option {
+                        Some(frame) => {
+                            let result = self.can.transmit(&frame);
+                            match result {
+                                Ok(_) => {}
+                                Err(e) => return Err(CyphalError::CanError(e)),
+                            }
+                        }
+                        None => return Err(CyphalError::NotDefined),
+                    }
+                }
+                None => return Err(CyphalError::NotDefined),
+            }
+        }
 
         Ok(id)
     }
@@ -42,7 +68,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::can::Can;
+    use crate::can::{Can, CanResult};
 
     struct FakeFrame {}
     impl embedded_can::Frame for FakeFrame {
@@ -90,11 +116,11 @@ mod test {
 
         type Error = FakeError;
 
-        fn transmit(&mut self, _: &Self::Frame) -> Result<(), Self::Error> {
+        fn transmit(&mut self, _: &Self::Frame) -> CanResult<()> {
             Ok(())
         }
 
-        fn receive(&mut self) -> Result<Self::Frame, Self::Error> {
+        fn receive(&mut self) -> CanResult<Self::Frame> {
             todo!()
         }
     }

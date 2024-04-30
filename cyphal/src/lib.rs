@@ -7,7 +7,7 @@ pub mod can;
 pub mod crc;
 
 mod error;
-pub use error::{CyphalError, Result};
+pub use error::{CyphalError, CyphalResult};
 
 mod message_transfer;
 pub use message_transfer::MessageTransfer;
