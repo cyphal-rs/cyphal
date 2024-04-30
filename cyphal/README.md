@@ -2,6 +2,8 @@
 
 Open Cyphal Rust Implementation
 
+🚧 *Work in progress*
+
 ## Optional Cargo features
 
 - **`can`**: Enables the CAN (controller area network) feature

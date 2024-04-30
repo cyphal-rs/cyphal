@@ -2,6 +2,8 @@
 
 Rust library for manipulating OpenCyphal DSDL (data structure description language) files
 
+🚧 *Work in progress*
+
 ## Minimum Supported Rust Version (MSRV)
 
 This crate is guaranteed to compile on stable Rust 1.75 and up. It *might*

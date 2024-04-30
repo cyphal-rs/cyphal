@@ -5,6 +5,8 @@
 
 Open Cyphal Rust Implementation
 
+🚧 *Work in progress*
+
 ## Crates
 
 | Source | crates.io | Docs | Description |
