@@ -1,36 +1,42 @@
-use crate::{can::CanId, CyphalResult, Priority};
+use crate::{can::CanId, CyphalResult, NodeId, Priority, SubjectId};
+use embedded_can::{ExtendedId, Id};
 
+#[derive(Clone, Copy, Debug)]
 pub struct MessageCanId {
     anonymous: bool,
     priority: Priority,
-    source: u8,
-    subject_id: u16,
+    source: NodeId,
+    subject_id: SubjectId,
 }
 
 impl MessageCanId {
-    pub fn new(priority: Priority, source: u8, subject_id: u16) -> CyphalResult<Self> {
-        Ok(MessageCanId {
-            anonymous: false,
-            priority,
-            source,
-            subject_id,
-        })
-    }
-
-    pub fn new_anonymous(priority: Priority, source: u8, subject_id: u16) -> CyphalResult<Self> {
-        Ok(MessageCanId {
-            anonymous: true,
-            priority,
-            source,
-            subject_id,
-        })
+    pub fn new(
+        priority: Priority,
+        source: Option<NodeId>,
+        subject_id: SubjectId,
+    ) -> CyphalResult<Self> {
+        match source {
+            Some(s) => Ok(MessageCanId {
+                anonymous: false,
+                priority,
+                source: s,
+                subject_id,
+            }),
+            none => Ok(MessageCanId {
+                anonymous: true,
+                priority,
+                //TODO: generate a pseudorandom pseudo-ID value for source
+                source: 0,
+                subject_id,
+            }),
+        }
     }
 
     pub fn anonymous(&self) -> bool {
         self.anonymous
     }
 
-    pub fn subject_id(&self) -> u16 {
+    pub fn subject_id(&self) -> SubjectId {
         self.subject_id
     }
 }
@@ -44,7 +50,7 @@ impl CanId for MessageCanId {
         false
     }
 
-    fn source(&self) -> u8 {
+    fn source(&self) -> NodeId {
         self.source
     }
 
@@ -68,13 +74,19 @@ impl CanId for MessageCanId {
     }
 }
 
+impl Into<Id> for MessageCanId {
+    fn into(self) -> Id {
+        Id::Extended(ExtendedId::new(self.as_raw()).unwrap())
+    }
+}
+
 #[cfg(test)]
 mod test {
     extern crate std;
 
     use crate::{
         can::{CanId, MessageCanId},
-        Priority,
+        NodeId, Priority, SubjectId,
     };
 
     #[test]
@@ -82,11 +94,11 @@ mod test {
     fn test_0x107D552A() {
         // Arrange
         let priority = Priority::Nominal;
-        let source: u8 = 42;
-        let subject_id: u16 = 7509;
+        let source: NodeId = 42;
+        let subject_id: SubjectId = 7509;
 
         // Act
-        let target = MessageCanId::new(priority, source, subject_id).unwrap();
+        let target = MessageCanId::new(priority, Some(source), subject_id).unwrap();
 
         // Assert
         assert!(!target.anonymous());

@@ -1,11 +1,11 @@
-use crate::{can::CanId, Priority};
+use crate::{can::CanId, NodeId, Priority};
 
 pub struct ServiceCanId {
     anonymous: bool,
     destination: u8,
     priority: Priority,
     service_id: u8,
-    source: u8,
+    source: NodeId,
 }
 
 impl ServiceCanId {
@@ -31,7 +31,7 @@ impl CanId for ServiceCanId {
         true
     }
 
-    fn source(&self) -> u8 {
+    fn source(&self) -> NodeId {
         self.source
     }
 

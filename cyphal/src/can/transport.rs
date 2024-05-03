@@ -1,6 +1,8 @@
 use crate::{can::Can, CyphalError, CyphalResult, MessageTransfer, TransferId, Transport};
 use embedded_can::{ExtendedId, Frame};
 
+use super::MessageCanId;
+
 pub struct CanTransport<C: Can> {
     transfer_id: TransferId,
     can: C,
@@ -37,25 +39,21 @@ where
     {
         let id = self.next_transfer_id();
 
+        let can_id =
+            MessageCanId::new(message.priority(), message.source(), message.subject()).unwrap();
         //TODO: send payload
         let mut payload = message.payload();
         while payload.len() > 64 {
             let pieces = payload.split_at(64);
             payload = pieces.1;
 
-            let option = ExtendedId::new(0);
+            let option = Frame::new(can_id, pieces.0);
             match option {
-                Some(id) => {
-                    let option = Frame::new(id, pieces.0);
-                    match option {
-                        Some(frame) => {
-                            let result = self.can.transmit(&frame);
-                            match result {
-                                Ok(_) => {}
-                                Err(e) => return Err(CyphalError::CanError(e)),
-                            }
-                        }
-                        None => return Err(CyphalError::NotDefined),
+                Some(frame) => {
+                    let result = self.can.transmit(&frame);
+                    match result {
+                        Ok(_) => {}
+                        Err(e) => return Err(CyphalError::CanError(e)),
                     }
                 }
                 None => return Err(CyphalError::NotDefined),
