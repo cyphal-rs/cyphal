@@ -22,7 +22,7 @@ impl MessageCanId {
                 source: s,
                 subject_id,
             }),
-            none => Ok(MessageCanId {
+            None => Ok(MessageCanId {
                 anonymous: true,
                 priority,
                 //TODO: generate a pseudorandom pseudo-ID value for source

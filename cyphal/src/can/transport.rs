@@ -1,5 +1,5 @@
 use crate::{can::Can, CyphalError, CyphalResult, MessageTransfer, TransferId, Transport};
-use embedded_can::{ExtendedId, Frame};
+use embedded_can::Frame;
 
 use super::MessageCanId;
 
