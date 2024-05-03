@@ -1,14 +1,7 @@
-use crate::{CyphalResult, NodeId, Priority, SubjectId};
+use crate::{NodeId, Priority, SubjectId};
 
-pub trait Message<const PAYLOAD_SIZE: usize>: Sized {
-    type Payload;
-
-    fn new(
-        priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
-        payload: Self::Payload,
-    ) -> CyphalResult<Self>;
+pub trait Message<const N: usize>: Sized {
+    type Payload: Sized;
 
     fn source(&self) -> Option<NodeId>;
 
@@ -33,14 +26,12 @@ pub(crate) mod test {
         payload: [u8; 1],
     }
 
-    impl Message<1> for MockMessage {
-        type Payload = [u8; 1];
-
-        fn new(
+    impl MockMessage {
+        pub fn new(
             priority: Priority,
             subject: SubjectId,
             source: Option<NodeId>,
-            payload: Self::Payload,
+            payload: [u8; 1],
         ) -> CyphalResult<Self> {
             Ok(Self {
                 priority,
@@ -49,17 +40,21 @@ pub(crate) mod test {
                 payload,
             })
         }
+    }
 
-        fn source(&self) -> Option<NodeId> {
-            self.source
+    impl Message<1> for MockMessage {
+        type Payload = [u8; 1];
+
+        fn priority(&self) -> Priority {
+            self.priority
         }
 
         fn subject(&self) -> SubjectId {
             self.subject
         }
 
-        fn priority(&self) -> Priority {
-            self.priority
+        fn source(&self) -> Option<NodeId> {
+            self.source
         }
 
         fn payload(&self) -> &[u8] {
@@ -74,14 +69,12 @@ pub(crate) mod test {
         payload: [u8; 65],
     }
 
-    impl Message<65> for MockLargeMessage {
-        type Payload = [u8; 65];
-
-        fn new(
+    impl MockLargeMessage {
+        pub fn new(
             priority: Priority,
             subject: SubjectId,
             source: Option<NodeId>,
-            payload: Self::Payload,
+            payload: [u8; 65],
         ) -> CyphalResult<Self> {
             Ok(Self {
                 priority,
@@ -90,6 +83,10 @@ pub(crate) mod test {
                 payload,
             })
         }
+    }
+
+    impl Message<65> for MockLargeMessage {
+        type Payload = [u8; 65];
 
         fn source(&self) -> Option<NodeId> {
             self.source
@@ -114,7 +111,7 @@ pub(crate) mod test {
         assert_eq!(message.payload().len(), 1);
 
         let mut transport = MockTransport::new();
-        let id = transport.transmit_message(&message).unwrap();
-        assert_eq!(id, 1);
+        transport.publish(&message).unwrap();
+        assert_eq!(transport.transfer_id, 1);
     }
 }

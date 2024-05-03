@@ -1,12 +1,12 @@
-use crate::{can::CanId, NodeId, Priority};
+use crate::{can::CanId, NodeId, Priority, ServiceId};
 use embedded_can::{ExtendedId, Id};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct ServiceCanId {
     anonymous: bool,
-    destination: u8,
+    destination: NodeId,
     priority: Priority,
-    service_id: u8,
+    service_id: ServiceId,
     source: NodeId,
 }
 
@@ -15,11 +15,11 @@ impl ServiceCanId {
         self.anonymous
     }
 
-    pub fn destination(&self) -> u8 {
+    pub fn destination(&self) -> NodeId {
         self.destination
     }
 
-    pub fn service_id(&self) -> u8 {
+    pub fn service_id(&self) -> ServiceId {
         self.service_id
     }
 }

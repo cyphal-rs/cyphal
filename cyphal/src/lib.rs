@@ -18,12 +18,13 @@ pub use priority::Priority;
 mod node;
 pub use node::Node;
 
-// mod service_transfer;
-// pub use service_transfer::ServiceTransfer;
+mod service;
+pub use service::{Request, Response};
 
 mod transport;
 pub use transport::Transport;
 
 pub type SubjectId = u64;
 pub type TransferId = u64;
-pub type NodeId = u64;
+pub type NodeId = u8;
+pub type ServiceId = u16;

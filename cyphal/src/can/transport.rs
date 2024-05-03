@@ -31,11 +31,8 @@ impl<C> Transport for CanTransport<C>
 where
     C: Can,
 {
-    fn transmit_message<const PAYLOAD_SIZE: usize>(
-        &mut self,
-        message: &impl Message<PAYLOAD_SIZE>,
-    ) -> CyphalResult<TransferId> {
-        let transfer_id = self.next_transfer_id();
+    fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+        let _ = self.next_transfer_id();
         let can_id =
             MessageCanId::new(message.priority(), message.source(), message.subject()).unwrap();
 
@@ -64,7 +61,14 @@ where
             }
         }
 
-        Ok(transfer_id)
+        Ok(())
+    }
+
+    fn invoque<const N: usize, const M: usize, R: crate::Request<N, M>>(
+        &mut self,
+        _: &R,
+    ) -> CyphalResult<R::Response> {
+        todo!()
     }
 }
 
@@ -73,7 +77,7 @@ mod test {
     use crate::{
         can::{Can, CanResult, CanTransport},
         message::test::{MockLargeMessage, MockMessage},
-        Message, Priority, Transport,
+        Priority, Transport,
     };
 
     struct MockFrame {}
@@ -140,9 +144,8 @@ mod test {
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
         let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
-        let transfer_id = transport.transmit_message(&message).unwrap();
+        transport.publish(&message).unwrap();
 
-        assert_eq!(transfer_id, 1);
         assert_eq!(transport.can.sent_frames, 1);
     }
 
@@ -152,9 +155,8 @@ mod test {
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
         let message = MockLargeMessage::new(Priority::Nominal, 1, None, [0; 65]).unwrap();
-        let transfer_id = transport.transmit_message(&message).unwrap();
+        transport.publish(&message).unwrap();
 
-        assert_eq!(transfer_id, 1);
         assert_eq!(transport.can.sent_frames, 2);
     }
 }
