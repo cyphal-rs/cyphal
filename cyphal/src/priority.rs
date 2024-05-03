@@ -1,6 +1,6 @@
 use crate::CyphalError;
 
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum Priority {
     Exceptional = 0,
     Immediate = 1,

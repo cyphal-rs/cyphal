@@ -1,5 +1,7 @@
 use crate::{can::CanId, NodeId, Priority};
+use embedded_can::{ExtendedId, Id};
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct ServiceCanId {
     anonymous: bool,
     destination: u8,
@@ -37,5 +39,11 @@ impl CanId for ServiceCanId {
 
     fn as_raw(&self) -> u32 {
         todo!()
+    }
+}
+
+impl Into<Id> for ServiceCanId {
+    fn into(self) -> Id {
+        Id::Extended(ExtendedId::new(self.as_raw()).unwrap())
     }
 }

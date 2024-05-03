@@ -9,8 +9,8 @@ pub mod crc;
 mod error;
 pub use error::{CyphalError, CyphalResult};
 
-mod message_transfer;
-pub use message_transfer::MessageTransfer;
+mod message;
+pub use message::Message;
 
 mod priority;
 pub use priority::Priority;

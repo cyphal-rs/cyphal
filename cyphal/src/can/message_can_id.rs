@@ -1,7 +1,7 @@
 use crate::{can::CanId, CyphalResult, NodeId, Priority, SubjectId};
 use embedded_can::{ExtendedId, Id};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct MessageCanId {
     anonymous: bool,
     priority: Priority,

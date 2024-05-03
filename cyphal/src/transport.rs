@@ -1,25 +1,23 @@
-use crate::{CyphalResult, MessageTransfer, TransferId};
+use crate::{CyphalResult, Message, TransferId};
 
 pub trait Transport {
-    fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+    fn transmit_message<const PAYLOAD_SIZE: usize>(
         &mut self,
-        message: &M,
-    ) -> CyphalResult<TransferId>
-    where
-        M: MessageTransfer<PAYLOAD_SIZE>;
+        message: &impl Message<{ PAYLOAD_SIZE }>,
+    ) -> CyphalResult<TransferId>;
 }
 
 #[cfg(test)]
 pub(crate) mod test {
-    use crate::{CyphalResult, MessageTransfer, TransferId, Transport};
+    use crate::{CyphalResult, Message, TransferId, Transport};
 
-    pub struct FakeTransport {
+    pub struct MockTransport {
         transfer_id: TransferId,
     }
 
-    impl FakeTransport {
+    impl MockTransport {
         pub fn new() -> Self {
-            FakeTransport { transfer_id: 0 }
+            MockTransport { transfer_id: 0 }
         }
 
         fn next_transfer_id(&mut self) -> TransferId {
@@ -29,14 +27,11 @@ pub(crate) mod test {
         }
     }
 
-    impl Transport for FakeTransport {
-        fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+    impl Transport for MockTransport {
+        fn transmit_message<const PAYLOAD_SIZE: usize>(
             &mut self,
-            message: &M,
-        ) -> CyphalResult<TransferId>
-        where
-            M: MessageTransfer<PAYLOAD_SIZE>,
-        {
+            message: &impl Message<PAYLOAD_SIZE>,
+        ) -> CyphalResult<TransferId> {
             let _ = message.payload();
 
             Ok(self.next_transfer_id())

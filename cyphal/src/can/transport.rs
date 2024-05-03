@@ -1,7 +1,8 @@
-use crate::{can::Can, CyphalError, CyphalResult, MessageTransfer, TransferId, Transport};
+use crate::{
+    can::{Can, CanError, MessageCanId},
+    CyphalError, CyphalResult, Message, TransferId, Transport,
+};
 use embedded_can::Frame;
-
-use super::MessageCanId;
 
 pub struct CanTransport<C: Can> {
     transfer_id: TransferId,
@@ -30,48 +31,55 @@ impl<C> Transport for CanTransport<C>
 where
     C: Can,
 {
-    fn transmit_message<const PAYLOAD_SIZE: usize, M>(
+    fn transmit_message<const PAYLOAD_SIZE: usize>(
         &mut self,
-        message: &M,
-    ) -> CyphalResult<TransferId>
-    where
-        M: MessageTransfer<PAYLOAD_SIZE>,
-    {
-        let id = self.next_transfer_id();
-
+        message: &impl Message<PAYLOAD_SIZE>,
+    ) -> CyphalResult<TransferId> {
+        let transfer_id = self.next_transfer_id();
         let can_id =
             MessageCanId::new(message.priority(), message.source(), message.subject()).unwrap();
-        //TODO: send payload
-        let mut payload = message.payload();
-        while payload.len() > 64 {
-            let pieces = payload.split_at(64);
-            payload = pieces.1;
 
-            let option = Frame::new(can_id, pieces.0);
-            match option {
-                Some(frame) => {
-                    let result = self.can.transmit(&frame);
-                    match result {
+        let mut payload = message.payload();
+        while payload.len() > 0 {
+            if payload.len() > 64 {
+                let pieces = payload.split_at(64);
+                payload = pieces.1;
+
+                match Frame::new(can_id, pieces.0) {
+                    Some(frame) => match self.can.transmit(&frame) {
                         Ok(_) => {}
                         Err(e) => return Err(CyphalError::CanError(e)),
-                    }
+                    },
+                    None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
                 }
-                None => return Err(CyphalError::NotDefined),
+            } else {
+                match Frame::new(can_id, payload) {
+                    Some(frame) => match self.can.transmit(&frame) {
+                        Ok(_) => {}
+                        Err(e) => return Err(CyphalError::CanError(e)),
+                    },
+                    None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
+                }
+                break;
             }
         }
 
-        Ok(id)
+        Ok(transfer_id)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::can::{Can, CanResult};
+    use crate::{
+        can::{Can, CanResult, CanTransport},
+        message::test::{MockLargeMessage, MockMessage},
+        Message, Priority, Transport,
+    };
 
-    struct FakeFrame {}
-    impl embedded_can::Frame for FakeFrame {
+    struct MockFrame {}
+    impl embedded_can::Frame for MockFrame {
         fn new(_: impl Into<embedded_can::Id>, _: &[u8]) -> Option<Self> {
-            todo!()
+            Some(MockFrame {})
         }
 
         fn new_remote(_: impl Into<embedded_can::Id>, _: usize) -> Option<Self> {
@@ -100,21 +108,24 @@ mod test {
     }
 
     #[derive(Debug)]
-    struct FakeError {}
-    impl embedded_can::Error for FakeError {
+    struct MockError {}
+    impl embedded_can::Error for MockError {
         fn kind(&self) -> embedded_can::ErrorKind {
             todo!()
         }
     }
 
-    struct FakeCan {}
+    struct MockCan {
+        pub sent_frames: u16,
+    }
 
-    impl Can for FakeCan {
-        type Frame = FakeFrame;
+    impl Can for MockCan {
+        type Frame = MockFrame;
 
-        type Error = FakeError;
+        type Error = MockError;
 
         fn transmit(&mut self, _: &Self::Frame) -> CanResult<()> {
+            self.sent_frames += 1;
             Ok(())
         }
 
@@ -123,11 +134,27 @@ mod test {
         }
     }
 
-    // #[test]
-    // #[ignore = "not implemented"]
-    // fn create_transport() {
-    //     let can = FakeCan {};
-    //     let mut transport = CanTransport::new(can).expect("Could not create transport");
-    //     let _ = transport.new_message_transfer(Priority::Nominal, 1, Some(2), &[0]);
-    // }
+    #[test]
+    fn transmit_small_message() {
+        let can = MockCan { sent_frames: 0 };
+        let mut transport = CanTransport::new(can).expect("Could not create transport");
+
+        let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
+        let transfer_id = transport.transmit_message(&message).unwrap();
+
+        assert_eq!(transfer_id, 1);
+        assert_eq!(transport.can.sent_frames, 1);
+    }
+
+    #[test]
+    fn transmit_large_message() {
+        let can = MockCan { sent_frames: 0 };
+        let mut transport = CanTransport::new(can).expect("Could not create transport");
+
+        let message = MockLargeMessage::new(Priority::Nominal, 1, None, [0; 65]).unwrap();
+        let transfer_id = transport.transmit_message(&message).unwrap();
+
+        assert_eq!(transfer_id, 1);
+        assert_eq!(transport.can.sent_frames, 2);
+    }
 }

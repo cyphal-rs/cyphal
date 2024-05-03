@@ -4,6 +4,7 @@ use embedded_can::{Error as EmbeddedError, ErrorKind};
 pub enum CanError {
     #[cfg(feature = "socketcan")]
     Socketcan(),
+    InvalidFrame,
 }
 
 impl EmbeddedError for CanError {
