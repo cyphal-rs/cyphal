@@ -13,17 +13,40 @@ pub trait Transport {
 pub(crate) mod test {
     use crate::{CyphalResult, Message, Request, Response, TransferId, Transport};
 
+    #[derive(Debug, Copy, Clone)]
+    pub struct MockTransferId {
+        value: u8,
+    }
+
+    impl crate::TransferId<u8> for MockTransferId {
+        fn value(&self) -> u8 {
+            self.value
+        }
+
+        fn next(&self) -> Self {
+            if self.value > 8 {
+                MockTransferId {
+                    value: self.value + 1,
+                }
+            } else {
+                MockTransferId { value: 0 }
+            }
+        }
+    }
+
     pub struct MockTransport {
-        pub transfer_id: TransferId,
+        pub transfer_id: MockTransferId,
     }
 
     impl MockTransport {
         pub fn new() -> Self {
-            MockTransport { transfer_id: 0 }
+            MockTransport {
+                transfer_id: MockTransferId { value: 0 },
+            }
         }
 
-        fn next_transfer_id(&mut self) -> TransferId {
-            self.transfer_id += 1;
+        fn next_transfer_id(&mut self) -> MockTransferId {
+            self.transfer_id = self.transfer_id.next();
 
             self.transfer_id
         }

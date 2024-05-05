@@ -1,15 +1,24 @@
-use super::CanError;
-use socketcan::{CanAnyFrame, CanFdFrame, CanFdSocket, Socket};
+use crate::can::{Can, CanError};
+use socketcan::{CanFrame, Socket};
 
-pub struct Socketcan {
-    socket: CanFdSocket,
+pub struct CanSocket {
+    socket: socketcan::CanSocket,
 }
 
-impl super::Can for Socketcan {
-    type Frame = CanFdFrame;
+impl CanSocket {
+    pub fn new(socket: socketcan::CanSocket) -> Self {
+        CanSocket { socket }
+    }
+}
+
+impl Can for CanSocket {
+    type Frame = CanFrame;
 
     type Error = CanError;
 
+    fn is_fd(&self) -> bool {
+        false
+    }
     fn transmit(&mut self, frame: &Self::Frame) -> Result<(), Self::Error> {
         let result = self.socket.write_frame(frame);
 
@@ -21,10 +30,9 @@ impl super::Can for Socketcan {
 
     fn receive(&mut self) -> Result<Self::Frame, Self::Error> {
         let result = self.socket.read_frame();
-
         match result {
             Ok(f) => match f {
-                CanAnyFrame::Fd(fd) => Ok(fd),
+                CanFrame::Data(f) => Ok(Self::Frame::from(f)),
                 _ => Err(CanError::Socketcan()),
             },
             Err(_) => Err(CanError::Socketcan()),

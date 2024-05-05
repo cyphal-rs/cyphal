@@ -1,11 +1,15 @@
+use super::{tail_byte, CanTransferId};
 use crate::{
-    can::{Can, CanError, MessageCanId},
-    CyphalError, CyphalResult, Message, TransferId, Transport,
+    can::{Can, CanError, MessageCanId, TransferId},
+    CyphalError, CyphalResult, Message, Transport,
 };
 use embedded_can::Frame;
 
+const CAN_MAX_PAYLOAD_SIZE: usize = 7;
+const CAN_FD_MAX_PAYLOAD_SIZE: usize = 63;
+
 pub struct CanTransport<C: Can> {
-    transfer_id: TransferId,
+    transfer_id: CanTransferId,
     can: C,
 }
 
@@ -15,13 +19,13 @@ where
 {
     pub fn new(can: C) -> CyphalResult<CanTransport<C>> {
         Ok(CanTransport {
-            transfer_id: 0,
+            transfer_id: CanTransferId::new(0),
             can,
         })
     }
 
-    fn next_transfer_id(&mut self) -> TransferId {
-        self.transfer_id += 1;
+    fn next_transfer_id(&mut self) -> CanTransferId {
+        self.transfer_id = self.transfer_id.next();
 
         self.transfer_id
     }
@@ -32,17 +36,27 @@ where
     C: Can,
 {
     fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
-        let _ = self.next_transfer_id();
+        let transfer_id = self.next_transfer_id();
         let can_id =
             MessageCanId::new(message.priority(), message.source(), message.subject()).unwrap();
 
-        let mut payload = message.payload();
-        while payload.len() > 0 {
-            if payload.len() > 64 {
-                let pieces = payload.split_at(64);
-                payload = pieces.1;
+        let max_payload_size = if self.can.is_fd() {
+            CAN_FD_MAX_PAYLOAD_SIZE
+        } else {
+            CAN_MAX_PAYLOAD_SIZE
+        };
+        let mut data = message.payload();
 
-                match Frame::new(can_id, pieces.0) {
+        while data.len() > 0 {
+            if data.len() > max_payload_size {
+                let pieces = data.split_at(max_payload_size);
+                data = pieces.1;
+
+                // Add tail byte
+                let t = tail_byte(true, true, true, transfer_id);
+                let payload = &[pieces.0, &[t]].concat();
+
+                match Frame::new(can_id, payload) {
                     Some(frame) => match self.can.transmit(&frame) {
                         Ok(_) => {}
                         Err(e) => return Err(CyphalError::CanError(e)),
@@ -50,7 +64,7 @@ where
                     None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
                 }
             } else {
-                match Frame::new(can_id, payload) {
+                match Frame::new(can_id, data) {
                     Some(frame) => match self.can.transmit(&frame) {
                         Ok(_) => {}
                         Err(e) => return Err(CyphalError::CanError(e)),
@@ -127,6 +141,10 @@ mod test {
         type Frame = MockFrame;
 
         type Error = MockError;
+
+        fn is_fd(&self) -> bool {
+            false
+        }
 
         fn transmit(&mut self, _: &Self::Frame) -> CanResult<()> {
             self.sent_frames += 1;

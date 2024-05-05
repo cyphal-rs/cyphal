@@ -16,7 +16,7 @@ pub trait Message<const N: usize>: Sized {
 pub(crate) mod test {
     use crate::{
         transport::test::MockTransport, CyphalResult, Message, NodeId, Priority, SubjectId,
-        Transport,
+        TransferId, Transport,
     };
 
     pub struct MockMessage {
@@ -112,6 +112,6 @@ pub(crate) mod test {
 
         let mut transport = MockTransport::new();
         transport.publish(&message).unwrap();
-        assert_eq!(transport.transfer_id, 1);
+        assert_eq!(transport.transfer_id.value(), 1);
     }
 }

@@ -21,10 +21,12 @@ pub use node::Node;
 mod service;
 pub use service::{Request, Response};
 
+mod transfer_id;
+pub use transfer_id::TransferId;
+
 mod transport;
 pub use transport::Transport;
 
 pub type SubjectId = u64;
-pub type TransferId = u64;
 pub type NodeId = u8;
 pub type ServiceId = u16;

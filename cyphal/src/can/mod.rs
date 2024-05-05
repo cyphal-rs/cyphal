@@ -11,12 +11,30 @@ mod service_can_id;
 pub use service_can_id::ServiceCanId;
 
 #[cfg(feature = "socketcan")]
-mod socketcan;
-#[cfg(feature = "socketcan")]
-pub use socketcan::Socketcan;
+pub mod socketcan;
 
 mod transport;
 pub use transport::CanTransport;
+
+mod can_transfer_id;
+pub use can_transfer_id::CanTransferId;
+
+use crate::TransferId;
+
+fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer_id: CanTransferId) -> u8 {
+    let mut tail_byte = transfer_id.value();
+    if is_start {
+        tail_byte = tail_byte | 0x80;
+    }
+    if is_end {
+        tail_byte = tail_byte | 0x40;
+    }
+    if toggle {
+        tail_byte = tail_byte | 0x20;
+    }
+
+    tail_byte
+}
 
 pub trait Can {
     /// Associated frame type.
@@ -24,6 +42,8 @@ pub trait Can {
 
     /// Associated error type.
     type Error: embedded_can::Error;
+
+    fn is_fd(&self) -> bool;
 
     /// Puts a frame in the transmit buffer. Blocks until space is available in
     /// the transmit buffer.
