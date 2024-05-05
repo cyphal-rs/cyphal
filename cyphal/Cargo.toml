@@ -11,8 +11,8 @@ version = "0.0.4"
 
 [features]
 can = ["dep:embedded-can"]
-crc = []
-socketcan = ["can", "dep:socketcan"]
+canfd = ["dep:embedded-can"]
+socketcan = ["dep:socketcan"]
 
 [dependencies]
 embedded-can = { version = "0.4.1", optional = true, default-features = false }

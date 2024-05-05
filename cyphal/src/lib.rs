@@ -1,6 +1,9 @@
 #![no_std]
 
-#[cfg(feature = "can")]
+#[cfg(all(feature = "can", feature = "canfd"))]
+compile_error!("feature \"can\" and feature \"canfd\" cannot be enabled at the same time");
+
+#[cfg(any(feature = "can", feature = "canfd"))]
 pub mod can;
 
 #[cfg(feature = "crc")]

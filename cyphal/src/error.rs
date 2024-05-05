@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum CyphalError {
-    #[cfg(feature = "can")]
+    #[cfg(any(feature = "can", feature = "canfd"))]
     CanError(crate::can::CanError),
     NotDefined,
     OutOfRange,

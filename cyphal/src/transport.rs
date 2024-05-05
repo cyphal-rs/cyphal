@@ -25,11 +25,11 @@ pub(crate) mod test {
 
         fn next(&self) -> Self {
             if self.value > 8 {
+                MockTransferId { value: 0 }
+            } else {
                 MockTransferId {
                     value: self.value + 1,
                 }
-            } else {
-                MockTransferId { value: 0 }
             }
         }
     }

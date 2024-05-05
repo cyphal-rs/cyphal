@@ -20,15 +20,18 @@ jobs:
     - name: Check with can feature
       run: cargo check --features "can"
 
-    - name: Check with socketcan feature
-      run: cargo check --features "socketcan"
+    - name: Check with socketcan feature with CAN 2.0
+      run: cargo check --features "can,socketcan"
 
-    - name: Check with socketcan crc
-      run: cargo check --features "crc"
+    - name: Check with socketcan feature with CAN FD
+      run: cargo check --features "canfd,socketcan"
 
-    - name: Run tests
-      run: cargo test --all-features
-  
+    - name: Run CAN 2.0 tests
+      run: cargo test --features "can"
+
+    - name: Run CAN FD tests
+      run: cargo test --features "canfd"
+
     - name: Analyze your code
       run: cargo clippy -- --deny=warnings
 

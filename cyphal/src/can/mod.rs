@@ -43,8 +43,6 @@ pub trait Can {
     /// Associated error type.
     type Error: embedded_can::Error;
 
-    fn is_fd(&self) -> bool;
-
     /// Puts a frame in the transmit buffer. Blocks until space is available in
     /// the transmit buffer.
     fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()>;

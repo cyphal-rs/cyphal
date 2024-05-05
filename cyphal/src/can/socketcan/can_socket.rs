@@ -16,9 +16,6 @@ impl Can for CanSocket {
 
     type Error = CanError;
 
-    fn is_fd(&self) -> bool {
-        false
-    }
     fn transmit(&mut self, frame: &Self::Frame) -> Result<(), Self::Error> {
         let result = self.socket.write_frame(frame);
 

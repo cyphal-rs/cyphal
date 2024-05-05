@@ -6,9 +6,9 @@ Open Cyphal Rust Implementation
 
 ## Optional Cargo features
 
-- **`can`**: Enables the CAN (controller area network) feature
-- **`socketcan`**: Enables the Socketcan feature which in turn enables the `can` feature
-- **`crc`**: Enables the CRC feature
+- **`can`**: Enables the CAN 2.0 feature
+- **`canfd`**: Enables the CAN FD feature
+- **`socketcan`**: Enables the Socketcan feature (requires either the `can` feature or the `canfd` feature)
 
 ## Minimum Supported Rust Version (MSRV)
 
