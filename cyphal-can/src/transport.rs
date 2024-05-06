@@ -33,7 +33,7 @@ where
     }
 
     fn send_frame(&mut self, can_id: MessageCanId, payload: &[u8]) -> CyphalResult<()> {
-        match Frame::new(can_id, &payload) {
+        match Frame::new(can_id, payload) {
             Ok(frame) => match self.can.transmit(&frame) {
                 Ok(()) => {}
                 Err(_) => return Err(CyphalError::Transport),
@@ -62,7 +62,7 @@ where
             // CRC-16/CCITT-FALSE checksum
             let checksum = CRC16.checksum(data).to_be_bytes();
 
-            while data.len() > 0 {
+            while !data.is_empty() {
                 if data.len() > PAYLOAD_SIZE - 1 {
                     let pieces = data.split_at(PAYLOAD_SIZE - 1);
                     data = pieces.1;
@@ -197,13 +197,13 @@ where
 fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer_id: CanTransferId) -> u8 {
     let mut tail_byte = transfer_id.value();
     if is_start {
-        tail_byte = tail_byte | 0x80;
+        tail_byte |= 0x80;
     }
     if is_end {
-        tail_byte = tail_byte | 0x40;
+        tail_byte |= 0x40;
     }
     if toggle {
-        tail_byte = tail_byte | 0x20;
+        tail_byte |= 0x20;
     }
 
     tail_byte
