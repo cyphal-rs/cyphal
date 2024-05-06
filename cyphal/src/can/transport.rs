@@ -7,6 +7,8 @@ use core::cmp::Ordering;
 use crc::Crc;
 use embedded_can::Frame;
 
+const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
+
 #[cfg(feature = "can")]
 const PAYLOAD_SIZE: usize = 8;
 
@@ -38,7 +40,7 @@ where
     fn send_frame(
         &mut self,
         can_id: MessageCanId,
-        payload: [u8; PAYLOAD_SIZE],
+        payload: &[u8],
     ) -> Option<Result<(), CyphalError>> {
         match Frame::new(can_id, &payload) {
             Some(frame) => match self.can.transmit(&frame) {
@@ -66,9 +68,8 @@ where
         if data.len() > PAYLOAD_SIZE - 1 {
             let mut frame_count = 1;
 
-            //TODO: add CRC-16/CCITT-FALSE
-            const X25: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
-            let checksum = X25.checksum(data).to_be_bytes();
+            // CRC-16/CCITT-FALSE checksum
+            let checksum = CRC16.checksum(data).to_be_bytes();
 
             while data.len() > 0 {
                 if data.len() > PAYLOAD_SIZE - 1 {
@@ -84,7 +85,7 @@ where
                     payload[PAYLOAD_SIZE - 1] =
                         tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer_id);
 
-                    if let Some(value) = self.send_frame(can_id, payload) {
+                    if let Some(value) = self.send_frame(can_id, &payload) {
                         return value;
                     }
                 } else {
@@ -94,16 +95,18 @@ where
                     payload[..data.len()].copy_from_slice(data);
 
                     match data.len().cmp(&(PAYLOAD_SIZE - 2)) {
-                        Ordering::Greater => {
+                        Ordering::Less => {
                             // crc 16 checksum can fit in this frame
-                            payload[PAYLOAD_SIZE - 3] = checksum[0];
-                            payload[PAYLOAD_SIZE - 2] = checksum[1];
+                            payload[data.len()] = checksum[0];
+                            payload[data.len() + 1] = checksum[1];
 
                             // add the tail byte
-                            payload[PAYLOAD_SIZE - 1] =
+                            payload[data.len() + 2] =
                                 tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, payload) {
+                            if let Some(value) =
+                                self.send_frame(can_id, &payload[..(data.len() + 3)])
+                            {
                                 return value;
                             }
 
@@ -117,51 +120,49 @@ where
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, payload) {
+                            if let Some(value) = self.send_frame(can_id, &payload) {
                                 return value;
                             }
 
                             frame_count += 1;
 
-                            let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
+                            let mut payload: [u8; 2] = [0; 2];
 
                             // the second byte of the crc 16 checksum goes in this frame
-                            payload[PAYLOAD_SIZE - 2] = checksum[1];
+                            payload[0] = checksum[1];
 
                             // add the tail byte
-                            payload[PAYLOAD_SIZE - 1] =
-                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                            payload[1] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, payload) {
+                            if let Some(value) = self.send_frame(can_id, &payload) {
                                 return value;
                             }
 
                             break;
                         }
-                        Ordering::Less => {
+                        Ordering::Greater => {
                             // crc 16 chcksum must go in another frame
 
                             // add the tail byte
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, payload) {
+                            if let Some(value) = self.send_frame(can_id, &payload) {
                                 return value;
                             }
 
                             frame_count += 1;
 
-                            let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
+                            let mut payload: [u8; 3] = [0; 3];
 
                             // the crc 16 checksum goes in this frame
-                            payload[PAYLOAD_SIZE - 3] = checksum[0];
-                            payload[PAYLOAD_SIZE - 2] = checksum[1];
+                            payload[0] = checksum[0];
+                            payload[1] = checksum[1];
 
                             // add the tail byte
-                            payload[PAYLOAD_SIZE - 1] =
-                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                            payload[2] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, payload) {
+                            if let Some(value) = self.send_frame(can_id, &payload) {
                                 return value;
                             }
 
@@ -216,6 +217,7 @@ mod test {
 
     #[derive(Debug, Copy, Clone)]
     struct MockFrame {
+        dlc: usize,
         data: [u8; PAYLOAD_SIZE],
     }
     impl Frame for MockFrame {
@@ -224,7 +226,10 @@ mod test {
                 n if n <= PAYLOAD_SIZE => {
                     let mut bytes: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
                     bytes[..n].copy_from_slice(data);
-                    Some(MockFrame { data: bytes })
+                    Some(MockFrame {
+                        dlc: data.len(),
+                        data: bytes,
+                    })
                 }
                 _ => None,
             }
@@ -298,12 +303,17 @@ mod test {
     #[test]
     #[cfg(feature = "can")]
     fn transmit_large_message() {
+        use crate::can::transport::CRC16;
+
         let can = MockCan {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let message = MockLargeMessage::new(Priority::Nominal, 1, None, [255; 65]).unwrap();
+        let data: [u8; 65] = [255; 65];
+        let checksum = CRC16.checksum(&data).to_be_bytes();
+
+        let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 10);
@@ -316,7 +326,15 @@ mod test {
         check_frame(transport.can.sent_frames[6], false, false, true);
         check_frame(transport.can.sent_frames[7], false, false, false);
         check_frame(transport.can.sent_frames[8], false, false, true);
-        check_frame(transport.can.sent_frames[9], false, true, false);
+
+        assert_eq!(transport.can.sent_frames[9].dlc, 5);
+        assert_eq!(transport.can.sent_frames[9].data[2], checksum[0]);
+        assert_eq!(transport.can.sent_frames[9].data[3], checksum[1]);
+
+        let tail_byte = transport.can.sent_frames[9].data[4];
+        assert_eq!(tail_byte & 0x80 > 0, false);
+        assert_eq!(tail_byte & 0x40 > 0, true);
+        assert_eq!(tail_byte & 0x20 > 0, false);
     }
 
     #[test]
@@ -337,21 +355,18 @@ mod test {
 
     fn check_frame(frame: MockFrame, start_of_transfer: bool, end_of_transfer: bool, toogle: bool) {
         #[cfg(feature = "can")]
-        assert_eq!(frame.data.len(), 8);
+        assert_eq!(frame.dlc, 8);
 
         #[cfg(feature = "canfd")]
-        assert_eq!(frame.data.len(), 64);
+        assert_eq!(frame.dlc, 64);
 
         #[cfg(feature = "can")]
         let tail_byte = frame.data[7];
 
         #[cfg(feature = "canfd")]
         let tail_byte = frame.data[63];
-
         assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
-
         assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
-
         assert_eq!(tail_byte & 0x20 > 0, toogle);
     }
 }
