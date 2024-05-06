@@ -1,8 +1,10 @@
 use crate::CanResult;
 
-pub trait Can {
+pub trait Can<const MAX_PAYLOAD_SIZE: usize> {
+    const MAX_PAYLOAD_SIZE: usize = MAX_PAYLOAD_SIZE;
+
     /// Associated frame type.
-    type Frame: crate::Frame;
+    type Frame: crate::Frame<MAX_PAYLOAD_SIZE>;
 
     /// Puts a frame in the transmit buffer. Blocks until space is available in
     /// the transmit buffer.

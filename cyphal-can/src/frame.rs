@@ -1,7 +1,9 @@
 use crate::{CanId, CanResult};
 
 /// A CAN Frame
-pub trait Frame: Sized {
+pub trait Frame<const MAX_PAYLOAD_SIZE: usize>: Sized {
+    const PAYLOAD_SIZE: usize = MAX_PAYLOAD_SIZE;
+
     /// Creates a new frame.
     ///
     /// This will return `None` if the data slice is too long.

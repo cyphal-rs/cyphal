@@ -5,21 +5,13 @@ use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport}
 
 const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
-const PAYLOAD_SIZE: usize = 8;
-
-#[cfg(feature = "canfd")]
-const PAYLOAD_SIZE: usize = 64;
-
-pub struct CanTransport<C: Can> {
+pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
     transfer_id: CanTransferId,
     can: C,
 }
 
-impl<C> CanTransport<C>
-where
-    C: Can,
-{
-    pub fn new(can: C) -> CyphalResult<CanTransport<C>> {
+impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE, C> {
+    pub fn new(can: C) -> CyphalResult<CanTransport<PAYLOAD_SIZE, C>> {
         Ok(CanTransport {
             transfer_id: CanTransferId::new(0),
             can,
@@ -44,10 +36,7 @@ where
     }
 }
 
-impl<C> Transport for CanTransport<C>
-where
-    C: Can,
-{
+impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
     fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
         let transfer_id = self.next_transfer_id();
         let can_id =
@@ -213,7 +202,7 @@ fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer_id: CanTransfe
 mod test {
     extern crate std;
 
-    use super::{CRC16, PAYLOAD_SIZE};
+    use super::CRC16;
     use crate::{Can, CanError, CanId, CanResult, CanTransport, Frame};
     use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
     use std::vec::Vec;
@@ -221,15 +210,48 @@ mod test {
     #[derive(Debug, Copy, Clone)]
     struct MockFrame {
         dlc: usize,
-        data: [u8; PAYLOAD_SIZE],
+        data: [u8; 8],
     }
-    impl Frame for MockFrame {
+    impl Frame<8> for MockFrame {
         fn new(_: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
-                n if n <= PAYLOAD_SIZE => {
-                    let mut bytes: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
+                n if n <= MockFrame::PAYLOAD_SIZE => {
+                    let mut bytes: [u8; MockFrame::PAYLOAD_SIZE] = [0; MockFrame::PAYLOAD_SIZE];
                     bytes[..n].copy_from_slice(data);
                     Ok(MockFrame {
+                        dlc: data.len(),
+                        data: bytes,
+                    })
+                }
+                _ => Err(CanError::Other),
+            }
+        }
+
+        fn id(&self) -> CanId {
+            todo!()
+        }
+
+        fn dlc(&self) -> usize {
+            todo!()
+        }
+
+        fn data(&self) -> &[u8] {
+            todo!()
+        }
+    }
+
+    #[derive(Debug, Copy, Clone)]
+    struct MockFdFrame {
+        dlc: usize,
+        data: [u8; 64],
+    }
+    impl Frame<64> for MockFdFrame {
+        fn new(_: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
+            match data.len() {
+                n if n <= MockFdFrame::PAYLOAD_SIZE => {
+                    let mut bytes: [u8; MockFdFrame::PAYLOAD_SIZE] = [0; MockFdFrame::PAYLOAD_SIZE];
+                    bytes[..n].copy_from_slice(data);
+                    Ok(MockFdFrame {
                         dlc: data.len(),
                         data: bytes,
                     })
@@ -341,8 +363,24 @@ mod test {
         pub sent_frames: Vec<MockFrame>,
     }
 
-    impl Can for MockCan {
+    impl Can<8> for MockCan {
         type Frame = MockFrame;
+
+        fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
+            self.sent_frames.push(*frame);
+            Ok(())
+        }
+
+        fn receive(&mut self) -> CanResult<Self::Frame> {
+            todo!()
+        }
+    }
+    struct MockCanFd {
+        pub sent_frames: Vec<MockFdFrame>,
+    }
+
+    impl Can<64> for MockCanFd {
+        type Frame = MockFdFrame;
 
         fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
             self.sent_frames.push(*frame);
@@ -402,9 +440,8 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "canfd")]
-    fn transmit_large_message() {
-        let can = MockCan {
+    fn transmit_large_message_fd() {
+        let can = MockCanFd {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
@@ -416,7 +453,7 @@ mod test {
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
-        check_frame(transport.can.sent_frames[0], true, false, true);
+        check_fdframe(transport.can.sent_frames[0], true, false, true);
 
         assert_eq!(transport.can.sent_frames[1].dlc, 5);
         assert_eq!(transport.can.sent_frames[1].data[2], checksum[0]);
@@ -431,14 +468,21 @@ mod test {
     fn check_frame(frame: MockFrame, start_of_transfer: bool, end_of_transfer: bool, toogle: bool) {
         assert_eq!(frame.dlc, 8);
 
-        #[cfg(feature = "canfd")]
+        let tail_byte = frame.data[7];
+        assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
+        assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
+        assert_eq!(tail_byte & 0x20 > 0, toogle);
+    }
+
+    fn check_fdframe(
+        frame: MockFdFrame,
+        start_of_transfer: bool,
+        end_of_transfer: bool,
+        toogle: bool,
+    ) {
         assert_eq!(frame.dlc, 64);
 
-        let tail_byte = frame.data[7];
-
-        #[cfg(feature = "canfd")]
         let tail_byte = frame.data[63];
-
         assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
         assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
         assert_eq!(tail_byte & 0x20 > 0, toogle);
