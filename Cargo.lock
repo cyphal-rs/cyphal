@@ -49,7 +49,7 @@ checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
 
 [[package]]
 name = "cyphal"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "crc",
  "embedded-can",
@@ -58,7 +58,7 @@ dependencies = [
 
 [[package]]
 name = "dsdl"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "cyphal",
 ]
