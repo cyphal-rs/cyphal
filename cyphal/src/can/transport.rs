@@ -3,6 +3,8 @@ use crate::{
     can::{Can, CanError, MessageCanId, TransferId},
     CyphalError, CyphalResult, Message, Transport,
 };
+use core::cmp::Ordering;
+use crc::Crc;
 use embedded_can::Frame;
 
 #[cfg(feature = "can")]
@@ -32,6 +34,21 @@ where
 
         self.transfer_id
     }
+
+    fn send_frame(
+        &mut self,
+        can_id: MessageCanId,
+        payload: [u8; PAYLOAD_SIZE],
+    ) -> Option<Result<(), CyphalError>> {
+        match Frame::new(can_id, &payload) {
+            Some(frame) => match self.can.transmit(&frame) {
+                Ok(_) => {}
+                Err(e) => return Some(Err(CyphalError::CanError(e))),
+            },
+            None => return Some(Err(CyphalError::CanError(CanError::InvalidFrame))),
+        }
+        None
+    }
 }
 
 impl<C> Transport for CanTransport<C>
@@ -49,6 +66,10 @@ where
         if data.len() > PAYLOAD_SIZE - 1 {
             let mut frame_count = 1;
 
+            //TODO: add CRC-16/CCITT-FALSE
+            const X25: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
+            let checksum = X25.checksum(data).to_be_bytes();
+
             while data.len() > 0 {
                 if data.len() > PAYLOAD_SIZE - 1 {
                     let pieces = data.split_at(PAYLOAD_SIZE - 1);
@@ -63,12 +84,8 @@ where
                     payload[PAYLOAD_SIZE - 1] =
                         tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer_id);
 
-                    match Frame::new(can_id, &payload) {
-                        Some(frame) => match self.can.transmit(&frame) {
-                            Ok(_) => {}
-                            Err(e) => return Err(CyphalError::CanError(e)),
-                        },
-                        None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
+                    if let Some(value) = self.send_frame(can_id, payload) {
+                        return value;
                     }
                 } else {
                     let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
@@ -76,18 +93,81 @@ where
                     // copy the data
                     payload[..data.len()].copy_from_slice(data);
 
-                    // add the tail byte
-                    payload[PAYLOAD_SIZE - 1] =
-                        tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                    match data.len().cmp(&(PAYLOAD_SIZE - 2)) {
+                        Ordering::Greater => {
+                            // crc 16 checksum can fit in this frame
+                            payload[PAYLOAD_SIZE - 3] = checksum[0];
+                            payload[PAYLOAD_SIZE - 2] = checksum[1];
 
-                    match Frame::new(can_id, &payload) {
-                        Some(frame) => match self.can.transmit(&frame) {
-                            Ok(_) => {}
-                            Err(e) => return Err(CyphalError::CanError(e)),
-                        },
-                        None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
+                            // add the tail byte
+                            payload[PAYLOAD_SIZE - 1] =
+                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+
+                            if let Some(value) = self.send_frame(can_id, payload) {
+                                return value;
+                            }
+
+                            break;
+                        }
+                        Ordering::Equal => {
+                            // only the firt byte of the crc 16 checksum can fit in this frame
+                            payload[PAYLOAD_SIZE - 2] = checksum[0];
+
+                            // add the tail byte
+                            payload[PAYLOAD_SIZE - 1] =
+                                tail_byte(false, false, frame_count % 2 > 0, transfer_id);
+
+                            if let Some(value) = self.send_frame(can_id, payload) {
+                                return value;
+                            }
+
+                            frame_count += 1;
+
+                            let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
+
+                            // the second byte of the crc 16 checksum goes in this frame
+                            payload[PAYLOAD_SIZE - 2] = checksum[1];
+
+                            // add the tail byte
+                            payload[PAYLOAD_SIZE - 1] =
+                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+
+                            if let Some(value) = self.send_frame(can_id, payload) {
+                                return value;
+                            }
+
+                            break;
+                        }
+                        Ordering::Less => {
+                            // crc 16 chcksum must go in another frame
+
+                            // add the tail byte
+                            payload[PAYLOAD_SIZE - 1] =
+                                tail_byte(false, false, frame_count % 2 > 0, transfer_id);
+
+                            if let Some(value) = self.send_frame(can_id, payload) {
+                                return value;
+                            }
+
+                            frame_count += 1;
+
+                            let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
+
+                            // the crc 16 checksum goes in this frame
+                            payload[PAYLOAD_SIZE - 3] = checksum[0];
+                            payload[PAYLOAD_SIZE - 2] = checksum[1];
+
+                            // add the tail byte
+                            payload[PAYLOAD_SIZE - 1] =
+                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+
+                            if let Some(value) = self.send_frame(can_id, payload) {
+                                return value;
+                            }
+
+                            break;
+                        }
                     }
-                    break;
                 }
                 frame_count += 1;
             }

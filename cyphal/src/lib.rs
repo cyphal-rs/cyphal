@@ -6,9 +6,6 @@ compile_error!("feature \"can\" and feature \"canfd\" cannot be enabled at the s
 #[cfg(any(feature = "can", feature = "canfd"))]
 pub mod can;
 
-#[cfg(feature = "crc")]
-pub mod crc;
-
 mod error;
 pub use error::{CyphalError, CyphalResult};
 
