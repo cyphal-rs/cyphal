@@ -1,3 +1,5 @@
+use cyphal::TransferId;
+
 #[derive(Debug, Copy, Clone)]
 pub struct CanTransferId {
     value: u8,
@@ -9,7 +11,7 @@ impl CanTransferId {
     }
 }
 
-impl crate::TransferId<u8> for CanTransferId {
+impl TransferId<u8> for CanTransferId {
     fn value(&self) -> u8 {
         self.value
     }

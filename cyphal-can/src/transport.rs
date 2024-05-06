@@ -1,15 +1,10 @@
-use super::{tail_byte, CanTransferId};
-use crate::{
-    can::{Can, CanError, MessageCanId, TransferId},
-    CyphalError, CyphalResult, Message, Transport,
-};
+use crate::{Can, CanTransferId, Frame, MessageCanId};
 use core::cmp::Ordering;
 use crc::Crc;
-use embedded_can::Frame;
+use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport};
 
 const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
-#[cfg(feature = "can")]
 const PAYLOAD_SIZE: usize = 8;
 
 #[cfg(feature = "canfd")]
@@ -37,19 +32,15 @@ where
         self.transfer_id
     }
 
-    fn send_frame(
-        &mut self,
-        can_id: MessageCanId,
-        payload: &[u8],
-    ) -> Option<Result<(), CyphalError>> {
+    fn send_frame(&mut self, can_id: MessageCanId, payload: &[u8]) -> CyphalResult<()> {
         match Frame::new(can_id, &payload) {
-            Some(frame) => match self.can.transmit(&frame) {
-                Ok(_) => {}
-                Err(e) => return Some(Err(CyphalError::CanError(e))),
+            Ok(frame) => match self.can.transmit(&frame) {
+                Ok(()) => {}
+                Err(_) => return Err(CyphalError::Transport),
             },
-            None => return Some(Err(CyphalError::CanError(CanError::InvalidFrame))),
+            Err(_) => return Err(CyphalError::Transport),
         }
-        None
+        Ok(())
     }
 }
 
@@ -85,8 +76,9 @@ where
                     payload[PAYLOAD_SIZE - 1] =
                         tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer_id);
 
-                    if let Some(value) = self.send_frame(can_id, &payload) {
-                        return value;
+                    match self.send_frame(can_id, &payload) {
+                        Ok(()) => {}
+                        Err(e) => return Err(e),
                     }
                 } else {
                     let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
@@ -104,10 +96,9 @@ where
                             payload[data.len() + 2] =
                                 tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) =
-                                self.send_frame(can_id, &payload[..(data.len() + 3)])
-                            {
-                                return value;
+                            match self.send_frame(can_id, &payload[..(data.len() + 3)]) {
+                                Ok(()) => {}
+                                Err(e) => return Err(e),
                             }
 
                             break;
@@ -120,8 +111,9 @@ where
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, &payload) {
-                                return value;
+                            match self.send_frame(can_id, &payload) {
+                                Ok(()) => {}
+                                Err(e) => return Err(e),
                             }
 
                             frame_count += 1;
@@ -134,8 +126,9 @@ where
                             // add the tail byte
                             payload[1] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, &payload) {
-                                return value;
+                            match self.send_frame(can_id, &payload) {
+                                Ok(()) => {}
+                                Err(e) => return Err(e),
                             }
 
                             break;
@@ -147,8 +140,9 @@ where
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, &payload) {
-                                return value;
+                            match self.send_frame(can_id, &payload) {
+                                Ok(()) => {}
+                                Err(e) => return Err(e),
                             }
 
                             frame_count += 1;
@@ -162,8 +156,9 @@ where
                             // add the tail byte
                             payload[2] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            if let Some(value) = self.send_frame(can_id, &payload) {
-                                return value;
+                            match self.send_frame(can_id, &payload) {
+                                Ok(()) => {}
+                                Err(e) => return Err(e),
                             }
 
                             break;
@@ -182,19 +177,16 @@ where
             // add the tail byte
             payload[PAYLOAD_SIZE - 1] = tail_byte(true, true, true, transfer_id);
 
-            match Frame::new(can_id, &payload) {
-                Some(frame) => match self.can.transmit(&frame) {
-                    Ok(_) => {}
-                    Err(e) => return Err(CyphalError::CanError(e)),
-                },
-                None => return Err(CyphalError::CanError(CanError::InvalidFrame)),
+            match self.send_frame(can_id, &payload) {
+                Ok(()) => {}
+                Err(e) => return Err(e),
             }
         }
 
         Ok(())
     }
 
-    fn invoque<const N: usize, const M: usize, R: crate::Request<N, M>>(
+    fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
         &mut self,
         _: &R,
     ) -> CyphalResult<R::Response> {
@@ -202,17 +194,28 @@ where
     }
 }
 
+fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer_id: CanTransferId) -> u8 {
+    let mut tail_byte = transfer_id.value();
+    if is_start {
+        tail_byte = tail_byte | 0x80;
+    }
+    if is_end {
+        tail_byte = tail_byte | 0x40;
+    }
+    if toggle {
+        tail_byte = tail_byte | 0x20;
+    }
+
+    tail_byte
+}
+
 #[cfg(test)]
 mod test {
     extern crate std;
 
     use super::{CRC16, PAYLOAD_SIZE};
-    use crate::{
-        can::{Can, CanResult, CanTransport},
-        message::test::{MockLargeMessage, MockMessage},
-        Priority, Transport,
-    };
-    use embedded_can::{Frame, Id};
+    use crate::{Can, CanError, CanId, CanResult, CanTransport, Frame};
+    use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
     use std::vec::Vec;
 
     #[derive(Debug, Copy, Clone)]
@@ -221,33 +224,21 @@ mod test {
         data: [u8; PAYLOAD_SIZE],
     }
     impl Frame for MockFrame {
-        fn new(_: impl Into<Id>, data: &[u8]) -> Option<Self> {
+        fn new(_: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
                 n if n <= PAYLOAD_SIZE => {
                     let mut bytes: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
                     bytes[..n].copy_from_slice(data);
-                    Some(MockFrame {
+                    Ok(MockFrame {
                         dlc: data.len(),
                         data: bytes,
                     })
                 }
-                _ => None,
+                _ => Err(CanError::Other),
             }
         }
 
-        fn new_remote(_: impl Into<embedded_can::Id>, _: usize) -> Option<Self> {
-            todo!()
-        }
-
-        fn is_extended(&self) -> bool {
-            todo!()
-        }
-
-        fn is_remote_frame(&self) -> bool {
-            todo!()
-        }
-
-        fn id(&self) -> embedded_can::Id {
+        fn id(&self) -> CanId {
             todo!()
         }
 
@@ -260,11 +251,89 @@ mod test {
         }
     }
 
-    #[derive(Debug)]
-    struct MockError {}
-    impl embedded_can::Error for MockError {
-        fn kind(&self) -> embedded_can::ErrorKind {
-            todo!()
+    pub struct MockMessage {
+        priority: Priority,
+        subject: u64,
+        source: Option<NodeId>,
+        payload: [u8; 1],
+    }
+
+    impl MockMessage {
+        pub fn new(
+            priority: Priority,
+            subject: SubjectId,
+            source: Option<NodeId>,
+            payload: [u8; 1],
+        ) -> CyphalResult<Self> {
+            Ok(Self {
+                priority,
+                subject,
+                source,
+                payload,
+            })
+        }
+    }
+
+    impl Message<1> for MockMessage {
+        type Payload = [u8; 1];
+
+        fn priority(&self) -> Priority {
+            self.priority
+        }
+
+        fn subject(&self) -> SubjectId {
+            self.subject
+        }
+
+        fn source(&self) -> Option<NodeId> {
+            self.source
+        }
+
+        fn payload(&self) -> &[u8] {
+            &self.payload
+        }
+    }
+
+    pub struct MockLargeMessage {
+        priority: Priority,
+        subject: u64,
+        source: Option<NodeId>,
+        payload: [u8; 65],
+    }
+
+    impl MockLargeMessage {
+        pub fn new(
+            priority: Priority,
+            subject: SubjectId,
+            source: Option<NodeId>,
+            payload: [u8; 65],
+        ) -> CyphalResult<Self> {
+            Ok(Self {
+                priority,
+                subject,
+                source,
+                payload,
+            })
+        }
+    }
+
+    impl Message<65> for MockLargeMessage {
+        type Payload = [u8; 65];
+
+        fn source(&self) -> Option<NodeId> {
+            self.source
+        }
+
+        fn subject(&self) -> SubjectId {
+            self.subject
+        }
+
+        fn priority(&self) -> Priority {
+            self.priority
+        }
+
+        fn payload(&self) -> &[u8] {
+            &self.payload
         }
     }
 
@@ -274,8 +343,6 @@ mod test {
 
     impl Can for MockCan {
         type Frame = MockFrame;
-
-        type Error = MockError;
 
         fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
             self.sent_frames.push(*frame);
@@ -301,7 +368,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "can")]
     fn transmit_large_message() {
         let can = MockCan {
             sent_frames: Vec::new(),
@@ -363,13 +429,11 @@ mod test {
     }
 
     fn check_frame(frame: MockFrame, start_of_transfer: bool, end_of_transfer: bool, toogle: bool) {
-        #[cfg(feature = "can")]
         assert_eq!(frame.dlc, 8);
 
         #[cfg(feature = "canfd")]
         assert_eq!(frame.dlc, 64);
 
-        #[cfg(feature = "can")]
         let tail_byte = frame.data[7];
 
         #[cfg(feature = "canfd")]

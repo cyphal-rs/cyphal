@@ -1,11 +1,5 @@
 #![no_std]
 
-#[cfg(all(feature = "can", feature = "canfd"))]
-compile_error!("feature \"can\" and feature \"canfd\" cannot be enabled at the same time");
-
-#[cfg(any(feature = "can", feature = "canfd"))]
-pub mod can;
-
 mod error;
 pub use error::{CyphalError, CyphalResult};
 

@@ -1,5 +1,5 @@
-use crate::{can::CanId, CyphalResult, NodeId, Priority, SubjectId};
-use embedded_can::{ExtendedId, Id};
+use crate::CanId;
+use cyphal::{CyphalResult, NodeId, Priority, SubjectId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct MessageCanId {
@@ -39,22 +39,20 @@ impl MessageCanId {
     pub fn subject_id(&self) -> SubjectId {
         self.subject_id
     }
-}
 
-impl CanId for MessageCanId {
-    fn priority(&self) -> Priority {
+    pub fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn is_service(&self) -> bool {
+    pub fn is_service(&self) -> bool {
         false
     }
 
-    fn source(&self) -> NodeId {
+    pub fn source(&self) -> NodeId {
         self.source
     }
 
-    fn as_raw(&self) -> u32 {
+    pub fn as_raw(&self) -> u32 {
         // set priority bits 26 to 29
         let mut result: u32 = (u8::from(self.priority) as u32) << 26;
 
@@ -74,9 +72,10 @@ impl CanId for MessageCanId {
     }
 }
 
-impl Into<Id> for MessageCanId {
-    fn into(self) -> Id {
-        Id::Extended(ExtendedId::new(self.as_raw()).unwrap())
+impl From<MessageCanId> for CanId {
+    #[inline]
+    fn from(id: MessageCanId) -> Self {
+        CanId::Message(id)
     }
 }
 
@@ -84,10 +83,8 @@ impl Into<Id> for MessageCanId {
 mod test {
     extern crate std;
 
-    use crate::{
-        can::{CanId, MessageCanId},
-        NodeId, Priority, SubjectId,
-    };
+    use crate::MessageCanId;
+    use cyphal::{NodeId, Priority, SubjectId};
 
     #[test]
     #[allow(non_snake_case)]

@@ -14,23 +14,11 @@ jobs:
         toolchain: 1.75.0
         components: clippy, rustfmt
 
-    - name: Check with no features
+    - name: Check
       run: cargo check
 
-    - name: Check with can feature
-      run: cargo check --features "can"
-
-    - name: Check with socketcan feature with CAN 2.0
-      run: cargo check --features "can,socketcan"
-
-    - name: Check with socketcan feature with CAN FD
-      run: cargo check --features "canfd,socketcan"
-
-    - name: Run CAN 2.0 tests
-      run: cargo test --features "can"
-
-    - name: Run CAN FD tests
-      run: cargo test --features "canfd"
+    - name: Run tests
+      run: cargo test
 
     - name: Analyze your code
       run: cargo clippy -- --deny=warnings
@@ -41,6 +29,14 @@ jobs:
     - name: Publish cyphal package
       if: startsWith(github.event.ref, 'refs/tags/v')
       run: cargo publish --package cyphal --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+    - name: Publish cyphal-can package
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      run: cargo publish --package cyphal-can --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+    - name: Publish cyphal-socketcan package
+      if: startsWith(github.event.ref, 'refs/tags/v')
+      run: cargo publish --package cyphal-socketcan --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
     - name: Publish dsdl package
       if: startsWith(github.event.ref, 'refs/tags/v')

@@ -13,7 +13,7 @@ pub trait Message<const N: usize>: Sized {
 }
 
 #[cfg(test)]
-pub(crate) mod test {
+mod test {
     use crate::{
         transport::test::MockTransport, CyphalResult, Message, NodeId, Priority, SubjectId,
         TransferId, Transport,
@@ -55,49 +55,6 @@ pub(crate) mod test {
 
         fn source(&self) -> Option<NodeId> {
             self.source
-        }
-
-        fn payload(&self) -> &[u8] {
-            &self.payload
-        }
-    }
-
-    pub struct MockLargeMessage {
-        priority: Priority,
-        subject: u64,
-        source: Option<NodeId>,
-        payload: [u8; 65],
-    }
-
-    impl MockLargeMessage {
-        pub fn new(
-            priority: Priority,
-            subject: SubjectId,
-            source: Option<NodeId>,
-            payload: [u8; 65],
-        ) -> CyphalResult<Self> {
-            Ok(Self {
-                priority,
-                subject,
-                source,
-                payload,
-            })
-        }
-    }
-
-    impl Message<65> for MockLargeMessage {
-        type Payload = [u8; 65];
-
-        fn source(&self) -> Option<NodeId> {
-            self.source
-        }
-
-        fn subject(&self) -> SubjectId {
-            self.subject
-        }
-
-        fn priority(&self) -> Priority {
-            self.priority
         }
 
         fn payload(&self) -> &[u8] {

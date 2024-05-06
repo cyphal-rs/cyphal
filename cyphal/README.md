@@ -4,12 +4,6 @@ Open Cyphal Rust Implementation
 
 🚧 *Work in progress*
 
-## Optional Cargo features
-
-- **`can`**: Enables the CAN 2.0 feature
-- **`canfd`**: Enables the CAN FD feature
-- **`socketcan`**: Enables the Socketcan feature (requires either the `can` feature or the `canfd` feature)
-
 ## Minimum Supported Rust Version (MSRV)
 
 This crate is guaranteed to compile on stable Rust 1.75 and up. It *might*
