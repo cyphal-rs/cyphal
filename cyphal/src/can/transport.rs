@@ -206,7 +206,7 @@ where
 mod test {
     extern crate std;
 
-    use super::PAYLOAD_SIZE;
+    use super::{CRC16, PAYLOAD_SIZE};
     use crate::{
         can::{Can, CanResult, CanTransport},
         message::test::{MockLargeMessage, MockMessage},
@@ -303,8 +303,6 @@ mod test {
     #[test]
     #[cfg(feature = "can")]
     fn transmit_large_message() {
-        use crate::can::transport::CRC16;
-
         let can = MockCan {
             sent_frames: Vec::new(),
         };
@@ -345,12 +343,23 @@ mod test {
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let message = MockLargeMessage::new(Priority::Nominal, 1, None, [255; 65]).unwrap();
+        let data: [u8; 65] = [255; 65];
+        let checksum = CRC16.checksum(&data).to_be_bytes();
+
+        let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
         check_frame(transport.can.sent_frames[0], true, false, true);
-        check_frame(transport.can.sent_frames[1], false, true, false);
+
+        assert_eq!(transport.can.sent_frames[1].dlc, 5);
+        assert_eq!(transport.can.sent_frames[1].data[2], checksum[0]);
+        assert_eq!(transport.can.sent_frames[1].data[3], checksum[1]);
+
+        let tail_byte = transport.can.sent_frames[1].data[4];
+        assert_eq!(tail_byte & 0x80 > 0, false);
+        assert_eq!(tail_byte & 0x40 > 0, true);
+        assert_eq!(tail_byte & 0x20 > 0, false);
     }
 
     fn check_frame(frame: MockFrame, start_of_transfer: bool, end_of_transfer: bool, toogle: bool) {
@@ -365,6 +374,7 @@ mod test {
 
         #[cfg(feature = "canfd")]
         let tail_byte = frame.data[63];
+
         assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
         assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
         assert_eq!(tail_byte & 0x20 > 0, toogle);
