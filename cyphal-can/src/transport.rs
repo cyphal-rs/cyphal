@@ -209,17 +209,19 @@ mod test {
 
     #[derive(Debug, Copy, Clone)]
     struct MockFrame {
+        id: CanId,
         dlc: usize,
         data: [u8; 8],
     }
     impl Frame<8> for MockFrame {
-        fn new(_: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
+        fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
-                n if n <= MockFrame::PAYLOAD_SIZE => {
+                dlc if dlc <= MockFrame::PAYLOAD_SIZE => {
                     let mut bytes: [u8; MockFrame::PAYLOAD_SIZE] = [0; MockFrame::PAYLOAD_SIZE];
-                    bytes[..n].copy_from_slice(data);
+                    bytes[..dlc].copy_from_slice(data);
                     Ok(MockFrame {
-                        dlc: data.len(),
+                        id: id.into(),
+                        dlc,
                         data: bytes,
                     })
                 }
@@ -228,31 +230,33 @@ mod test {
         }
 
         fn id(&self) -> CanId {
-            todo!()
+            self.id
         }
 
         fn dlc(&self) -> usize {
-            todo!()
+            self.dlc
         }
 
         fn data(&self) -> &[u8] {
-            todo!()
+            &self.data
         }
     }
 
     #[derive(Debug, Copy, Clone)]
     struct MockFdFrame {
+        id: CanId,
         dlc: usize,
         data: [u8; 64],
     }
     impl Frame<64> for MockFdFrame {
-        fn new(_: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
+        fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
-                n if n <= MockFdFrame::PAYLOAD_SIZE => {
+                dlc if dlc <= MockFdFrame::PAYLOAD_SIZE => {
                     let mut bytes: [u8; MockFdFrame::PAYLOAD_SIZE] = [0; MockFdFrame::PAYLOAD_SIZE];
-                    bytes[..n].copy_from_slice(data);
+                    bytes[..dlc].copy_from_slice(data);
                     Ok(MockFdFrame {
-                        dlc: data.len(),
+                        id: id.into(),
+                        dlc,
                         data: bytes,
                     })
                 }
@@ -261,15 +265,15 @@ mod test {
         }
 
         fn id(&self) -> CanId {
-            todo!()
+            self.id
         }
 
         fn dlc(&self) -> usize {
-            todo!()
+            self.dlc
         }
 
         fn data(&self) -> &[u8] {
-            todo!()
+            &self.data
         }
     }
 
