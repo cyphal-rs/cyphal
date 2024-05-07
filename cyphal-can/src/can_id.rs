@@ -1,3 +1,5 @@
+use cyphal::Priority;
+
 use crate::{CanResult, MessageCanId, ServiceCanId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -27,6 +29,13 @@ impl CanId {
         match *self {
             CanId::Message(m) => m.as_raw(),
             CanId::Service(s) => s.as_raw(),
+        }
+    }
+
+    pub fn priority(&self) -> Priority {
+        match *self {
+            CanId::Message(m) => m.priority(),
+            CanId::Service(s) => s.priority(),
         }
     }
 }
