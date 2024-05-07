@@ -70,6 +70,7 @@ dependencies = [
 name = "cyphal-socketcan"
 version = "0.0.5"
 dependencies = [
+ "cyphal",
  "cyphal-can",
  "embedded-can",
  "socketcan",
