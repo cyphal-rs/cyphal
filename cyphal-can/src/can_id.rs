@@ -10,7 +10,7 @@ pub enum CanId {
 impl CanId {
     pub fn new(id: u32) -> CanResult<CanId> {
         // check bit 25 to see what type of Id this is
-        if id | 0x0200_0000 == 0 {
+        if (id & 0x0200_0000) == 0 {
             match MessageCanId::from_raw(id) {
                 Ok(i) => Ok(CanId::Message(i)),
                 Err(e) => Err(e),
