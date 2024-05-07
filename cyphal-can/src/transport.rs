@@ -412,24 +412,81 @@ mod test {
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let data: [u8; 65] = [255; 65];
+        let data: Vec<u8> = (0..65).collect();
+        let data: [u8; 65] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
         let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 10);
-        check_frame(transport.can.sent_frames[0], true, false, true);
-        check_frame(transport.can.sent_frames[1], false, false, false);
-        check_frame(transport.can.sent_frames[2], false, false, true);
-        check_frame(transport.can.sent_frames[3], false, false, false);
-        check_frame(transport.can.sent_frames[4], false, false, true);
-        check_frame(transport.can.sent_frames[5], false, false, false);
-        check_frame(transport.can.sent_frames[6], false, false, true);
-        check_frame(transport.can.sent_frames[7], false, false, false);
-        check_frame(transport.can.sent_frames[8], false, false, true);
+        check_frame(
+            transport.can.sent_frames[0],
+            [0, 1, 2, 3, 4, 5, 6],
+            true,
+            false,
+            true,
+        );
+        check_frame(
+            transport.can.sent_frames[1],
+            [7, 8, 9, 10, 11, 12, 13],
+            false,
+            false,
+            false,
+        );
+        check_frame(
+            transport.can.sent_frames[2],
+            [14, 15, 16, 17, 18, 19, 20],
+            false,
+            false,
+            true,
+        );
+        check_frame(
+            transport.can.sent_frames[3],
+            [21, 22, 23, 24, 25, 26, 27],
+            false,
+            false,
+            false,
+        );
+        check_frame(
+            transport.can.sent_frames[4],
+            [28, 29, 30, 31, 32, 33, 34],
+            false,
+            false,
+            true,
+        );
+        check_frame(
+            transport.can.sent_frames[5],
+            [35, 36, 37, 38, 39, 40, 41],
+            false,
+            false,
+            false,
+        );
+        check_frame(
+            transport.can.sent_frames[6],
+            [42, 43, 44, 45, 46, 47, 48],
+            false,
+            false,
+            true,
+        );
+        check_frame(
+            transport.can.sent_frames[7],
+            [49, 50, 51, 52, 53, 54, 55],
+            false,
+            false,
+            false,
+        );
+        check_frame(
+            transport.can.sent_frames[8],
+            [56, 57, 58, 59, 60, 61, 62],
+            false,
+            false,
+            true,
+        );
 
         assert_eq!(transport.can.sent_frames[9].dlc, 5);
+        assert_eq!(transport.can.sent_frames[9].data[0], 63);
+        assert_eq!(transport.can.sent_frames[9].data[1], 64);
         assert_eq!(transport.can.sent_frames[9].data[2], checksum[0]);
         assert_eq!(transport.can.sent_frames[9].data[3], checksum[1]);
 
@@ -446,14 +503,18 @@ mod test {
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let data: [u8; 65] = [255; 65];
+        let data: Vec<u8> = (0..65).collect();
+        let data: [u8; 65] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
         let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
-        check_fdframe(transport.can.sent_frames[0], true, false, true);
+
+        let data: Vec<u8> = (0..63).collect();
+        let data: [u8; 63] = data.try_into().unwrap();
+        check_fdframe(transport.can.sent_frames[0], data, true, false, true);
 
         assert_eq!(transport.can.sent_frames[1].dlc, 5);
         assert_eq!(transport.can.sent_frames[1].data[2], checksum[0]);
@@ -465,8 +526,18 @@ mod test {
         assert_eq!(tail_byte & 0x20 > 0, false);
     }
 
-    fn check_frame(frame: MockFrame, start_of_transfer: bool, end_of_transfer: bool, toogle: bool) {
+    fn check_frame(
+        frame: MockFrame,
+        data: [u8; 7],
+        start_of_transfer: bool,
+        end_of_transfer: bool,
+        toogle: bool,
+    ) {
         assert_eq!(frame.dlc, 8);
+
+        for (i, v) in data.iter().enumerate() {
+            assert_eq!(frame.data[i], *v);
+        }
 
         let tail_byte = frame.data[7];
         assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
@@ -476,11 +547,16 @@ mod test {
 
     fn check_fdframe(
         frame: MockFdFrame,
+        data: [u8; 63],
         start_of_transfer: bool,
         end_of_transfer: bool,
         toogle: bool,
     ) {
         assert_eq!(frame.dlc, 64);
+
+        for (i, v) in data.iter().enumerate() {
+            assert_eq!(frame.data[i], *v);
+        }
 
         let tail_byte = frame.data[63];
         assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
