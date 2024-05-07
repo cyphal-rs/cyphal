@@ -1,10 +1,10 @@
 #![no_std]
 
 mod can;
-use can::Can;
+pub use can::Can;
 
 mod can_id;
-use can_id::CanId;
+pub use can_id::CanId;
 
 mod error;
 pub use error::{CanError, CanResult};

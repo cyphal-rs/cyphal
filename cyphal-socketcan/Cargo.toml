@@ -9,3 +9,5 @@ version = "0.0.5"
 
 [dependencies]
 cyphal-can = { version = "0.0.5", path = "../cyphal-can" }
+embedded-can = "0.4.1"
+socketcan = "3.3.0"

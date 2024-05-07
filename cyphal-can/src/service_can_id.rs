@@ -1,4 +1,4 @@
-use crate::CanId;
+use crate::CanResult;
 use cyphal::{NodeId, Priority, ServiceId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
@@ -11,6 +11,10 @@ pub struct ServiceCanId {
 }
 
 impl ServiceCanId {
+    pub fn from_raw(_: u32) -> CanResult<Self> {
+        todo!()
+    }
+
     pub fn anonymous(&self) -> bool {
         self.anonymous
     }
@@ -37,12 +41,5 @@ impl ServiceCanId {
 
     pub fn as_raw(&self) -> u32 {
         todo!()
-    }
-}
-
-impl From<ServiceCanId> for CanId {
-    #[inline]
-    fn from(id: ServiceCanId) -> Self {
-        CanId::Service(id)
     }
 }

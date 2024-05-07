@@ -1,5 +1,5 @@
-use crate::CanId;
-use cyphal::{CyphalResult, NodeId, Priority, SubjectId};
+use crate::CanResult;
+use cyphal::{NodeId, Priority, SubjectId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct MessageCanId {
@@ -14,7 +14,7 @@ impl MessageCanId {
         priority: Priority,
         source: Option<NodeId>,
         subject_id: SubjectId,
-    ) -> CyphalResult<Self> {
+    ) -> CanResult<Self> {
         match source {
             Some(s) => Ok(MessageCanId {
                 anonymous: false,
@@ -30,6 +30,10 @@ impl MessageCanId {
                 subject_id,
             }),
         }
+    }
+
+    pub fn from_raw(_: u32) -> CanResult<Self> {
+        todo!()
     }
 
     pub fn anonymous(&self) -> bool {
@@ -69,13 +73,6 @@ impl MessageCanId {
 
         // set source node id bits 0 to 7
         result | (self.source as u32)
-    }
-}
-
-impl From<MessageCanId> for CanId {
-    #[inline]
-    fn from(id: MessageCanId) -> Self {
-        CanId::Message(id)
     }
 }
 
