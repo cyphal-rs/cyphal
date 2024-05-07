@@ -40,7 +40,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
         let transfer_id = self.next_transfer_id();
         let can_id =
-            MessageCanId::new(message.priority(), message.source(), message.subject()).unwrap();
+            MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
 
         let mut data = message.payload();
 
@@ -275,7 +275,7 @@ mod test {
 
     pub struct MockMessage {
         priority: Priority,
-        subject: u64,
+        subject: SubjectId,
         source: Option<NodeId>,
         payload: [u8; 1],
     }
@@ -318,7 +318,7 @@ mod test {
 
     pub struct MockLargeMessage {
         priority: Priority,
-        subject: u64,
+        subject: SubjectId,
         source: Option<NodeId>,
         payload: [u8; 65],
     }

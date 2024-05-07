@@ -1,38 +1,56 @@
-use crate::CanResult;
+use crate::{CanError, CanResult};
 use cyphal::{NodeId, Priority, ServiceId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct ServiceCanId {
-    anonymous: bool,
-    destination: NodeId,
     priority: Priority,
+    is_request: bool,
     service_id: ServiceId,
+    destination: NodeId,
     source: NodeId,
 }
 
 impl ServiceCanId {
-    pub fn from_raw(_: u32) -> CanResult<Self> {
-        todo!()
-    }
+    pub fn new(
+        priority: Priority,
+        is_request: bool,
+        service_id: ServiceId,
+        destination: NodeId,
+        source: NodeId,
+    ) -> CanResult<Self> {
+        if service_id > 511 {
+            return Err(CanError::InvalidId);
+        }
+        if destination > 127 {
+            return Err(CanError::InvalidId);
+        }
+        if source > 127 {
+            return Err(CanError::InvalidId);
+        }
 
-    pub fn anonymous(&self) -> bool {
-        self.anonymous
-    }
-
-    pub fn destination(&self) -> NodeId {
-        self.destination
-    }
-
-    pub fn service_id(&self) -> ServiceId {
-        self.service_id
+        Ok(ServiceCanId {
+            priority,
+            is_request,
+            service_id,
+            destination,
+            source,
+        })
     }
 
     pub fn priority(&self) -> Priority {
         self.priority
     }
 
-    pub fn is_service(&self) -> bool {
-        true
+    pub fn is_request(&self) -> bool {
+        self.is_request
+    }
+
+    pub fn service_id(&self) -> ServiceId {
+        self.service_id
+    }
+
+    pub fn destination(&self) -> NodeId {
+        self.destination
     }
 
     pub fn source(&self) -> NodeId {
@@ -40,6 +58,56 @@ impl ServiceCanId {
     }
 
     pub fn as_raw(&self) -> u32 {
-        todo!()
+        // set priority bits 26 to 28
+        let mut result: u32 = (u8::from(self.priority) as u32) << 26;
+
+        // set is service bit 25
+        result |= 0x0200_0000;
+
+        if self.is_request {
+            result |= 0x0100_0000;
+        }
+
+        // set service id bits 14 to 22
+        result |= (self.service_id as u32) << 14;
+
+        // set subject id bits 8 to 20
+        result |= (self.destination as u32) << 7;
+
+        // set source node id bits 0 to 7
+        result | (self.source as u32)
+    }
+}
+
+impl TryFrom<u32> for ServiceCanId {
+    type Error = CanError;
+
+    fn try_from(value: u32) -> CanResult<Self> {
+        // make sure it's a service id
+        if (value & 0x0200_0000) == 0 {
+            return Err(CanError::InvalidId);
+        }
+
+        // make sure reserved bit 23 is set to zero
+        if (value & 0x0080_0000) > 0 {
+            return Err(CanError::InvalidId);
+        }
+
+        let priority = match Priority::try_from((value >> 26) as u8) {
+            Ok(p) => p,
+            Err(_) => return Err(CanError::InvalidId),
+        };
+        let is_request = (value & 0x0100_0000) > 0;
+        let service_id = ((value >> 14) & 0x01FF) as ServiceId;
+        let destination = ((value >> 7) & 0x7F) as NodeId;
+        let source = (value & 0x7F) as NodeId;
+
+        Ok(ServiceCanId {
+            priority,
+            is_request,
+            service_id,
+            destination,
+            source,
+        })
     }
 }

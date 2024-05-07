@@ -13,12 +13,12 @@ impl CanId {
     pub fn new(id: u32) -> CanResult<CanId> {
         // check bit 25 to see what type of Id this is
         if (id & 0x0200_0000) == 0 {
-            match MessageCanId::from_raw(id) {
+            match MessageCanId::try_from(id) {
                 Ok(i) => Ok(CanId::Message(i)),
                 Err(e) => Err(e),
             }
         } else {
-            match ServiceCanId::from_raw(id) {
+            match ServiceCanId::try_from(id) {
                 Ok(i) => Ok(CanId::Service(i)),
                 Err(e) => Err(e),
             }
@@ -51,5 +51,31 @@ impl From<ServiceCanId> for CanId {
     #[inline]
     fn from(id: ServiceCanId) -> Self {
         CanId::Service(id)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use cyphal::Priority;
+
+    use crate::{CanId, MessageCanId, ServiceCanId};
+
+    #[test]
+    fn test_new_message_id() {
+        let id = MessageCanId::new(Priority::Nominal, 1, None)
+            .unwrap()
+            .as_raw();
+
+        let target = CanId::new(id).unwrap();
+        assert_eq!(target.as_raw(), id);
+    }
+
+    #[test]
+    fn test_new_service_id() {
+        let id = ServiceCanId::new(Priority::Nominal, true, 1, 1, 1)
+            .unwrap()
+            .as_raw();
+
+        assert_eq!(CanId::new(id).unwrap().as_raw(), id);
     }
 }

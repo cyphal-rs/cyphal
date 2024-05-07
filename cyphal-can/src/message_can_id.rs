@@ -1,39 +1,42 @@
-use crate::CanResult;
+use crate::{CanError, CanResult};
 use cyphal::{NodeId, Priority, SubjectId};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct MessageCanId {
-    anonymous: bool,
     priority: Priority,
-    source: NodeId,
+    anonymous: bool,
     subject_id: SubjectId,
+    source: NodeId,
 }
 
 impl MessageCanId {
     pub fn new(
         priority: Priority,
-        source: Option<NodeId>,
         subject_id: SubjectId,
+        source: Option<NodeId>,
     ) -> CanResult<Self> {
+        if subject_id > 8191 {
+            return Err(CanError::InvalidId);
+        }
+        if source.is_some_and(|s| s > 127) {
+            return Err(CanError::InvalidId);
+        }
+
         match source {
             Some(s) => Ok(MessageCanId {
-                anonymous: false,
                 priority,
-                source: s,
+                anonymous: false,
                 subject_id,
+                source: s,
             }),
             None => Ok(MessageCanId {
-                anonymous: true,
                 priority,
-                //TODO: generate a pseudorandom pseudo-ID value for source
-                source: 0,
+                anonymous: true,
                 subject_id,
+                //FIXME: generate a pseudorandom pseudo-ID value for source
+                source: 0,
             }),
         }
-    }
-
-    pub fn from_raw(_: u32) -> CanResult<Self> {
-        todo!()
     }
 
     pub fn anonymous(&self) -> bool {
@@ -57,7 +60,7 @@ impl MessageCanId {
     }
 
     pub fn as_raw(&self) -> u32 {
-        // set priority bits 26 to 29
+        // set priority bits 26 to 28
         let mut result: u32 = (u8::from(self.priority) as u32) << 26;
 
         // set anonymous bit 24
@@ -73,6 +76,38 @@ impl MessageCanId {
 
         // set source node id bits 0 to 7
         result | (self.source as u32)
+    }
+}
+
+impl TryFrom<u32> for MessageCanId {
+    type Error = CanError;
+
+    fn try_from(value: u32) -> CanResult<Self> {
+        // make sure it's a message id
+        if (value & 0x0200_0000) > 0 {
+            return Err(CanError::InvalidId);
+        }
+
+        // make sure reserved bit seven is set to zero
+        if (value & 0x80) > 0 {
+            return Err(CanError::InvalidId);
+        }
+
+        let priority = match Priority::try_from((value >> 26) as u8) {
+            Ok(p) => p,
+            Err(_) => return Err(CanError::InvalidId),
+        };
+
+        let anonymous = (value & 0x0100_0000) > 0;
+        let source = (value & 0x7F) as NodeId;
+        let subject_id = ((value >> 8) & 0x1FFF) as SubjectId;
+
+        Ok(MessageCanId {
+            priority,
+            anonymous,
+            subject_id,
+            source,
+        })
     }
 }
 
@@ -92,7 +127,7 @@ mod test {
         let subject_id: SubjectId = 7509;
 
         // Act
-        let target = MessageCanId::new(priority, Some(source), subject_id).unwrap();
+        let target = MessageCanId::new(priority, subject_id, Some(source)).unwrap();
 
         // Assert
         assert!(!target.anonymous());

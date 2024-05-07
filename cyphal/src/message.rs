@@ -21,7 +21,7 @@ mod test {
 
     pub struct MockMessage {
         priority: Priority,
-        subject: u64,
+        subject: SubjectId,
         source: Option<NodeId>,
         payload: [u8; 1],
     }

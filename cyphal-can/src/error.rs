@@ -1,7 +1,8 @@
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum CanError {
-    /// The peripheral receive buffer was overrun.
+    InvalidId,
+
     Overrun,
 
     // MAC sublayer errors
@@ -32,6 +33,7 @@ pub enum CanError {
 impl core::fmt::Display for CanError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
+            Self::InvalidId => write!(f, "Invalid CAN ID"),
             Self::Overrun => write!(f, "The peripheral receive buffer was overrun"),
             Self::Bit => write!(
                 f,

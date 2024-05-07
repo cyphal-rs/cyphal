@@ -21,6 +21,6 @@ pub use transfer_id::TransferId;
 mod transport;
 pub use transport::Transport;
 
-pub type SubjectId = u64;
+pub type SubjectId = u16;
 pub type NodeId = u8;
 pub type ServiceId = u16;

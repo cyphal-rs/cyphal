@@ -1,4 +1,4 @@
-use crate::CyphalError;
+use crate::{CyphalError, CyphalResult};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum Priority {
@@ -21,7 +21,7 @@ impl From<Priority> for u8 {
 impl TryFrom<u8> for Priority {
     type Error = CyphalError;
 
-    fn try_from(value: u8) -> core::result::Result<Self, Self::Error> {
+    fn try_from(value: u8) -> CyphalResult<Self> {
         match value {
             0 => Ok(Priority::Exceptional),
             1 => Ok(Priority::Immediate),
