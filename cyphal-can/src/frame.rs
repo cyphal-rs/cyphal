@@ -2,9 +2,6 @@ use crate::{CanId, CanResult};
 
 /// A CAN Frame
 pub trait Frame<const MAX_PAYLOAD_SIZE: usize>: Sized {
-    /// Maximum payload size supported by the CAN frame.  This will be 8 for CAN 2.0 or 64 for CAN FD.
-    const PAYLOAD_SIZE: usize = MAX_PAYLOAD_SIZE;
-
     /// Creates a new frame.
     ///
     /// This will return an error if the data slice is too long.

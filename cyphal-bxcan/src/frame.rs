@@ -1,5 +1,5 @@
 use bxcan::{Data, ExtendedId, Frame as BxcanFrame};
-use cyphal_can::{CanError, CanId, CanResult, Frame as CyphalFrame};
+use cyphal_can::{CanError, CanId, CanResult, Frame as CyphalFrame, CLASSIC_PAYLOAD_SIZE};
 
 /// Represents a CAN 2.0 Frame
 pub struct Frame {
@@ -13,13 +13,13 @@ impl Frame {
     }
 }
 
-impl CyphalFrame<8> for Frame {
+impl CyphalFrame<CLASSIC_PAYLOAD_SIZE> for Frame {
     fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
         let can_id: CanId = id.into();
         let extended_id = ExtendedId::new(can_id.as_raw()).unwrap();
         match data.len() {
-            n if n <= Frame::PAYLOAD_SIZE => {
-                let mut bytes: [u8; Frame::PAYLOAD_SIZE] = [0; Frame::PAYLOAD_SIZE];
+            n if n <= CLASSIC_PAYLOAD_SIZE => {
+                let mut bytes: [u8; CLASSIC_PAYLOAD_SIZE] = [0; CLASSIC_PAYLOAD_SIZE];
                 bytes[..n].copy_from_slice(data);
                 let frame = BxcanFrame::new_data(extended_id, Data::new(data).unwrap());
                 Ok(Frame { can_id, frame })

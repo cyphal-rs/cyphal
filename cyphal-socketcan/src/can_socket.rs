@@ -1,5 +1,5 @@
 use crate::Frame;
-use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame};
+use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame, CLASSIC_PAYLOAD_SIZE};
 use embedded_can::{Frame as EmbeddedFrame, Id};
 use socketcan::{CanFrame, CanSocket as SocketcanSocket, Socket};
 
@@ -18,7 +18,7 @@ impl CanSocket {
     }
 }
 
-impl Can<8> for CanSocket {
+impl Can<CLASSIC_PAYLOAD_SIZE> for CanSocket {
     type Frame = Frame;
 
     fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
@@ -52,24 +52,26 @@ impl Can<8> for CanSocket {
 
 #[cfg(test)]
 mod test {
+    use crate::CanSocket;
     use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
     use cyphal_can::CanTransport;
 
-    use crate::CanSocket;
+    const SINGLE_SIZE: usize = 2;
+    const MULTI_SIZE: usize = 65;
 
-    pub struct MockMessage {
+    pub struct SingleFrameMessage {
         priority: Priority,
         subject: SubjectId,
         source: Option<NodeId>,
-        payload: [u8; 1],
+        payload: [u8; SINGLE_SIZE],
     }
 
-    impl MockMessage {
+    impl SingleFrameMessage {
         pub fn new(
             priority: Priority,
             subject: SubjectId,
             source: Option<NodeId>,
-            payload: [u8; 1],
+            payload: [u8; SINGLE_SIZE],
         ) -> CyphalResult<Self> {
             Ok(Self {
                 priority,
@@ -80,8 +82,8 @@ mod test {
         }
     }
 
-    impl Message<1> for MockMessage {
-        type Payload = [u8; 1];
+    impl Message<SINGLE_SIZE> for SingleFrameMessage {
+        type Payload = [u8; SINGLE_SIZE];
 
         fn priority(&self) -> Priority {
             self.priority
@@ -100,12 +102,40 @@ mod test {
         }
     }
 
+    pub struct MultiFrameMessage {
+        priority: Priority,
+        subject: SubjectId,
+        source: Option<NodeId>,
+        payload: [u8; MULTI_SIZE],
+    }
+
+    impl Message<MULTI_SIZE> for MultiFrameMessage {
+        type Payload = [u8; MULTI_SIZE];
+
+        fn source(&self) -> Option<NodeId> {
+            self.source
+        }
+
+        fn subject(&self) -> SubjectId {
+            self.subject
+        }
+
+        fn priority(&self) -> Priority {
+            self.priority
+        }
+
+        fn payload(&self) -> &[u8] {
+            &self.payload
+        }
+    }
+
     #[test]
     #[ignore]
     fn publish() {
         let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();
-        let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
+        let message =
+            SingleFrameMessage::new(Priority::Nominal, 1, None, 0x1234_u16.to_be_bytes()).unwrap();
         transport.publish(&message).unwrap();
     }
 }

@@ -28,6 +28,14 @@ ip link set vcan1 mtu 72
 ip link set up vcan1
 ```
 
+### Extra Tools
+
+It can also be quite usefull for testing ad debugging to install can utilities:
+
+```bash
+apt-get install can-tools
+```
+
 ## Minimum Supported Rust Version (MSRV)
 
 This crate is guaranteed to compile on stable Rust 1.75 and up. It *might*

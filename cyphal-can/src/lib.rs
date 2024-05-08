@@ -2,6 +2,12 @@
 #![no_std]
 #![warn(missing_docs)]
 
+/// Payload size for CAN 2.0
+pub const CLASSIC_PAYLOAD_SIZE: usize = 8;
+
+/// Payload size for CAN FD
+pub const FD_PAYLOAD_SIZE: usize = 64;
+
 mod can;
 pub use can::Can;
 

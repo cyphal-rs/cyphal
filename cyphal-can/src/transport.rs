@@ -1,4 +1,4 @@
-use crate::{Can, CanTransferId, Frame, MessageCanId};
+use crate::{Can, CanTransferId, Frame, MessageCanId, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE};
 use core::cmp::Ordering;
 use crc::Crc;
 use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport};
@@ -14,6 +14,11 @@ pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE, C> {
     /// Constructs a new CAN transport
     pub fn new(can: C) -> CyphalResult<CanTransport<PAYLOAD_SIZE, C>> {
+        assert!(
+            PAYLOAD_SIZE == CLASSIC_PAYLOAD_SIZE || PAYLOAD_SIZE == FD_PAYLOAD_SIZE,
+            "Invalid PAYLOAD_SIZE value.  Must be 8 for CAN Classic or 64 for CAN FD"
+        );
+
         Ok(CanTransport {
             transfer_id: CanTransferId::new(),
             can,
@@ -205,7 +210,9 @@ mod test {
     extern crate std;
 
     use super::CRC16;
-    use crate::{Can, CanError, CanId, CanResult, CanTransport, Frame};
+    use crate::{
+        Can, CanError, CanId, CanResult, CanTransport, Frame, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+    };
     use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
     use std::vec::Vec;
 
@@ -215,11 +222,11 @@ mod test {
         dlc: usize,
         data: [u8; 8],
     }
-    impl Frame<8> for MockFrame {
+    impl Frame<CLASSIC_PAYLOAD_SIZE> for MockFrame {
         fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
-                dlc if dlc <= MockFrame::PAYLOAD_SIZE => {
-                    let mut bytes: [u8; MockFrame::PAYLOAD_SIZE] = [0; MockFrame::PAYLOAD_SIZE];
+                dlc if dlc <= CLASSIC_PAYLOAD_SIZE => {
+                    let mut bytes: [u8; CLASSIC_PAYLOAD_SIZE] = [0; CLASSIC_PAYLOAD_SIZE];
                     bytes[..dlc].copy_from_slice(data);
                     Ok(MockFrame {
                         id: id.into(),
@@ -250,11 +257,11 @@ mod test {
         dlc: usize,
         data: [u8; 64],
     }
-    impl Frame<64> for MockFdFrame {
+    impl Frame<FD_PAYLOAD_SIZE> for MockFdFrame {
         fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
             match data.len() {
-                dlc if dlc <= MockFdFrame::PAYLOAD_SIZE => {
-                    let mut bytes: [u8; MockFdFrame::PAYLOAD_SIZE] = [0; MockFdFrame::PAYLOAD_SIZE];
+                dlc if dlc <= FD_PAYLOAD_SIZE => {
+                    let mut bytes: [u8; FD_PAYLOAD_SIZE] = [0; FD_PAYLOAD_SIZE];
                     bytes[..dlc].copy_from_slice(data);
                     Ok(MockFdFrame {
                         id: id.into(),

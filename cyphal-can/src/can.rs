@@ -2,9 +2,6 @@ use crate::CanResult;
 
 /// Trait representing a CAN interface
 pub trait Can<const MAX_PAYLOAD_SIZE: usize> {
-    /// Maximum payload size supported by the CAN interface.  This will be 8 for CAN 2.0 or 64 for CAN FD.
-    const MAX_PAYLOAD_SIZE: usize = MAX_PAYLOAD_SIZE;
-
     /// Associated frame type.
     type Frame: crate::Frame<MAX_PAYLOAD_SIZE>;
 
