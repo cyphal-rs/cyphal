@@ -1,32 +1,8 @@
-# Cyphal/CAN Socketcan
+# Cyphal/CAN BXCAN
 
-Open Cyphal SocketCAN Rust Implementation
+Open Cyphal BXCAN Rust Implementation
 
 🚧 *Work in progress*
-
-## Environment
-
-To run the tests, two virtual CAN interfaces must be setup.  In both cases, the vcan kernel module needs to be loaded:
-
-```bash
-modprobe vcan
-```
-
-### CAN 2.0 vcan0 interface
-
-```bash
-ip link add dev vcan0 type vcan
-ip link set vcan0 mtu 16
-ip link set up vcan0
-```
-
-### CAN FD vcan1 interface
-
-```bash
-ip link add dev vcan1 type vcan
-ip link set vcan1 mtu 72
-ip link set up vcan1
-```
 
 ## Minimum Supported Rust Version (MSRV)
 

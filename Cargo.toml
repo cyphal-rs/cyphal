@@ -1,3 +1,11 @@
 [workspace]
-members = ["cyphal", "cyphal-can", "cyphal-serial", "cyphal-socketcan", "cyphal-udp", "dsdl"]
+members = [
+    "cyphal",
+    "cyphal-bxcan",
+    "cyphal-can",
+    "cyphal-serial",
+    "cyphal-socketcan",
+    "cyphal-udp",
+    "dsdl",
+]
 resolver = "2"
