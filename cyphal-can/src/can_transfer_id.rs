@@ -1,13 +1,15 @@
 use cyphal::TransferId;
 
+/// Represents the Transfer ID used by the CAN transport.
 #[derive(Debug, Copy, Clone)]
 pub struct CanTransferId {
     value: u8,
 }
 
 impl CanTransferId {
-    pub fn new(value: u8) -> Self {
-        CanTransferId { value }
+    /// Constructs a new CAN Transfer ID
+    pub fn new() -> Self {
+        CanTransferId { value: 0 }
     }
 }
 
@@ -18,9 +20,11 @@ impl TransferId<u8> for CanTransferId {
 
     fn next(&self) -> Self {
         if self.value > 31 {
-            Self::new(self.value + 1)
+            CanTransferId {
+                value: self.value + 1,
+            }
         } else {
-            Self::new(0)
+            CanTransferId { value: 0 }
         }
     }
 }

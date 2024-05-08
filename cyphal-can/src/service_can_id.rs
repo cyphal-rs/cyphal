@@ -1,6 +1,7 @@
 use crate::{CanError, CanResult};
 use cyphal::{NodeId, Priority, ServiceId};
 
+/// Represents an extended CAN ID used for services
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct ServiceCanId {
     priority: Priority,
@@ -11,6 +12,7 @@ pub struct ServiceCanId {
 }
 
 impl ServiceCanId {
+    /// Constructs a new service CAN ID
     pub fn new(
         priority: Priority,
         is_request: bool,
@@ -37,26 +39,32 @@ impl ServiceCanId {
         })
     }
 
+    /// Returns the priority of the service call
     pub fn priority(&self) -> Priority {
         self.priority
     }
 
+    /// Indicates if its a service request if `true`, or a response if `false`
     pub fn is_request(&self) -> bool {
         self.is_request
     }
 
+    /// Returns the Service ID.
     pub fn service_id(&self) -> ServiceId {
         self.service_id
     }
 
+    /// Returns the Node ID of the destination.
     pub fn destination(&self) -> NodeId {
         self.destination
     }
 
+    /// Returns the Node ID from where the service call originates.
     pub fn source(&self) -> NodeId {
         self.source
     }
 
+    /// Returns a `u32` representation of the service CAN ID
     pub fn as_raw(&self) -> u32 {
         // set priority bits 26 to 28
         let mut result: u32 = (u8::from(self.priority) as u32) << 26;

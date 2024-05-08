@@ -5,15 +5,17 @@ use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport}
 
 const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
+/// Represents a CAN Transport
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
     transfer_id: CanTransferId,
     can: C,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE, C> {
+    /// Constructs a new CAN transport
     pub fn new(can: C) -> CyphalResult<CanTransport<PAYLOAD_SIZE, C>> {
         Ok(CanTransport {
-            transfer_id: CanTransferId::new(0),
+            transfer_id: CanTransferId::new(),
             can,
         })
     }

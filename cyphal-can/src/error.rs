@@ -1,8 +1,11 @@
+/// Represents a CAN Error
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
 pub enum CanError {
+    /// Invalid CAN ID
     InvalidId,
 
+    /// Overrun error
     Overrun,
 
     // MAC sublayer errors
@@ -54,4 +57,5 @@ impl core::fmt::Display for CanError {
     }
 }
 
+/// The result of a Cyphal CAN operation.  On failure, a `CANError` will be included.
 pub type CanResult<T> = core::result::Result<T, CanError>;

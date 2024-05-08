@@ -1,6 +1,7 @@
 use crate::{CanError, CanResult};
 use cyphal::{NodeId, Priority, SubjectId};
 
+/// Represents an extended CAN ID used for messages
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct MessageCanId {
     priority: Priority,
@@ -10,6 +11,7 @@ pub struct MessageCanId {
 }
 
 impl MessageCanId {
+    /// Constructs a new message CAN ID
     pub fn new(
         priority: Priority,
         subject_id: SubjectId,
@@ -39,26 +41,29 @@ impl MessageCanId {
         }
     }
 
-    pub fn anonymous(&self) -> bool {
-        self.anonymous
-    }
-
-    pub fn subject_id(&self) -> SubjectId {
-        self.subject_id
-    }
-
+    /// Returns the priority of the message
     pub fn priority(&self) -> Priority {
         self.priority
     }
 
-    pub fn is_service(&self) -> bool {
-        false
+    /// Indicates if the message is anonymous
+    pub fn is_anonymous(&self) -> bool {
+        self.anonymous
     }
 
+    /// Returns the Subject ID of the message
+    pub fn subject_id(&self) -> SubjectId {
+        self.subject_id
+    }
+
+    /// Returns the Node ID from where the message originates.
+    ///
+    /// Note: Anonymous messages contain a generated pseudorandom pseudo-ID value
     pub fn source(&self) -> NodeId {
         self.source
     }
 
+    /// Returns a `u32` representation of the message CAN ID
     pub fn as_raw(&self) -> u32 {
         // set priority bits 26 to 28
         let mut result: u32 = (u8::from(self.priority) as u32) << 26;
@@ -130,10 +135,9 @@ mod test {
         let target = MessageCanId::new(priority, subject_id, Some(source)).unwrap();
 
         // Assert
-        assert!(!target.anonymous());
+        assert!(!target.is_anonymous());
         assert_eq!(target.subject_id(), subject_id);
         assert_eq!(target.priority(), priority);
-        assert!(!target.is_service());
         assert_eq!(target.source(), source);
         assert_eq!(target.as_raw(), 0x107D552A);
     }
@@ -159,7 +163,6 @@ mod test {
         assert!(!target.anonymous());
         assert_eq!(target.subject_id(), subject_id);
         assert_eq!(target.priority(), priority);
-        assert!(!target.is_service());
         assert_eq!(target.source(), source);
         assert_eq!(target.as_raw(), 0x107D552A);
     }

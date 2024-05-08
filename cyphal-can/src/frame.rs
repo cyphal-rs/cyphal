@@ -2,22 +2,20 @@ use crate::{CanId, CanResult};
 
 /// A CAN Frame
 pub trait Frame<const MAX_PAYLOAD_SIZE: usize>: Sized {
+    /// Maximum payload size supported by the CAN frame.  This will be 8 for CAN 2.0 or 64 for CAN FD.
     const PAYLOAD_SIZE: usize = MAX_PAYLOAD_SIZE;
 
     /// Creates a new frame.
     ///
-    /// This will return `None` if the data slice is too long.
+    /// This will return an error if the data slice is too long.
     fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self>;
 
     /// Returns the frame identifier.
     fn id(&self) -> CanId;
 
-    /// Returns the data length code (DLC) which is in the range 0..8.
-    ///
-    /// For data frames the DLC value always matches the length of the data.
-    /// Remote frames do not carry any data, yet the DLC can be greater than 0.
+    /// Returns the data length code (DLC) which is in the range 0..8 for CAN 2.0 and 0..64 for CAN FD.
     fn dlc(&self) -> usize;
 
-    /// Returns the frame data (0..8 bytes in length).
+    /// Returns the frame data which is 0..8 bytes in length for CAN 2.0 and 0..64  bytes in length for CAN FD.
     fn data(&self) -> &[u8];
 }

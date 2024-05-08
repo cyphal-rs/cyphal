@@ -1,4 +1,6 @@
+//! Open Cyphal CAN Transport Rust Implementation
 #![no_std]
+#![warn(missing_docs)]
 
 mod can;
 pub use can::Can;
