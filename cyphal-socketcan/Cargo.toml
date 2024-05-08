@@ -12,3 +12,9 @@ cyphal = { version = "0.0.6", path = "../cyphal" }
 cyphal-can = { version = "0.0.6", path = "../cyphal-can" }
 embedded-can = "0.4.1"
 socketcan = "3.3.0"
+
+[[example]]
+name = "can"
+
+[[example]]
+name = "canfd"

@@ -12,3 +12,6 @@ pub use frame::Frame;
 
 mod fd_frame;
 pub use fd_frame::FdFrame;
+
+#[cfg(test)]
+pub(crate) mod test;

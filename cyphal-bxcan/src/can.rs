@@ -1,13 +1,13 @@
 use crate::Frame;
 use bxcan::{Can as BxCan, Instance};
-use cyphal_can::{Can as CyphalCan, CanError};
+use cyphal_can::{Can as CyphalCan, CanError, CLASSIC_PAYLOAD_SIZE};
 
 /// /// Represents a CAN 2.0 BXCAN interface
 pub struct Can<I: Instance> {
     bxcan: BxCan<I>,
 }
 
-impl<I: Instance> CyphalCan<8> for Can<I> {
+impl<I: Instance> CyphalCan<CLASSIC_PAYLOAD_SIZE> for Can<I> {
     type Frame = Frame;
 
     fn transmit(&mut self, frame: &Self::Frame) -> cyphal_can::CanResult<()> {
