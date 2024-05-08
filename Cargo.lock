@@ -61,11 +61,11 @@ checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
 
 [[package]]
 name = "cyphal"
-version = "0.0.5"
+version = "0.0.6"
 
 [[package]]
 name = "cyphal-bxcan"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "bxcan",
  "cyphal",
@@ -74,7 +74,7 @@ dependencies = [
 
 [[package]]
 name = "cyphal-can"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "crc",
  "cyphal",
@@ -82,14 +82,14 @@ dependencies = [
 
 [[package]]
 name = "cyphal-serial"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "cyphal",
 ]
 
 [[package]]
 name = "cyphal-socketcan"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "cyphal",
  "cyphal-can",
@@ -99,14 +99,14 @@ dependencies = [
 
 [[package]]
 name = "cyphal-udp"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "cyphal",
 ]
 
 [[package]]
 name = "dsdl"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "cyphal",
 ]
