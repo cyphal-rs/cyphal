@@ -1,15 +1,18 @@
+use crate::{CanResult, MessageCanId, ServiceCanId};
 use cyphal::Priority;
 
-use crate::{CanResult, MessageCanId, ServiceCanId};
-
+/// Represets an Extended CAN ID
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum CanId {
+    /// Extended CAN ID used for messages
     Message(MessageCanId),
 
+    /// Extended CAN ID used for services
     Service(ServiceCanId),
 }
 
 impl CanId {
+    /// Constructs a new `CanID`
     pub fn new(id: u32) -> CanResult<CanId> {
         // check bit 25 to see what type of Id this is
         if (id & 0x0200_0000) == 0 {
@@ -25,6 +28,7 @@ impl CanId {
         }
     }
 
+    /// Returns a `u32` representation of the CAN ID
     pub fn as_raw(&self) -> u32 {
         match *self {
             CanId::Message(m) => m.as_raw(),
@@ -32,6 +36,7 @@ impl CanId {
         }
     }
 
+    /// Returns the `Priority` of the CAN ID
     pub fn priority(&self) -> Priority {
         match *self {
             CanId::Message(m) => m.priority(),

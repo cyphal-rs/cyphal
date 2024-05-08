@@ -1,8 +1,11 @@
 use crate::{CyphalResult, Message, Request};
 
+/// Trait representing the Cyphal transport
 pub trait Transport {
+    /// Publishes a message
     fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()>;
 
+    /// Invoques a service call
     fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
         &mut self,
         request: &R,

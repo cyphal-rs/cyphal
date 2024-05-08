@@ -1,14 +1,20 @@
 use crate::{NodeId, Priority, SubjectId};
 
+/// Trait representing a message
 pub trait Message<const N: usize>: Sized {
+    /// Type representing the payload of the message
     type Payload: Sized;
 
-    fn source(&self) -> Option<NodeId>;
-
-    fn subject(&self) -> SubjectId;
-
+    /// The Priority of the message
     fn priority(&self) -> Priority;
 
+    /// Returns the Node ID of the sender.  Anonymous messages can be sent using `None`
+    fn source(&self) -> Option<NodeId>;
+
+    /// Returns the Subject ID of the message
+    fn subject(&self) -> SubjectId;
+
+    /// Return the message payload
     fn payload(&self) -> &[u8];
 }
 

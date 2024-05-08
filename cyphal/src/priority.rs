@@ -1,14 +1,30 @@
 use crate::{CyphalError, CyphalResult};
 
+/// The priority level of a transmission
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum Priority {
+    /// Exceptional is the highest priority level and should only be sent when a total system failure has occurred.
     Exceptional = 0,
+
+    /// Immediate is a high priority message.
     Immediate = 1,
+
+    /// Fast is high priority messages but have looser latency requirements than `Immediate` messages.
     Fast = 2,
+
+    /// High priority messages are more important than `Nominal` messages but have looser latency requirements than `Fast` messages.
     High = 3,
+
+    ///  This is what all messages should use by default. Specifically the heartbeat messages should use this priority.
     Nominal = 4,
+
+    /// Low priority messages are expected to be sent on a bus under all conditions but cannot prevent the delivery of nominal messages.
     Low = 5,
+
+    /// Slow messages are low priority messages that have no time sensitivity at all.
     Slow = 6,
+
+    ///  These messages might never be sent (theoretically) for some possible system states.
     Optional = 7,
 }
 
