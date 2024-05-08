@@ -1,8 +1,8 @@
+use crate::Frame;
 use bxcan::{Can as BxCan, Instance};
 use cyphal_can::{Can as CyphalCan, CanError};
 
-use crate::Frame;
-
+/// /// Represents a CAN 2.0 BXCAN interface
 pub struct Can<I: Instance> {
     bxcan: BxCan<I>,
 }
