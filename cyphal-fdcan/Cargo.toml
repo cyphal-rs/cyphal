@@ -7,7 +7,16 @@ license = "MIT OR Apache-2.0"
 edition = "2021"
 version = "0.0.6"
 
+[package.metadata.docs.rs]
+features = ["fdcan_g0_g4_l5"]
+targets = ["thumbv7em-none-eabihf"]
+
 [dependencies]
+fdcan = "0.2.0"
 cyphal = { version = "0.0.6", path = "../cyphal" }
 cyphal-can = { version = "0.0.6", path = "../cyphal-can" }
-fdcan = "0.2.0"
+
+[features]
+default = ["fdcan_g0_g4_l5"]
+fdcan_g0_g4_l5 = ["fdcan/fdcan_g0_g4_l5"] # Peripheral map found on G0 G4 L5
+fdcan_h7 = ["fdcan/fdcan_h7"]
