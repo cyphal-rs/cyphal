@@ -21,7 +21,7 @@ pub(crate) mod test {
         value: u8,
     }
 
-    impl crate::TransferId<u8> for MockTransferId {
+    impl TransferId<u8> for MockTransferId {
         fn value(&self) -> u8 {
             self.value
         }
@@ -37,6 +37,12 @@ pub(crate) mod test {
         }
     }
 
+    impl Default for MockTransferId {
+        fn default() -> Self {
+            MockTransferId { value: 0 }
+        }
+    }
+
     pub struct MockTransport {
         pub transfer_id: MockTransferId,
     }
@@ -44,7 +50,7 @@ pub(crate) mod test {
     impl MockTransport {
         pub fn new() -> Self {
             MockTransport {
-                transfer_id: MockTransferId { value: 0 },
+                transfer_id: MockTransferId::default(),
             }
         }
 

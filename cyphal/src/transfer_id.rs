@@ -1,5 +1,5 @@
 /// Represents a Transfer ID
-pub trait TransferId<T>: Sized {
+pub trait TransferId<T>: Sized + Default {
     /// Returns the value of the Transfer ID
     fn value(&self) -> T;
 

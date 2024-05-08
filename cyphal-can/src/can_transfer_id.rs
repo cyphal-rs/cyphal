@@ -28,3 +28,9 @@ impl TransferId<u8> for CanTransferId {
         }
     }
 }
+
+impl Default for CanTransferId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
