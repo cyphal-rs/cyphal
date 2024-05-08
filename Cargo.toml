@@ -2,7 +2,7 @@
 members = [
     "cyphal",
     "cyphal-bxcan",
-    "cyphal-can",
+    "cyphal-can", "cyphal-fdcan",
     "cyphal-serial",
     "cyphal-socketcan",
     "cyphal-udp",
