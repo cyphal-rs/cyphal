@@ -7,6 +7,10 @@ Open Cyphal Rust Implementation
 
 🚧 *Work in progress*
 
+## Book
+
+Documentation is available in the [cyphal book](./book).
+
 ## Crates
 
 | Source | crates.io | Docs | Description |
