@@ -1,11 +1,14 @@
+//! Open Cyphal SocketCAN Rust Implementation
+#![warn(missing_docs)]
+
 mod can_socket;
 pub use can_socket::CanSocket;
 
 mod can_fd_socket;
 pub use can_fd_socket::CanFdSocket;
 
-mod socketcan_frame;
-pub use socketcan_frame::SocketcanFrame;
+mod frame;
+pub use frame::Frame;
 
-mod socketcan_fd_frame;
-pub use socketcan_fd_frame::SocketcanFdFrame;
+mod fd_frame;
+pub use fd_frame::FdFrame;

@@ -1,20 +1,25 @@
-use crate::SocketcanFdFrame;
-use cyphal_can::{Can, CanError, CanId, CanResult, Frame};
+use crate::FdFrame;
+use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame};
 use embedded_can::{Frame as EmbeddedFrame, Id};
-use socketcan::{CanAnyFrame, Socket};
+use socketcan::{CanAnyFrame, CanFdSocket as SocketcanFdSocket, Socket};
 
+/// Represents a CAN FD Socket
 pub struct CanFdSocket {
-    socket: socketcan::CanFdSocket,
+    socket: SocketcanFdSocket,
 }
 
 impl CanFdSocket {
-    pub fn new(socket: socketcan::CanFdSocket) -> Self {
-        CanFdSocket { socket }
+    /// Constructs a new CAN FD Socket
+    pub fn new(iface: &str) -> CanResult<Self> {
+        match SocketcanFdSocket::open(iface) {
+            Ok(socket) => Ok(CanFdSocket { socket }),
+            Err(_) => Err(CanError::Other),
+        }
     }
 }
 
 impl Can<64> for CanFdSocket {
-    type Frame = SocketcanFdFrame;
+    type Frame = FdFrame;
 
     fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
         let result = self
@@ -35,11 +40,9 @@ impl Can<64> for CanFdSocket {
                     let id = f.id();
                     match id {
                         Id::Standard(_) => Err(CanError::Other),
-                        Id::Extended(e) => Ok(SocketcanFdFrame::new(
-                            CanId::new(e.as_raw()).unwrap(),
-                            f.data(),
-                        )
-                        .unwrap()),
+                        Id::Extended(e) => {
+                            Ok(FdFrame::new(CanId::new(e.as_raw()).unwrap(), f.data()).unwrap())
+                        }
                     }
                 }
                 _ => Err(CanError::Other),

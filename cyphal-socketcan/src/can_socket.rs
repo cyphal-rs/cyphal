@@ -1,20 +1,25 @@
-use crate::SocketcanFrame;
-use cyphal_can::{Can, CanError, CanId, CanResult, Frame};
+use crate::Frame;
+use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame};
 use embedded_can::{Frame as EmbeddedFrame, Id};
-use socketcan::{CanFrame, Socket};
+use socketcan::{CanFrame, CanSocket as SocketcanSocket, Socket};
 
+/// Represents a CAN 2.0 Socket
 pub struct CanSocket {
-    socket: socketcan::CanSocket,
+    socket: SocketcanSocket,
 }
 
 impl CanSocket {
-    pub fn new(socket: socketcan::CanSocket) -> Self {
-        CanSocket { socket }
+    /// Constructs a new CAN 2.0 Socket
+    pub fn new(iface: &str) -> CanResult<Self> {
+        match SocketcanSocket::open(iface) {
+            Ok(socket) => Ok(CanSocket { socket }),
+            Err(_) => Err(CanError::Other),
+        }
     }
 }
 
 impl Can<8> for CanSocket {
-    type Frame = SocketcanFrame;
+    type Frame = Frame;
 
     fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
         let result = self.socket.write_frame(frame.inner_frame());
@@ -33,11 +38,9 @@ impl Can<8> for CanSocket {
                     let id = f.id();
                     match id {
                         Id::Standard(_) => Err(CanError::Other),
-                        Id::Extended(e) => Ok(SocketcanFrame::new(
-                            CanId::new(e.as_raw()).unwrap(),
-                            f.data(),
-                        )
-                        .unwrap()),
+                        Id::Extended(e) => {
+                            Ok(Frame::new(CanId::new(e.as_raw()).unwrap(), f.data()).unwrap())
+                        }
                     }
                 }
                 _ => Err(CanError::Other),
@@ -51,7 +54,6 @@ impl Can<8> for CanSocket {
 mod test {
     use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
     use cyphal_can::CanTransport;
-    use socketcan::Socket;
 
     use crate::CanSocket;
 
@@ -101,7 +103,7 @@ mod test {
     #[test]
     #[ignore]
     fn publish() {
-        let socket = CanSocket::new(socketcan::CanSocket::open("vcan0").unwrap());
+        let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();
         let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
         transport.publish(&message).unwrap();
