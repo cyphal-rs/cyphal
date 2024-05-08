@@ -1,4 +1,4 @@
-use bxcan::{Data, ExtendedId, Frame as BxcanFrame, Id};
+use bxcan::{Data, ExtendedId, Frame as BxcanFrame};
 use cyphal_can::{CanError, CanId, CanResult, Frame as CyphalFrame};
 
 /// Represents a CAN 2.0 Frame
