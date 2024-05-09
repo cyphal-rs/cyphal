@@ -5,7 +5,8 @@ use cyphal_socketcan::CanFdSocket;
 const SINGLE_SIZE: usize = 2;
 const MULTI_SIZE: usize = 65;
 
-fn main() {
+#[async_std::main]
+async fn main() {
     let socket = CanFdSocket::new("vcan1").unwrap();
     let mut transport = CanTransport::new(socket).unwrap();
 
@@ -13,12 +14,13 @@ fn main() {
     let data: [u8; 2] = data.try_into().unwrap();
     let message = SingleFrameMessage::new(Priority::Nominal, 1, None, data).unwrap();
 
-    transport.publish(&message).unwrap();
+    let _ = transport.publish(&message).await;
 
     let data: Vec<u8> = (1..66).collect();
     let data: [u8; 65] = data.try_into().unwrap();
     let message = MultiFrameMessage::new(Priority::High, 2, None, data).unwrap();
-    transport.publish(&message).unwrap();
+
+    let _ = transport.publish(&message).await;
 }
 
 pub struct SingleFrameMessage {

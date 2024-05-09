@@ -41,7 +41,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
-    fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
         let transfer_id = self.next_transfer_id();
         let can_id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
@@ -176,7 +176,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         }
 
         while let Some(frame) = self.outbound_queue.pop() {
-            match self.can.transmit(&frame) {
+            match self.can.transmit(&frame).await {
                 Ok(()) => {}
                 Err(_) => return Err(CyphalError::Transport),
             }
@@ -184,7 +184,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         Ok(())
     }
 
-    fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
+    async fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
         &mut self,
         _: &R,
     ) -> CyphalResult<R::Response> {
@@ -222,21 +222,21 @@ mod test {
     use cyphal::{Priority, Transport as _};
     use std::vec::Vec;
 
-    #[test]
-    fn transmit_small_message() {
+    #[async_std::test]
+    async fn transmit_small_message() {
         let can = TestCan {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
         let message = TestSmallMessage::new(Priority::Nominal, 1, None, [0; 2]).unwrap();
-        transport.publish(&message).unwrap();
+        transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 1);
     }
 
-    #[test]
-    fn transmit_large_message() {
+    #[async_std::test]
+    async fn transmit_large_message() {
         let can = TestCan {
             sent_frames: Vec::new(),
         };
@@ -247,7 +247,7 @@ mod test {
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
         let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
-        transport.publish(&message).unwrap();
+        transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 10);
         check_classic_frame(
@@ -326,8 +326,8 @@ mod test {
         assert_eq!(tail_byte & 0x20 > 0, false);
     }
 
-    #[test]
-    fn transmit_large_message_fd() {
+    #[async_std::test]
+    async fn transmit_large_message_fd() {
         let can = TestCanFd {
             sent_frames: Vec::new(),
         };
@@ -338,7 +338,7 @@ mod test {
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
         let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
-        transport.publish(&message).unwrap();
+        transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
 

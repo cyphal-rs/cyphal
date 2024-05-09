@@ -21,7 +21,7 @@ impl CanSocket {
 impl Can<CLASSIC_PAYLOAD_SIZE> for CanSocket {
     type Frame = Frame;
 
-    fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
+    async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
         let result = self.socket.write_frame(frame.inner_frame());
 
         match result {
@@ -30,7 +30,7 @@ impl Can<CLASSIC_PAYLOAD_SIZE> for CanSocket {
         }
     }
 
-    fn receive(&mut self) -> CanResult<Self::Frame> {
+    async fn receive(&mut self) -> CanResult<Self::Frame> {
         let result = self.socket.read_frame();
         match result {
             Ok(f) => match f {
@@ -59,27 +59,27 @@ mod test {
     use cyphal::{Priority, Transport};
     use cyphal_can::CanTransport;
 
-    #[test]
+    #[async_std::test]
     #[ignore]
-    fn publish() {
+    async fn publish() {
         let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();
 
         let data: Vec<u8> = (1..3).collect();
         let data: [u8; 2] = data.try_into().unwrap();
         let message = SingleFrameMessage::new(Priority::Nominal, 1, None, data).unwrap();
-        transport.publish(&message).unwrap();
+        transport.publish(&message).await.unwrap();
     }
 
-    #[test]
+    #[async_std::test]
     #[ignore]
-    fn publish_multi_frame() {
+    async fn publish_multi_frame() {
         let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();
 
         let data: Vec<u8> = (1..66).collect();
         let data: [u8; 65] = data.try_into().unwrap();
         let message = MultiFrameMessage::new(Priority::Nominal, 1, None, data).unwrap();
-        transport.publish(&message).unwrap();
+        transport.publish(&message).await.unwrap();
     }
 }

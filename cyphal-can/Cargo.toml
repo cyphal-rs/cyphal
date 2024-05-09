@@ -10,3 +10,6 @@ version = "0.0.6"
 [dependencies]
 cyphal = { version = "0.0.6", path = "../cyphal" }
 crc = { version = "3.2.1" }
+
+[dev-dependencies]
+async-std = { version = "1.12.0", features = ["attributes"] }

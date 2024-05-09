@@ -1,5 +1,6 @@
 //! Open Cyphal CAN Transport Rust Implementation
 #![no_std]
+#![allow(async_fn_in_trait)]
 #![warn(missing_docs)]
 
 mod error;

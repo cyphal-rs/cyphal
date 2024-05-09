@@ -10,14 +10,14 @@ pub struct Can<I: Instance> {
 impl<I: Instance> CyphalCan<CLASSIC_PAYLOAD_SIZE> for Can<I> {
     type Frame = Frame;
 
-    fn transmit(&mut self, frame: &Self::Frame) -> cyphal_can::CanResult<()> {
+    async fn transmit(&mut self, frame: &Self::Frame) -> cyphal_can::CanResult<()> {
         match self.bxcan.transmit(frame.inner_frame()) {
             Ok(_) => Ok(()),
             Err(_) => Err(CanError::Other),
         }
     }
 
-    fn receive(&mut self) -> cyphal_can::CanResult<Self::Frame> {
+    async fn receive(&mut self) -> cyphal_can::CanResult<Self::Frame> {
         todo!()
     }
 }

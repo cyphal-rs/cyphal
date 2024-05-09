@@ -172,12 +172,12 @@ pub struct TestCan {
 impl Can<8> for TestCan {
     type Frame = TestFrame;
 
-    fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
+    async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
         self.sent_frames.push(*frame);
         Ok(())
     }
 
-    fn receive(&mut self) -> CanResult<Self::Frame> {
+    async fn receive(&mut self) -> CanResult<Self::Frame> {
         todo!()
     }
 }
@@ -188,12 +188,12 @@ pub struct TestCanFd {
 impl Can<64> for TestCanFd {
     type Frame = TestFdFrame;
 
-    fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
+    async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
         self.sent_frames.push(*frame);
         Ok(())
     }
 
-    fn receive(&mut self) -> CanResult<Self::Frame> {
+    async fn receive(&mut self) -> CanResult<Self::Frame> {
         todo!()
     }
 }

@@ -1,4 +1,5 @@
 //! Open Cyphal SocketCAN Rust Implementation
+#![allow(async_fn_in_trait)]
 #![warn(missing_docs)]
 
 mod can_socket;

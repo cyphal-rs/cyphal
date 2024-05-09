@@ -197,13 +197,13 @@ impl TestTransport {
 }
 
 impl Transport for TestTransport {
-    fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
         let _ = message.payload();
         self.next_transfer_id();
         Ok(())
     }
 
-    fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
+    async fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
         &mut self,
         request: &R,
     ) -> CyphalResult<R::Response> {
