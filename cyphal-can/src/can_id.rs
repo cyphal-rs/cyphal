@@ -61,9 +61,8 @@ impl From<ServiceCanId> for CanId {
 
 #[cfg(test)]
 mod test {
-    use cyphal::Priority;
-
     use crate::{CanId, MessageCanId, ServiceCanId};
+    use cyphal::Priority;
 
     #[test]
     fn test_new_message_id() {
@@ -76,11 +75,52 @@ mod test {
     }
 
     #[test]
+    fn test_priority() {
+        let id1: CanId = MessageCanId::new(Priority::Nominal, 1, None)
+            .unwrap()
+            .into();
+        let id2: CanId = ServiceCanId::new(Priority::High, true, 1, 1, 1)
+            .unwrap()
+            .into();
+
+        assert_eq!(id1.priority(), Priority::Nominal);
+        assert_eq!(id2.priority(), Priority::High);
+    }
+
+    #[test]
+    fn test_new_invalid_message_id() {
+        let id = 0x0080_0000_u32;
+
+        assert!(CanId::new(id).is_err());
+    }
+
+    #[test]
     fn test_new_service_id() {
         let id = ServiceCanId::new(Priority::Nominal, true, 1, 1, 1)
             .unwrap()
             .as_raw();
 
         assert_eq!(CanId::new(id).unwrap().as_raw(), id);
+    }
+
+    #[test]
+    fn test_new_invalid_service_id() {
+        let id = 0x0280_0000_u32;
+
+        assert!(CanId::new(id).is_err());
+    }
+
+    #[test]
+    fn test_from_message_id() {
+        let id = MessageCanId::new(Priority::Nominal, 1, None).unwrap();
+
+        assert_eq!(CanId::from(id), CanId::Message(id));
+    }
+
+    #[test]
+    fn test_from_service_id() {
+        let id = ServiceCanId::new(Priority::Nominal, true, 1, 1, 1).unwrap();
+
+        assert_eq!(CanId::from(id), CanId::Service(id));
     }
 }

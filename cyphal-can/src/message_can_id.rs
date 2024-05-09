@@ -89,12 +89,24 @@ impl TryFrom<u32> for MessageCanId {
 
     fn try_from(value: u32) -> CanResult<Self> {
         // make sure it's a message id
-        if (value & 0x0200_0000) > 0 {
+        if (value & 0x0200_0000) != 0 {
             return Err(CanError::InvalidId);
         }
 
-        // make sure reserved bit seven is set to zero
-        if (value & 0x80) > 0 {
+        // make sure reserved bit 7 is set to zero
+        if (value & 0x80) != 0 {
+            return Err(CanError::InvalidId);
+        }
+        // make sure reserved bit 21 is set to one
+        if (value & 0x0020_0000) == 0 {
+            return Err(CanError::InvalidId);
+        }
+        // make sure reserved bit 22 is set to one
+        if (value & 0x0040_0000) == 0 {
+            return Err(CanError::InvalidId);
+        }
+        // make sure reserved bit 23 is set to zero
+        if (value & 0x0080_0000) != 0 {
             return Err(CanError::InvalidId);
         }
 
