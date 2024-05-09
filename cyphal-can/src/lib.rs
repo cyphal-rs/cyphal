@@ -29,6 +29,9 @@ pub(crate) use queue::Queue;
 mod service_can_id;
 pub use service_can_id::ServiceCanId;
 
+#[cfg(test)]
+pub(crate) mod test;
+
 mod transport;
 pub use transport::CanTransport;
 

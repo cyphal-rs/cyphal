@@ -13,73 +13,29 @@ pub trait Transport {
 }
 
 #[cfg(test)]
-pub(crate) mod test {
-    use crate::{CyphalResult, Message, Request, Response, TransferId, Transport};
+mod test {
+    use crate::{
+        test::{TestMessage, TestRequest, TestTransport, TEST_MESSAGE_SIZE, TEST_REQUEST_SIZE},
+        Priority, Transport,
+    };
 
-    #[derive(Debug, Copy, Clone)]
-    pub struct MockTransferId {
-        value: u8,
+    #[test]
+    fn test_publish() {
+        let message = TestMessage::new(Priority::Nominal, 1, None, [0; TEST_MESSAGE_SIZE]).unwrap();
+
+        let mut transport = TestTransport::new();
+        let result = transport.publish(&message);
+
+        assert!(result.is_ok())
     }
 
-    impl TransferId<u8> for MockTransferId {
-        fn value(&self) -> u8 {
-            self.value
-        }
+    #[test]
+    fn test_invoque() {
+        let request = TestRequest::new(Priority::Nominal, 1, 2, 3, [0; TEST_REQUEST_SIZE]).unwrap();
 
-        fn next(&self) -> Self {
-            if self.value > 8 {
-                MockTransferId { value: 0 }
-            } else {
-                MockTransferId {
-                    value: self.value + 1,
-                }
-            }
-        }
-    }
+        let mut transport = TestTransport::new();
+        let result = transport.invoque(&request);
 
-    impl Default for MockTransferId {
-        fn default() -> Self {
-            MockTransferId { value: 0 }
-        }
-    }
-
-    pub struct MockTransport {
-        pub transfer_id: MockTransferId,
-    }
-
-    impl MockTransport {
-        pub fn new() -> Self {
-            MockTransport {
-                transfer_id: MockTransferId::default(),
-            }
-        }
-
-        fn next_transfer_id(&mut self) -> MockTransferId {
-            self.transfer_id = self.transfer_id.next();
-
-            self.transfer_id
-        }
-    }
-
-    impl Transport for MockTransport {
-        fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
-            let _ = message.payload();
-            self.next_transfer_id();
-            Ok(())
-        }
-
-        fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
-            &mut self,
-            request: &R,
-        ) -> CyphalResult<R::Response> {
-            Ok(R::Response::new(
-                request.priority(),
-                request.service(),
-                request.destination(),
-                request.source(),
-                [0; M],
-            )
-            .unwrap())
-        }
+        assert!(result.is_ok())
     }
 }

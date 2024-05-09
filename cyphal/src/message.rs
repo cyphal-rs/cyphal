@@ -20,61 +20,33 @@ pub trait Message<const N: usize>: Sized {
 
 #[cfg(test)]
 mod test {
+    extern crate std;
+
     use crate::{
-        transport::test::MockTransport, CyphalResult, Message, NodeId, Priority, SubjectId,
-        TransferId, Transport,
+        test::{TestMessage, TEST_MESSAGE_SIZE},
+        Message as _, NodeId, Priority, SubjectId,
     };
-
-    pub struct MockMessage {
-        priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
-        payload: [u8; 1],
-    }
-
-    impl MockMessage {
-        pub fn new(
-            priority: Priority,
-            subject: SubjectId,
-            source: Option<NodeId>,
-            payload: [u8; 1],
-        ) -> CyphalResult<Self> {
-            Ok(Self {
-                priority,
-                subject,
-                source,
-                payload,
-            })
-        }
-    }
-
-    impl Message<1> for MockMessage {
-        type Payload = [u8; 1];
-
-        fn priority(&self) -> Priority {
-            self.priority
-        }
-
-        fn subject(&self) -> SubjectId {
-            self.subject
-        }
-
-        fn source(&self) -> Option<NodeId> {
-            self.source
-        }
-
-        fn payload(&self) -> &[u8] {
-            &self.payload
-        }
-    }
+    use std::vec::Vec;
 
     #[test]
-    fn new() {
-        let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
-        assert_eq!(message.payload().len(), 1);
+    fn test_new() {
+        let priority = Priority::Optional;
+        let subject_id: SubjectId = 12;
+        let source: Option<NodeId> = Some(56);
+        let data: Vec<u8> = (0..(TEST_MESSAGE_SIZE as u8)).collect();
+        let data: [u8; TEST_MESSAGE_SIZE] = data.try_into().unwrap();
 
-        let mut transport = MockTransport::new();
-        transport.publish(&message).unwrap();
-        assert_eq!(transport.transfer_id.value(), 1);
+        let message = TestMessage::new(priority, subject_id, source, data).unwrap();
+
+        assert_eq!(message.priority(), priority);
+        assert_eq!(message.subject(), subject_id);
+        assert_eq!(message.source(), source);
+
+        let payload = message.payload();
+        assert_eq!(payload.len(), TEST_MESSAGE_SIZE);
+
+        for (i, v) in data.iter().enumerate() {
+            assert_eq!(payload[i], *v);
+        }
     }
 }

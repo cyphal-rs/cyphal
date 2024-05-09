@@ -11,8 +11,14 @@ pub use message::Message;
 mod priority;
 pub use priority::Priority;
 
-mod service;
-pub use service::{Request, Response};
+mod request;
+pub use request::Request;
+
+mod response;
+pub use response::Response;
+
+#[cfg(test)]
+pub(crate) mod test;
 
 mod transfer_id;
 pub use transfer_id::TransferId;

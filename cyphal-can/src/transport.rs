@@ -211,208 +211,23 @@ mod test {
 
     use super::CRC16;
     use crate::{
-        Can, CanError, CanId, CanResult, CanTransport, Frame, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+        test::{
+            check_classic_frame, check_fd_frame, TestCan, TestCanFd, TestLargeMessage,
+            TestSmallMessage,
+        },
+        CanTransport,
     };
-    use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
+    use cyphal::{Priority, Transport as _};
     use std::vec::Vec;
-
-    #[derive(Debug, Copy, Clone)]
-    struct MockFrame {
-        id: CanId,
-        dlc: usize,
-        data: [u8; 8],
-    }
-    impl Frame<CLASSIC_PAYLOAD_SIZE> for MockFrame {
-        fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
-            match data.len() {
-                dlc if dlc <= CLASSIC_PAYLOAD_SIZE => {
-                    let mut bytes: [u8; CLASSIC_PAYLOAD_SIZE] = [0; CLASSIC_PAYLOAD_SIZE];
-                    bytes[..dlc].copy_from_slice(data);
-                    Ok(MockFrame {
-                        id: id.into(),
-                        dlc,
-                        data: bytes,
-                    })
-                }
-                _ => Err(CanError::Other),
-            }
-        }
-
-        fn id(&self) -> CanId {
-            self.id
-        }
-
-        fn dlc(&self) -> usize {
-            self.dlc
-        }
-
-        fn data(&self) -> &[u8] {
-            &self.data
-        }
-    }
-
-    #[derive(Debug, Copy, Clone)]
-    struct MockFdFrame {
-        id: CanId,
-        dlc: usize,
-        data: [u8; 64],
-    }
-    impl Frame<FD_PAYLOAD_SIZE> for MockFdFrame {
-        fn new(id: impl Into<CanId>, data: &[u8]) -> CanResult<Self> {
-            match data.len() {
-                dlc if dlc <= FD_PAYLOAD_SIZE => {
-                    let mut bytes: [u8; FD_PAYLOAD_SIZE] = [0; FD_PAYLOAD_SIZE];
-                    bytes[..dlc].copy_from_slice(data);
-                    Ok(MockFdFrame {
-                        id: id.into(),
-                        dlc,
-                        data: bytes,
-                    })
-                }
-                _ => Err(CanError::Other),
-            }
-        }
-
-        fn id(&self) -> CanId {
-            self.id
-        }
-
-        fn dlc(&self) -> usize {
-            self.dlc
-        }
-
-        fn data(&self) -> &[u8] {
-            &self.data
-        }
-    }
-
-    pub struct MockMessage {
-        priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
-        payload: [u8; 1],
-    }
-
-    impl MockMessage {
-        pub fn new(
-            priority: Priority,
-            subject: SubjectId,
-            source: Option<NodeId>,
-            payload: [u8; 1],
-        ) -> CyphalResult<Self> {
-            Ok(Self {
-                priority,
-                subject,
-                source,
-                payload,
-            })
-        }
-    }
-
-    impl Message<1> for MockMessage {
-        type Payload = [u8; 1];
-
-        fn priority(&self) -> Priority {
-            self.priority
-        }
-
-        fn subject(&self) -> SubjectId {
-            self.subject
-        }
-
-        fn source(&self) -> Option<NodeId> {
-            self.source
-        }
-
-        fn payload(&self) -> &[u8] {
-            &self.payload
-        }
-    }
-
-    pub struct MockLargeMessage {
-        priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
-        payload: [u8; 65],
-    }
-
-    impl MockLargeMessage {
-        pub fn new(
-            priority: Priority,
-            subject: SubjectId,
-            source: Option<NodeId>,
-            payload: [u8; 65],
-        ) -> CyphalResult<Self> {
-            Ok(Self {
-                priority,
-                subject,
-                source,
-                payload,
-            })
-        }
-    }
-
-    impl Message<65> for MockLargeMessage {
-        type Payload = [u8; 65];
-
-        fn source(&self) -> Option<NodeId> {
-            self.source
-        }
-
-        fn subject(&self) -> SubjectId {
-            self.subject
-        }
-
-        fn priority(&self) -> Priority {
-            self.priority
-        }
-
-        fn payload(&self) -> &[u8] {
-            &self.payload
-        }
-    }
-
-    struct MockCan {
-        pub sent_frames: Vec<MockFrame>,
-    }
-
-    impl Can<8> for MockCan {
-        type Frame = MockFrame;
-
-        fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
-            self.sent_frames.push(*frame);
-            Ok(())
-        }
-
-        fn receive(&mut self) -> CanResult<Self::Frame> {
-            todo!()
-        }
-    }
-    struct MockCanFd {
-        pub sent_frames: Vec<MockFdFrame>,
-    }
-
-    impl Can<64> for MockCanFd {
-        type Frame = MockFdFrame;
-
-        fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
-            self.sent_frames.push(*frame);
-            Ok(())
-        }
-
-        fn receive(&mut self) -> CanResult<Self::Frame> {
-            todo!()
-        }
-    }
 
     #[test]
     fn transmit_small_message() {
-        let can = MockCan {
+        let can = TestCan {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let message = MockMessage::new(Priority::Nominal, 1, None, [0]).unwrap();
+        let message = TestSmallMessage::new(Priority::Nominal, 1, None, [0; 2]).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 1);
@@ -420,7 +235,7 @@ mod test {
 
     #[test]
     fn transmit_large_message() {
-        let can = MockCan {
+        let can = TestCan {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
@@ -429,67 +244,67 @@ mod test {
         let data: [u8; 65] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
-        let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 10);
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[0],
             [0, 1, 2, 3, 4, 5, 6],
             true,
             false,
             true,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[1],
             [7, 8, 9, 10, 11, 12, 13],
             false,
             false,
             false,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[2],
             [14, 15, 16, 17, 18, 19, 20],
             false,
             false,
             true,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[3],
             [21, 22, 23, 24, 25, 26, 27],
             false,
             false,
             false,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[4],
             [28, 29, 30, 31, 32, 33, 34],
             false,
             false,
             true,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[5],
             [35, 36, 37, 38, 39, 40, 41],
             false,
             false,
             false,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[6],
             [42, 43, 44, 45, 46, 47, 48],
             false,
             false,
             true,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[7],
             [49, 50, 51, 52, 53, 54, 55],
             false,
             false,
             false,
         );
-        check_frame(
+        check_classic_frame(
             transport.can.sent_frames[8],
             [56, 57, 58, 59, 60, 61, 62],
             false,
@@ -511,7 +326,7 @@ mod test {
 
     #[test]
     fn transmit_large_message_fd() {
-        let can = MockCanFd {
+        let can = TestCanFd {
             sent_frames: Vec::new(),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
@@ -520,14 +335,14 @@ mod test {
         let data: [u8; 65] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
-        let message = MockLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
         transport.publish(&message).unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
 
         let data: Vec<u8> = (0..63).collect();
         let data: [u8; 63] = data.try_into().unwrap();
-        check_fdframe(transport.can.sent_frames[0], data, true, false, true);
+        check_fd_frame(transport.can.sent_frames[0], data, true, false, true);
 
         assert_eq!(transport.can.sent_frames[1].dlc, 5);
         assert_eq!(transport.can.sent_frames[1].data[2], checksum[0]);
@@ -537,43 +352,5 @@ mod test {
         assert_eq!(tail_byte & 0x80 > 0, false);
         assert_eq!(tail_byte & 0x40 > 0, true);
         assert_eq!(tail_byte & 0x20 > 0, false);
-    }
-
-    fn check_frame(
-        frame: MockFrame,
-        data: [u8; 7],
-        start_of_transfer: bool,
-        end_of_transfer: bool,
-        toogle: bool,
-    ) {
-        assert_eq!(frame.dlc, 8);
-
-        for (i, v) in data.iter().enumerate() {
-            assert_eq!(frame.data[i], *v);
-        }
-
-        let tail_byte = frame.data[7];
-        assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
-        assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
-        assert_eq!(tail_byte & 0x20 > 0, toogle);
-    }
-
-    fn check_fdframe(
-        frame: MockFdFrame,
-        data: [u8; 63],
-        start_of_transfer: bool,
-        end_of_transfer: bool,
-        toogle: bool,
-    ) {
-        assert_eq!(frame.dlc, 64);
-
-        for (i, v) in data.iter().enumerate() {
-            assert_eq!(frame.data[i], *v);
-        }
-
-        let tail_byte = frame.data[63];
-        assert_eq!(tail_byte & 0x80 > 0, start_of_transfer);
-        assert_eq!(tail_byte & 0x40 > 0, end_of_transfer);
-        assert_eq!(tail_byte & 0x20 > 0, toogle);
     }
 }
