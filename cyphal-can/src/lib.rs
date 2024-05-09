@@ -23,6 +23,9 @@ pub use frame::Frame;
 mod message_can_id;
 pub use message_can_id::MessageCanId;
 
+mod queue;
+pub(crate) use queue::Queue;
+
 mod service_can_id;
 pub use service_can_id::ServiceCanId;
 

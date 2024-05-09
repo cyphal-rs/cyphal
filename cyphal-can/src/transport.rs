@@ -1,4 +1,8 @@
-use crate::{Can, CanTransferId, Frame, MessageCanId, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE};
+extern crate alloc;
+
+use crate::{
+    Can, CanTransferId, Frame, MessageCanId, Queue, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+};
 use core::cmp::Ordering;
 use crc::Crc;
 use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport};
@@ -9,6 +13,7 @@ const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
     transfer_id: CanTransferId,
     can: C,
+    queue: Queue<PAYLOAD_SIZE, C::Frame>,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE, C> {
@@ -22,6 +27,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
         Ok(CanTransport {
             transfer_id: CanTransferId::new(),
             can,
+            queue: Queue::default(),
         })
     }
 
@@ -30,17 +36,6 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
         self.transfer_id
     }
-
-    fn send_frame(&mut self, can_id: MessageCanId, payload: &[u8]) -> CyphalResult<()> {
-        match Frame::new(can_id, payload) {
-            Ok(frame) => match self.can.transmit(&frame) {
-                Ok(()) => {}
-                Err(_) => return Err(CyphalError::Transport),
-            },
-            Err(_) => return Err(CyphalError::Transport),
-        }
-        Ok(())
-    }
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
@@ -48,7 +43,6 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         let transfer_id = self.next_transfer_id();
         let can_id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
-
         let mut data = message.payload();
 
         // is multiframe
@@ -72,9 +66,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                     payload[PAYLOAD_SIZE - 1] =
                         tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer_id);
 
-                    match self.send_frame(can_id, &payload) {
-                        Ok(()) => {}
-                        Err(e) => return Err(e),
+                    match Frame::new(can_id, &payload) {
+                        Ok(frame) => self.queue.push(frame),
+                        Err(_) => return Err(CyphalError::Transport),
                     }
                 } else {
                     let mut payload: [u8; PAYLOAD_SIZE] = [0; PAYLOAD_SIZE];
@@ -92,9 +86,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             payload[data.len() + 2] =
                                 tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            match self.send_frame(can_id, &payload[..(data.len() + 3)]) {
-                                Ok(()) => {}
-                                Err(e) => return Err(e),
+                            match Frame::new(can_id, &payload[..(data.len() + 3)]) {
+                                Ok(frame) => self.queue.push(frame),
+                                Err(_) => return Err(CyphalError::Transport),
                             }
 
                             break;
@@ -107,9 +101,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            match self.send_frame(can_id, &payload) {
-                                Ok(()) => {}
-                                Err(e) => return Err(e),
+                            match Frame::new(can_id, &payload) {
+                                Ok(frame) => self.queue.push(frame),
+                                Err(_) => return Err(CyphalError::Transport),
                             }
 
                             frame_count += 1;
@@ -122,9 +116,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             // add the tail byte
                             payload[1] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            match self.send_frame(can_id, &payload) {
-                                Ok(()) => {}
-                                Err(e) => return Err(e),
+                            match Frame::new(can_id, &payload) {
+                                Ok(frame) => self.queue.push(frame),
+                                Err(_) => return Err(CyphalError::Transport),
                             }
 
                             break;
@@ -136,9 +130,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             payload[PAYLOAD_SIZE - 1] =
                                 tail_byte(false, false, frame_count % 2 > 0, transfer_id);
 
-                            match self.send_frame(can_id, &payload) {
-                                Ok(()) => {}
-                                Err(e) => return Err(e),
+                            match Frame::new(can_id, &payload) {
+                                Ok(frame) => self.queue.push(frame),
+                                Err(_) => return Err(CyphalError::Transport),
                             }
 
                             frame_count += 1;
@@ -152,9 +146,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             // add the tail byte
                             payload[2] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
 
-                            match self.send_frame(can_id, &payload) {
-                                Ok(()) => {}
-                                Err(e) => return Err(e),
+                            match Frame::new(can_id, &payload) {
+                                Ok(frame) => self.queue.push(frame),
+                                Err(_) => return Err(CyphalError::Transport),
                             }
 
                             break;
@@ -173,12 +167,18 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
             // add the tail byte
             payload[PAYLOAD_SIZE - 1] = tail_byte(true, true, true, transfer_id);
 
-            match self.send_frame(can_id, &payload) {
-                Ok(()) => {}
-                Err(e) => return Err(e),
+            match Frame::new(can_id, &payload) {
+                Ok(frame) => self.queue.push(frame),
+                Err(_) => return Err(CyphalError::Transport),
             }
         }
 
+        while let Some(frame) = self.queue.pop() {
+            match self.can.transmit(&frame) {
+                Ok(()) => {}
+                Err(_) => return Err(CyphalError::Transport),
+            }
+        }
         Ok(())
     }
 
