@@ -1,8 +1,9 @@
 use crate::{CanResult, MessageCanId, ServiceCanId};
+use core::cmp::Ordering;
 use cyphal::Priority;
 
 /// Represets an Extended CAN ID
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Copy, Clone)]
 pub enum CanId {
     /// Extended CAN ID used for messages
     Message(MessageCanId),
@@ -58,6 +59,26 @@ impl From<ServiceCanId> for CanId {
         CanId::Service(id)
     }
 }
+
+impl Ord for CanId {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.as_raw().cmp(&other.as_raw())
+    }
+}
+
+impl PartialOrd for CanId {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for CanId {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_raw() == other.as_raw()
+    }
+}
+
+impl Eq for CanId {}
 
 #[cfg(test)]
 mod test {

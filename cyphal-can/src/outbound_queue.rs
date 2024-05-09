@@ -4,13 +4,13 @@ use crate::Frame;
 use alloc::collections::VecDeque;
 use cyphal::Priority;
 
-pub struct Queue<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> {
+pub struct OutboundQueue<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> {
     frames: [VecDeque<F>; 8],
 }
 
-impl<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> Queue<PAYLOAD_SIZE, F> {
+impl<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> OutboundQueue<PAYLOAD_SIZE, F> {
     pub fn new() -> Self {
-        Queue {
+        OutboundQueue {
             frames: [
                 VecDeque::new(),
                 VecDeque::new(),
@@ -67,7 +67,7 @@ impl<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> Queue<PAYLOAD_SIZE, F> {
     }
 }
 
-impl<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> Default for Queue<PAYLOAD_SIZE, F> {
+impl<const PAYLOAD_SIZE: usize, F: Frame<PAYLOAD_SIZE>> Default for OutboundQueue<PAYLOAD_SIZE, F> {
     fn default() -> Self {
         Self::new()
     }

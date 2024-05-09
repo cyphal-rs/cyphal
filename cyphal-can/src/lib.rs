@@ -20,11 +20,14 @@ pub use error::{CanError, CanResult};
 mod frame;
 pub use frame::Frame;
 
+// mod inbound_queue;
+// pub(crate) use inbound_queue::InboundQueue;
+
 mod message_can_id;
 pub use message_can_id::MessageCanId;
 
-mod queue;
-pub(crate) use queue::Queue;
+mod outbound_queue;
+pub(crate) use outbound_queue::OutboundQueue;
 
 mod service_can_id;
 pub use service_can_id::ServiceCanId;
