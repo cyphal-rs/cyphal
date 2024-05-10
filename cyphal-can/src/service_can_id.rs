@@ -6,7 +6,7 @@ use cyphal::{NodeId, Priority, ServiceId};
 pub struct ServiceCanId {
     priority: Priority,
     is_request: bool,
-    service_id: ServiceId,
+    service: ServiceId,
     destination: NodeId,
     source: NodeId,
 }
@@ -16,11 +16,11 @@ impl ServiceCanId {
     pub fn new(
         priority: Priority,
         is_request: bool,
-        service_id: ServiceId,
+        service: ServiceId,
         destination: NodeId,
         source: NodeId,
     ) -> CanResult<Self> {
-        if service_id > 511 {
+        if service > 511 {
             return Err(CanError::InvalidId);
         }
         if destination > 127 {
@@ -33,7 +33,7 @@ impl ServiceCanId {
         Ok(ServiceCanId {
             priority,
             is_request,
-            service_id,
+            service,
             destination,
             source,
         })
@@ -51,7 +51,7 @@ impl ServiceCanId {
 
     /// Returns the Service ID.
     pub fn service_id(&self) -> ServiceId {
-        self.service_id
+        self.service
     }
 
     /// Returns the Node ID of the destination.
@@ -77,7 +77,7 @@ impl ServiceCanId {
         }
 
         // set service id bits 14 to 22
-        result |= (self.service_id as u32) << 14;
+        result |= (self.service as u32) << 14;
 
         // set subject id bits 8 to 20
         result |= (self.destination as u32) << 7;
@@ -113,7 +113,7 @@ impl TryFrom<u32> for ServiceCanId {
         Ok(ServiceCanId {
             priority,
             is_request,
-            service_id,
+            service: service_id,
             destination,
             source,
         })

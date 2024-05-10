@@ -1,7 +1,8 @@
 extern crate alloc;
 
 use crate::{
-    Can, CanTransferId, Frame, MessageCanId, OutboundQueue, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+    Can, CanId, CanTransferId, Frame, InboundQueue, MessageCanId, OutboundQueue, ServiceCanId,
+    CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
 };
 use core::cmp::Ordering;
 use crc::Crc;
@@ -13,7 +14,7 @@ const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
     transfer_id: CanTransferId,
     can: C,
-    // inbound_queue: InboundQueue<PAYLOAD_SIZE, C::Frame>,
+    inbound_queue: InboundQueue<PAYLOAD_SIZE, C::Frame>,
     outbound_queue: OutboundQueue<PAYLOAD_SIZE, C::Frame>,
 }
 
@@ -28,7 +29,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
         Ok(CanTransport {
             transfer_id: CanTransferId::new(),
             can,
-            // inbound_queue: InboundQueue::default(),
+            inbound_queue: InboundQueue::default(),
             outbound_queue: OutboundQueue::default(),
         })
     }
@@ -38,14 +39,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
         self.transfer_id
     }
-}
 
-impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
-    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+    fn enqueue_frames(&mut self, can_id: CanId, mut data: &[u8]) -> CyphalResult<()> {
         let transfer_id = self.next_transfer_id();
-        let can_id =
-            MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
-        let mut data = message.payload();
 
         // is multiframe
         if data.len() > PAYLOAD_SIZE - 1 {
@@ -175,6 +171,17 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
             }
         }
 
+        Ok(())
+    }
+}
+
+impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
+    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+        let id =
+            MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
+
+        self.enqueue_frames(id.into(), message.payload())?;
+
         while let Some(frame) = self.outbound_queue.pop() {
             match self.can.transmit(&frame).await {
                 Ok(()) => {}
@@ -186,9 +193,37 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
 
     async fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
         &mut self,
-        _: &R,
+        request: &R,
     ) -> CyphalResult<R::Response> {
-        todo!()
+        let id = ServiceCanId::new(
+            request.priority(),
+            true,
+            request.service(),
+            request.destination(),
+            request.source(),
+        )
+        .unwrap();
+
+        self.enqueue_frames(id.into(), request.payload())?;
+
+        while let Some(frame) = self.outbound_queue.pop() {
+            match self.can.transmit(&frame).await {
+                Ok(()) => {}
+                Err(_) => return Err(CyphalError::Transport),
+            }
+        }
+
+        while let Ok(frame) = self.can.receive().await {
+            match self.inbound_queue.push(frame) {
+                None => {}
+                Some(_) => {
+                    // FIXME: Need to build response
+                    todo!()
+                }
+            }
+        }
+
+        Err(CyphalError::Transport)
     }
 }
 

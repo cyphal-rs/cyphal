@@ -21,8 +21,8 @@ pub use error::{CanError, CanResult};
 mod frame;
 pub use frame::Frame;
 
-// mod inbound_queue;
-// pub(crate) use inbound_queue::InboundQueue;
+mod inbound_queue;
+pub(crate) use inbound_queue::InboundQueue;
 
 mod message_can_id;
 pub use message_can_id::MessageCanId;
