@@ -1,14 +1,16 @@
 extern crate alloc;
 
+use super::{InboundQueue, OutboundQueue};
 use crate::{
-    Can, CanId, CanTransferId, Frame, InboundQueue, MessageCanId, OutboundQueue, ServiceCanId,
-    CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+    Can, CanId, CanTransferId, Frame, MessageCanId, ServiceCanId, CLASSIC_PAYLOAD_SIZE,
+    FD_PAYLOAD_SIZE,
 };
+use alloc::vec::Vec;
 use core::cmp::Ordering;
 use crc::Crc;
-use cyphal::{CyphalError, CyphalResult, Message, Request, TransferId, Transport};
+use cyphal::{CyphalError, CyphalResult, Message, Request, Response, TransferId, Transport};
 
-const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
+pub(super) const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
 /// Represents a CAN Transport
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
@@ -27,7 +29,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
         );
 
         Ok(CanTransport {
-            transfer_id: CanTransferId::new(),
+            transfer_id: CanTransferId::default(),
             can,
             inbound_queue: InboundQueue::default(),
             outbound_queue: OutboundQueue::default(),
@@ -40,7 +42,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
         self.transfer_id
     }
 
-    fn enqueue_frames(&mut self, can_id: CanId, mut data: &[u8]) -> CyphalResult<()> {
+    fn enqueue_frames(&mut self, can_id: CanId, mut data: &[u8]) -> CyphalResult<CanTransferId> {
         let transfer_id = self.next_transfer_id();
 
         // is multiframe
@@ -171,7 +173,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
             }
         }
 
-        Ok(())
+        Ok(transfer_id)
     }
 }
 
@@ -180,7 +182,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         let id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
 
-        self.enqueue_frames(id.into(), message.payload())?;
+        self.enqueue_frames(id.into(), message.data())?;
 
         while let Some(frame) = self.outbound_queue.pop() {
             match self.can.transmit(&frame).await {
@@ -204,7 +206,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         )
         .unwrap();
 
-        self.enqueue_frames(id.into(), request.payload())?;
+        let transfer_id = self.enqueue_frames(id.into(), request.data())?;
 
         while let Some(frame) = self.outbound_queue.pop() {
             match self.can.transmit(&frame).await {
@@ -214,11 +216,67 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         }
 
         while let Ok(frame) = self.can.receive().await {
-            match self.inbound_queue.push(frame) {
+            self.inbound_queue.push(frame);
+
+            match self.inbound_queue.get_transfer_frames(transfer_id) {
                 None => {}
-                Some(_) => {
-                    // FIXME: Need to build response
-                    todo!()
+                Some(mut queue) => {
+                    let first_frame = queue.pop_front().unwrap();
+                    let transfer_id = match first_frame.id() {
+                        CanId::Message(_) => return Err(CyphalError::Transport),
+                        CanId::Service(id) => id,
+                    };
+
+                    if first_frame.is_single_trame_transfer() {
+                        let mut data: [u8; M] = [0; M];
+                        data.copy_from_slice(&first_frame.data()[..M]);
+                        return R::Response::new(
+                            transfer_id.priority(),
+                            transfer_id.service(),
+                            transfer_id.destination(),
+                            transfer_id.source(),
+                            data,
+                        );
+                    } else {
+                        if !first_frame.is_start_of_transfer() || !first_frame.is_toggle_bit_set() {
+                            // something went wrong
+                            return Err(CyphalError::Transport);
+                        }
+
+                        let mut payload: Vec<u8> = Vec::new();
+                        payload.extend_from_slice(&first_frame.data()[..first_frame.dlc() - 2]);
+
+                        let mut toogle = false;
+
+                        while let Some(frame) = queue.pop_front() {
+                            if frame.is_start_of_transfer() || frame.is_toggle_bit_set() != toogle {
+                                // something went wrong
+                                return Err(CyphalError::Transport);
+                            }
+                            if frame.is_end_of_transfer() && !queue.is_empty() {
+                                // something went wrong
+                                return Err(CyphalError::Transport);
+                            }
+
+                            payload.extend_from_slice(&frame.data()[..frame.dlc() - 2]);
+                            toogle = !toogle
+                        }
+
+                        if payload.len() != M {
+                            // something went wrong
+                            return Err(CyphalError::Transport);
+                        }
+
+                        let mut data: [u8; M] = [0; M];
+                        data.copy_from_slice(&payload);
+                        return R::Response::new(
+                            transfer_id.priority(),
+                            transfer_id.service(),
+                            transfer_id.destination(),
+                            transfer_id.source(),
+                            data,
+                        );
+                    }
                 }
             }
         }
@@ -249,22 +307,23 @@ mod test {
     use super::CRC16;
     use crate::{
         test::{
-            check_classic_frame, check_fd_frame, TestCan, TestCanFd, TestLargeMessage,
-            TestSmallMessage,
+            check_classic_frame, check_fd_frame, TestCan, TestCanFd, TestFrame, TestLargeMessage,
+            TestRequest, TestSmallMessage, LARGE_MESSAGE_SIZE, TEST_REQUEST_SIZE,
         },
-        CanTransport,
+        CanError, CanTransport, Frame, ServiceCanId,
     };
-    use cyphal::{Priority, Transport as _};
+    use cyphal::{Priority, Response, Transport as _};
     use std::vec::Vec;
 
     #[async_std::test]
     async fn transmit_small_message() {
         let can = TestCan {
             sent_frames: Vec::new(),
+            receive_fn: || Err(CanError::Other),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let message = TestSmallMessage::new(Priority::Nominal, 1, None, [0; 2]).unwrap();
+        let message = TestSmallMessage::new(Priority::Nominal, 1, None, [1, 2]).unwrap();
         transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 1);
@@ -274,11 +333,12 @@ mod test {
     async fn transmit_large_message() {
         let can = TestCan {
             sent_frames: Vec::new(),
+            receive_fn: || Err(CanError::Other),
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let data: Vec<u8> = (0..65).collect();
-        let data: [u8; 65] = data.try_into().unwrap();
+        let data: Vec<u8> = (0..LARGE_MESSAGE_SIZE as u8).collect();
+        let data: [u8; LARGE_MESSAGE_SIZE] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
         let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
@@ -389,5 +449,29 @@ mod test {
         assert_eq!(tail_byte & 0x80 > 0, false);
         assert_eq!(tail_byte & 0x40 > 0, true);
         assert_eq!(tail_byte & 0x20 > 0, false);
+    }
+
+    #[async_std::test]
+    async fn test_invoque() {
+        let can = TestCan {
+            sent_frames: Vec::new(),
+            receive_fn: || {
+                let id = ServiceCanId::new(Priority::Nominal, false, 1, 3, 2).unwrap();
+                let frame = TestFrame::new(id, &[1, 2, 0, 0, 0, 0, 0, 0xE1]).unwrap();
+
+                Ok(frame)
+            },
+        };
+        let mut transport = CanTransport::new(can).expect("Could not create transport");
+
+        let data: Vec<u8> = (0..TEST_REQUEST_SIZE as u8).collect();
+        let data: [u8; TEST_REQUEST_SIZE] = data.try_into().unwrap();
+
+        let request = TestRequest::new(Priority::Nominal, 1, 2, 3, data).unwrap();
+        let response = transport.invoque(&request).await.unwrap();
+
+        assert_eq!(transport.can.sent_frames.len(), 1);
+        assert_eq!(response.data()[0], 1);
+        assert_eq!(response.data()[1], 2);
     }
 }

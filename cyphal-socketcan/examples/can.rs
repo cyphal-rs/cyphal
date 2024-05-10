@@ -47,8 +47,6 @@ impl SingleFrameMessage {
 }
 
 impl Message<SINGLE_SIZE> for SingleFrameMessage {
-    type Payload = [u8; SINGLE_SIZE];
-
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -61,7 +59,7 @@ impl Message<SINGLE_SIZE> for SingleFrameMessage {
         self.source
     }
 
-    fn payload(&self) -> &[u8] {
+    fn data(&self) -> &[u8; SINGLE_SIZE] {
         &self.payload
     }
 }
@@ -90,8 +88,6 @@ impl MultiFrameMessage {
 }
 
 impl Message<MULTI_SIZE> for MultiFrameMessage {
-    type Payload = [u8; MULTI_SIZE];
-
     fn source(&self) -> Option<NodeId> {
         self.source
     }
@@ -104,7 +100,7 @@ impl Message<MULTI_SIZE> for MultiFrameMessage {
         self.priority
     }
 
-    fn payload(&self) -> &[u8] {
+    fn data(&self) -> &[u8; MULTI_SIZE] {
         &self.payload
     }
 }

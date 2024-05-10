@@ -2,16 +2,13 @@ use crate::{CyphalResult, NodeId, Priority, ServiceId};
 
 /// Represents a response returned by a service
 pub trait Response<const N: usize>: Sized {
-    /// Type representing the payload in the response
-    type Payload: Sized;
-
     /// Constructs a new response
     fn new(
         priority: Priority,
         service: ServiceId,
         destination: NodeId,
         source: NodeId,
-        payload: [u8; N],
+        data: [u8; N],
     ) -> CyphalResult<Self>;
 
     /// Returns the priority level of the response
@@ -27,7 +24,7 @@ pub trait Response<const N: usize>: Sized {
     fn source(&self) -> NodeId;
 
     /// Returns the payload of the response
-    fn payload(&self) -> &[u8];
+    fn data(&self) -> &[u8; N];
 }
 
 #[cfg(test)]

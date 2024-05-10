@@ -1,32 +1,32 @@
 use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId};
 
-const SINGLE_SIZE: usize = 2;
-const MULTI_SIZE: usize = 65;
+pub const SMALL_MESSAGE_SIZE: usize = 2;
+pub const LARGE_MESSAGE_SIZE: usize = 65;
 
-pub struct SingleFrameMessage {
+pub struct TestSmallMessage {
     priority: Priority,
     subject: SubjectId,
     source: Option<NodeId>,
-    payload: [u8; SINGLE_SIZE],
+    data: [u8; SMALL_MESSAGE_SIZE],
 }
 
-impl SingleFrameMessage {
+impl TestSmallMessage {
     pub fn new(
         priority: Priority,
         subject: SubjectId,
         source: Option<NodeId>,
-        payload: [u8; SINGLE_SIZE],
+        data: [u8; SMALL_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
             priority,
             subject,
             source,
-            payload,
+            data,
         })
     }
 }
 
-impl Message<SINGLE_SIZE> for SingleFrameMessage {
+impl Message<SMALL_MESSAGE_SIZE> for TestSmallMessage {
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -39,35 +39,35 @@ impl Message<SINGLE_SIZE> for SingleFrameMessage {
         self.source
     }
 
-    fn data(&self) -> &[u8; SINGLE_SIZE] {
-        &self.payload
+    fn data(&self) -> &[u8; SMALL_MESSAGE_SIZE] {
+        &self.data
     }
 }
 
-pub struct MultiFrameMessage {
+pub struct TestLargeMessage {
     priority: Priority,
     subject: SubjectId,
     source: Option<NodeId>,
-    payload: [u8; MULTI_SIZE],
+    data: [u8; LARGE_MESSAGE_SIZE],
 }
 
-impl MultiFrameMessage {
+impl TestLargeMessage {
     pub fn new(
         priority: Priority,
         subject: SubjectId,
         source: Option<NodeId>,
-        payload: [u8; MULTI_SIZE],
+        data: [u8; LARGE_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
             priority,
             subject,
             source,
-            payload,
+            data,
         })
     }
 }
 
-impl Message<MULTI_SIZE> for MultiFrameMessage {
+impl Message<LARGE_MESSAGE_SIZE> for TestLargeMessage {
     fn source(&self) -> Option<NodeId> {
         self.source
     }
@@ -80,7 +80,7 @@ impl Message<MULTI_SIZE> for MultiFrameMessage {
         self.priority
     }
 
-    fn data(&self) -> &[u8; MULTI_SIZE] {
-        &self.payload
+    fn data(&self) -> &[u8; LARGE_MESSAGE_SIZE] {
+        &self.data
     }
 }

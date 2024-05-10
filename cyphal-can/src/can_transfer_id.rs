@@ -1,15 +1,22 @@
+use crate::{CanError, CanResult};
 use cyphal::TransferId;
 
+const MAX_TRANSFER_ID: u8 = 31;
+
 /// Represents the Transfer ID used by the CAN transport.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct CanTransferId {
     value: u8,
 }
 
 impl CanTransferId {
     /// Constructs a new CAN Transfer ID
-    pub fn new() -> Self {
-        CanTransferId { value: 0 }
+    pub fn new(value: u8) -> CanResult<Self> {
+        if value > MAX_TRANSFER_ID {
+            return Err(CanError::InvalidId);
+        }
+
+        Ok(CanTransferId { value })
     }
 }
 
@@ -19,19 +26,13 @@ impl TransferId<u8> for CanTransferId {
     }
 
     fn next(&self) -> Self {
-        if self.value < 31 {
+        if self.value < MAX_TRANSFER_ID {
             CanTransferId {
                 value: self.value + 1,
             }
         } else {
             CanTransferId { value: 0 }
         }
-    }
-}
-
-impl Default for CanTransferId {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -45,9 +46,18 @@ mod test {
 
     #[test]
     fn test_new() {
-        let id = CanTransferId::new();
+        let value: u8 = 5;
+        let id = CanTransferId::new(value).unwrap();
 
-        assert_eq!(id.value, 0);
+        assert_eq!(id.value, value);
+    }
+
+    #[test]
+    fn test_new_error() {
+        let value: u8 = 32;
+        let result = CanTransferId::new(value);
+
+        assert!(result.is_err());
     }
 
     #[test]

@@ -50,7 +50,7 @@ impl ServiceCanId {
     }
 
     /// Returns the Service ID.
-    pub fn service_id(&self) -> ServiceId {
+    pub fn service(&self) -> ServiceId {
         self.service
     }
 

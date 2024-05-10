@@ -52,7 +52,7 @@ impl MessageCanId {
     }
 
     /// Returns the Subject ID of the message
-    pub fn subject_id(&self) -> SubjectId {
+    pub fn subject(&self) -> SubjectId {
         self.subject_id
     }
 
@@ -148,7 +148,7 @@ mod test {
 
         // Assert
         assert!(!target.is_anonymous());
-        assert_eq!(target.subject_id(), subject_id);
+        assert_eq!(target.subject(), subject_id);
         assert_eq!(target.priority(), priority);
         assert_eq!(target.source(), source);
         assert_eq!(target.as_raw(), 0x107D552A);

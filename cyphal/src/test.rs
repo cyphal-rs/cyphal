@@ -12,7 +12,7 @@ pub struct TestMessage {
     priority: Priority,
     subject: SubjectId,
     source: Option<NodeId>,
-    payload: [u8; TEST_MESSAGE_SIZE],
+    data: [u8; TEST_MESSAGE_SIZE],
 }
 
 impl TestMessage {
@@ -20,20 +20,18 @@ impl TestMessage {
         priority: Priority,
         subject: SubjectId,
         source: Option<NodeId>,
-        payload: [u8; TEST_MESSAGE_SIZE],
+        data: [u8; TEST_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
             priority,
             subject,
             source,
-            payload,
+            data,
         })
     }
 }
 
 impl Message<TEST_MESSAGE_SIZE> for TestMessage {
-    type Payload = [u8; TEST_MESSAGE_SIZE];
-
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -46,8 +44,8 @@ impl Message<TEST_MESSAGE_SIZE> for TestMessage {
         self.source
     }
 
-    fn payload(&self) -> &[u8] {
-        &self.payload
+    fn data(&self) -> &[u8; TEST_MESSAGE_SIZE] {
+        &self.data
     }
 }
 
@@ -56,7 +54,7 @@ pub struct TestRequest {
     service: ServiceId,
     destination: NodeId,
     source: NodeId,
-    payload: [u8; TEST_REQUEST_SIZE],
+    data: [u8; TEST_REQUEST_SIZE],
 }
 
 impl TestRequest {
@@ -65,21 +63,19 @@ impl TestRequest {
         service: ServiceId,
         destination: NodeId,
         source: NodeId,
-        payload: [u8; TEST_REQUEST_SIZE],
+        data: [u8; TEST_REQUEST_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
             priority,
             service,
             destination,
             source,
-            payload,
+            data,
         })
     }
 }
 
 impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE> for TestRequest {
-    type Payload = [u8; TEST_REQUEST_SIZE];
-
     type Response = TestResponse;
 
     fn priority(&self) -> Priority {
@@ -98,8 +94,8 @@ impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE> for TestRequest {
         self.source
     }
 
-    fn payload(&self) -> &[u8] {
-        &self.payload
+    fn data(&self) -> &[u8; TEST_REQUEST_SIZE] {
+        &self.data
     }
 }
 
@@ -108,25 +104,23 @@ pub struct TestResponse {
     service: ServiceId,
     destination: NodeId,
     source: NodeId,
-    payload: [u8; TEST_RESPONSE_SIZE],
+    data: [u8; TEST_RESPONSE_SIZE],
 }
 
 impl Response<TEST_RESPONSE_SIZE> for TestResponse {
-    type Payload = [u8; TEST_RESPONSE_SIZE];
-
     fn new(
         priority: Priority,
         service: ServiceId,
         destination: NodeId,
         source: NodeId,
-        payload: [u8; TEST_RESPONSE_SIZE],
+        data: [u8; TEST_RESPONSE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
             priority,
             service,
             destination,
             source,
-            payload,
+            data,
         })
     }
 
@@ -146,8 +140,8 @@ impl Response<TEST_RESPONSE_SIZE> for TestResponse {
         self.source
     }
 
-    fn payload(&self) -> &[u8] {
-        &self.payload
+    fn data(&self) -> &[u8; TEST_RESPONSE_SIZE] {
+        &self.data
     }
 }
 
@@ -198,7 +192,7 @@ impl TestTransport {
 
 impl Transport for TestTransport {
     async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
-        let _ = message.payload();
+        let _ = message.data();
         self.next_transfer_id();
         Ok(())
     }

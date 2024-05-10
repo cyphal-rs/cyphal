@@ -2,9 +2,6 @@ use crate::{NodeId, Priority, Response, ServiceId};
 
 /// Represents a resquest sent to a service
 pub trait Request<const N: usize, const M: usize>: Sized {
-    /// Type representing the payload in the request
-    type Payload: Sized;
-
     /// Type representing the response returned by the service
     type Response: Response<M>;
 
@@ -21,5 +18,5 @@ pub trait Request<const N: usize, const M: usize>: Sized {
     fn source(&self) -> NodeId;
 
     /// Returns the payload of the request
-    fn payload(&self) -> &[u8];
+    fn data(&self) -> &[u8; N];
 }
