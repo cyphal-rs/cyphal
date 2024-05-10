@@ -5,7 +5,7 @@ readme = "README.md"
 repository = "https://github.com/cyphal-rs/cyphal"
 license = "MIT OR Apache-2.0"
 edition = "2021"
-version = "0.0.6"
+version = "0.0.7"
 
 [package.metadata.docs.rs]
 features = ["fdcan_g0_g4_l5"]
@@ -13,8 +13,8 @@ targets = ["thumbv7em-none-eabihf"]
 
 [dependencies]
 fdcan = "0.2.0"
-cyphal = { version = "0.0.6", path = "../cyphal" }
-cyphal-can = { version = "0.0.6", path = "../cyphal-can" }
+cyphal = { version = "0.0.7", path = "../cyphal" }
+cyphal-can = { version = "0.0.7", path = "../cyphal-can" }
 
 [features]
 default = ["fdcan_g0_g4_l5"]
