@@ -22,7 +22,7 @@ impl Can<FD_PAYLOAD_SIZE> for CanFdSocket {
     type Frame = FdFrame;
 
     async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
-        let result = self.socket.write_frame(frame.inner_frame().into()).await;
+        let result = self.socket.write_frame(frame.inner_frame()).await;
 
         match result {
             Ok(_) => Ok(()),
