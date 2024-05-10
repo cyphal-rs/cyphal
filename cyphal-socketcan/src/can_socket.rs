@@ -1,17 +1,17 @@
 use crate::Frame;
 use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame, CLASSIC_PAYLOAD_SIZE};
-use embedded_can::{Frame as EmbeddedFrame, Id};
-use socketcan::{CanFrame, CanSocket as SocketcanSocket, Socket};
+use embedded_can::{Frame as _, Id};
+use socketcan::{async_std::CanSocket as Socket, CanFrame};
 
 /// Represents a CAN 2.0 Socket
 pub struct CanSocket {
-    socket: SocketcanSocket,
+    socket: Socket,
 }
 
 impl CanSocket {
     /// Constructs a new CAN 2.0 Socket
     pub fn new(iface: &str) -> CanResult<Self> {
-        match SocketcanSocket::open(iface) {
+        match Socket::open(iface) {
             Ok(socket) => Ok(CanSocket { socket }),
             Err(_) => Err(CanError::Other),
         }
@@ -22,7 +22,7 @@ impl Can<CLASSIC_PAYLOAD_SIZE> for CanSocket {
     type Frame = Frame;
 
     async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
-        let result = self.socket.write_frame(frame.inner_frame());
+        let result = self.socket.write_frame(frame.inner_frame()).await;
 
         match result {
             Ok(_) => Ok(()),
@@ -31,7 +31,8 @@ impl Can<CLASSIC_PAYLOAD_SIZE> for CanSocket {
     }
 
     async fn receive(&mut self) -> CanResult<Self::Frame> {
-        let result = self.socket.read_frame();
+        let result = self.socket.read_frame().await;
+
         match result {
             Ok(f) => match f {
                 CanFrame::Data(f) => {

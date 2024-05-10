@@ -1,17 +1,17 @@
 use crate::FdFrame;
 use cyphal_can::{Can, CanError, CanId, CanResult, Frame as CyphalFrame, FD_PAYLOAD_SIZE};
 use embedded_can::{Frame as EmbeddedFrame, Id};
-use socketcan::{CanAnyFrame, CanFdSocket as SocketcanFdSocket, Socket};
+use socketcan::{async_std::CanFdSocket as FdSocket, CanAnyFrame};
 
 /// Represents a CAN FD Socket
 pub struct CanFdSocket {
-    socket: SocketcanFdSocket,
+    socket: FdSocket,
 }
 
 impl CanFdSocket {
     /// Constructs a new CAN FD Socket
     pub fn new(iface: &str) -> CanResult<Self> {
-        match SocketcanFdSocket::open(iface) {
+        match FdSocket::open(iface) {
             Ok(socket) => Ok(CanFdSocket { socket }),
             Err(_) => Err(CanError::Other),
         }
@@ -22,9 +22,7 @@ impl Can<FD_PAYLOAD_SIZE> for CanFdSocket {
     type Frame = FdFrame;
 
     async fn transmit(&mut self, frame: &Self::Frame) -> CanResult<()> {
-        let result = self
-            .socket
-            .write_frame(&CanAnyFrame::Fd(*frame.inner_frame()));
+        let result = self.socket.write_frame(frame.inner_frame().into()).await;
 
         match result {
             Ok(_) => Ok(()),
@@ -33,7 +31,8 @@ impl Can<FD_PAYLOAD_SIZE> for CanFdSocket {
     }
 
     async fn receive(&mut self) -> CanResult<Self::Frame> {
-        let result = self.socket.read_frame();
+        let result = self.socket.read_frame().await;
+
         match result {
             Ok(f) => match f {
                 CanAnyFrame::Normal(f) => {
@@ -81,7 +80,7 @@ mod test {
 
         let data: Vec<u8> = (1..66).collect();
         let data: [u8; 65] = data.try_into().unwrap();
-        let message = MultiFrameMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message = MultiFrameMessage::new(Priority::High, 2, Some(123), data).unwrap();
         transport.publish(&message).await.unwrap();
     }
 }

@@ -24,6 +24,87 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "cyphal-can",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--all-features",
+                    "--package=cyphal-can"
+                ],
+                "filter": {
+                    "name": "cyphal-can",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/cyphal-can"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "cyphal-socketcan",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--features",
+                    "async-std",
+                    "--package=cyphal-socketcan"
+                ],
+                "filter": {
+                    "name": "cyphal-socketcan",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/cyphal-socketcan"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "can example",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example",
+                    "can",
+                    "--all-features",
+                    "--package=cyphal-socketcan"
+                ],
+                "filter": {
+                    "name": "can",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/cyphal-socketcan"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "canfd example",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example",
+                    "canfd",
+                    "--all-features",
+                    "--package=cyphal-socketcan"
+                ],
+                "filter": {
+                    "name": "canfd",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/cyphal-socketcan"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "dsdl",
             "cargo": {
                 "args": [
