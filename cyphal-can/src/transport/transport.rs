@@ -10,7 +10,7 @@ use core::cmp::Ordering;
 use crc::Crc;
 use cyphal::{CyphalError, CyphalResult, Message, Request, Response, TransferId, Transport};
 
-pub(super) const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
+const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
 /// Represents a CAN Transport
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
