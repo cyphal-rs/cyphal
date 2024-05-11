@@ -27,13 +27,13 @@ pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE, C> {
     /// Constructs a new CAN transport
-    pub fn new(can: C) -> CyphalResult<CanTransport<PAYLOAD_SIZE, C>> {
+    pub fn new(can: C) -> CyphalResult<Self> {
         assert!(
             PAYLOAD_SIZE == CLASSIC_PAYLOAD_SIZE || PAYLOAD_SIZE == FD_PAYLOAD_SIZE,
             "Invalid PAYLOAD_SIZE value.  Must be 8 for CAN Classic or 64 for CAN FD"
         );
 
-        Ok(CanTransport {
+        Ok(Self {
             can,
             transfer: CanTransferId::default(),
             inbound_queue: InboundQueue::default(),

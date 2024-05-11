@@ -1,3 +1,5 @@
+use core::fmt::{Display, Formatter, Result as FmtResult};
+
 /// Represents a CAN Error
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum CanError {
@@ -32,8 +34,8 @@ pub enum CanError {
     Other,
 }
 
-impl core::fmt::Display for CanError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl Display for CanError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::InvalidId => write!(f, "Invalid CAN ID"),
             Self::Overrun => write!(f, "The peripheral receive buffer was overrun"),
@@ -57,4 +59,4 @@ impl core::fmt::Display for CanError {
 }
 
 /// The result of a Cyphal CAN operation.  On failure, a `CANError` will be included.
-pub type CanResult<T> = core::result::Result<T, CanError>;
+pub type CanResult<T> = Result<T, CanError>;

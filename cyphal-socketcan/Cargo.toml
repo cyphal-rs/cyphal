@@ -17,7 +17,7 @@ socketcan = { version = "3.3.0", features = ["async-std"] }
 async-std = { version = "1.12.0", features = ["attributes"] }
 
 [[example]]
-name = "can"
+name = "can_publish"
 
 [[example]]
-name = "canfd"
+name = "canfd_publish"

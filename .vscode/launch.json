@@ -65,17 +65,17 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "can example",
+            "name": "can publish example",
             "cargo": {
                 "args": [
                     "build",
                     "--example",
-                    "can",
+                    "can_publish",
                     "--all-features",
                     "--package=cyphal-socketcan"
                 ],
                 "filter": {
-                    "name": "can",
+                    "name": "can_publish",
                     "kind": "example"
                 }
             },
@@ -85,22 +85,42 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "canfd example",
+            "name": "canfd publish example",
             "cargo": {
                 "args": [
                     "build",
                     "--example",
-                    "canfd",
+                    "canfd_publish",
                     "--all-features",
                     "--package=cyphal-socketcan"
                 ],
                 "filter": {
-                    "name": "canfd",
+                    "name": "canfd_publish",
                     "kind": "example"
                 }
             },
             "args": [],
             "cwd": "${workspaceFolder}/cyphal-socketcan"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "udp publish example",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example",
+                    "publish",
+                    "--all-features",
+                    "--package=cyphal-udpsocket"
+                ],
+                "filter": {
+                    "name": "publish",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/cyphal-udpsocket"
         },
         {
             "type": "lldb",
