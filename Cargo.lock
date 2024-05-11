@@ -321,7 +321,12 @@ dependencies = [
 
 [[package]]
 name = "cyphal-udpsocket"
-version = "0.0.0"
+version = "0.0.7"
+dependencies = [
+ "async-std",
+ "cyphal",
+ "cyphal-udp",
+]
 
 [[package]]
 name = "dsdl"
