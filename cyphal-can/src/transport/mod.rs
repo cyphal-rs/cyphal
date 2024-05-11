@@ -19,8 +19,8 @@ const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
 /// Represents a CAN Transport
 pub struct CanTransport<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> {
-    transfer_id: CanTransferId,
     can: C,
+    transfer: CanTransferId,
     inbound_queue: InboundQueue<PAYLOAD_SIZE, C::Frame>,
     outbound_queue: OutboundQueue<PAYLOAD_SIZE, C::Frame>,
 }
@@ -34,21 +34,21 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
         );
 
         Ok(CanTransport {
-            transfer_id: CanTransferId::default(),
             can,
+            transfer: CanTransferId::default(),
             inbound_queue: InboundQueue::default(),
             outbound_queue: OutboundQueue::default(),
         })
     }
 
-    fn next_transfer_id(&mut self) -> CanTransferId {
-        self.transfer_id = self.transfer_id.next();
+    fn next_transfer(&mut self) -> CanTransferId {
+        self.transfer = self.transfer.next();
 
-        self.transfer_id
+        self.transfer
     }
 
     fn enqueue_frames(&mut self, can_id: CanId, mut data: &[u8]) -> CyphalResult<CanTransferId> {
-        let transfer_id = self.next_transfer_id();
+        let transfer = self.next_transfer();
 
         // is multiframe
         if data.len() > PAYLOAD_SIZE - 1 {
@@ -69,7 +69,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
                     // add the tail byte
                     payload[PAYLOAD_SIZE - 1] =
-                        tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer_id);
+                        tail_byte(frame_count == 1, false, frame_count % 2 > 0, transfer);
 
                     match Frame::new(can_id, &payload) {
                         Ok(frame) => self.outbound_queue.push(frame),
@@ -89,7 +89,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
                             // add the tail byte
                             payload[data.len() + 2] =
-                                tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                                tail_byte(false, true, frame_count % 2 > 0, transfer);
 
                             match Frame::new(can_id, &payload[..(data.len() + 3)]) {
                                 Ok(frame) => self.outbound_queue.push(frame),
@@ -104,7 +104,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
                             // add the tail byte
                             payload[PAYLOAD_SIZE - 1] =
-                                tail_byte(false, false, frame_count % 2 > 0, transfer_id);
+                                tail_byte(false, false, frame_count % 2 > 0, transfer);
 
                             match Frame::new(can_id, &payload) {
                                 Ok(frame) => self.outbound_queue.push(frame),
@@ -119,7 +119,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
                             payload[0] = checksum[1];
 
                             // add the tail byte
-                            payload[1] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                            payload[1] = tail_byte(false, true, frame_count % 2 > 0, transfer);
 
                             match Frame::new(can_id, &payload) {
                                 Ok(frame) => self.outbound_queue.push(frame),
@@ -133,7 +133,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 
                             // add the tail byte
                             payload[PAYLOAD_SIZE - 1] =
-                                tail_byte(false, false, frame_count % 2 > 0, transfer_id);
+                                tail_byte(false, false, frame_count % 2 > 0, transfer);
 
                             match Frame::new(can_id, &payload) {
                                 Ok(frame) => self.outbound_queue.push(frame),
@@ -149,7 +149,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
                             payload[1] = checksum[1];
 
                             // add the tail byte
-                            payload[2] = tail_byte(false, true, frame_count % 2 > 0, transfer_id);
+                            payload[2] = tail_byte(false, true, frame_count % 2 > 0, transfer);
 
                             match Frame::new(can_id, &payload) {
                                 Ok(frame) => self.outbound_queue.push(frame),
@@ -170,7 +170,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
             payload[..data.len()].copy_from_slice(data);
 
             // add the tail byte
-            payload[PAYLOAD_SIZE - 1] = tail_byte(true, true, true, transfer_id);
+            payload[PAYLOAD_SIZE - 1] = tail_byte(true, true, true, transfer);
 
             match Frame::new(can_id, &payload) {
                 Ok(frame) => self.outbound_queue.push(frame),
@@ -178,7 +178,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
             }
         }
 
-        Ok(transfer_id)
+        Ok(transfer)
     }
 }
 
@@ -211,7 +211,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         )
         .unwrap();
 
-        let transfer_id = self.enqueue_frames(id.into(), request.data())?;
+        let transfer = self.enqueue_frames(id.into(), request.data())?;
 
         while let Some(frame) = self.outbound_queue.pop() {
             match self.can.transmit(&frame).await {
@@ -223,11 +223,11 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         while let Ok(frame) = self.can.receive().await {
             self.inbound_queue.push(frame);
 
-            match self.inbound_queue.get_transfer_frames(transfer_id) {
+            match self.inbound_queue.get_transfer_frames(transfer) {
                 None => {}
                 Some(mut queue) => {
                     let first_frame = queue.pop_front().unwrap();
-                    let transfer_id = match first_frame.id() {
+                    let id = match first_frame.id() {
                         CanId::Message(_) => return Err(CyphalError::Transport),
                         CanId::Service(id) => id,
                     };
@@ -236,10 +236,10 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         let mut data: [u8; M] = [0; M];
                         data.copy_from_slice(&first_frame.data()[..M]);
                         return R::Response::new(
-                            transfer_id.priority(),
-                            transfer_id.service(),
-                            transfer_id.destination(),
-                            transfer_id.source(),
+                            id.priority(),
+                            id.service(),
+                            id.destination(),
+                            id.source(),
                             data,
                         );
                     } else {
@@ -275,10 +275,10 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         let mut data: [u8; M] = [0; M];
                         data.copy_from_slice(&payload);
                         return R::Response::new(
-                            transfer_id.priority(),
-                            transfer_id.service(),
-                            transfer_id.destination(),
-                            transfer_id.source(),
+                            id.priority(),
+                            id.service(),
+                            id.destination(),
+                            id.source(),
                             data,
                         );
                     }
@@ -290,8 +290,8 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     }
 }
 
-fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer_id: CanTransferId) -> u8 {
-    let mut tail_byte = transfer_id.value();
+fn tail_byte(is_start: bool, is_end: bool, toggle: bool, transfer: CanTransferId) -> u8 {
+    let mut tail_byte = transfer.value();
     if is_start {
         tail_byte |= 0x80;
     }

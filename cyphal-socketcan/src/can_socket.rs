@@ -61,7 +61,7 @@ mod test {
     use cyphal_can::CanTransport;
 
     #[async_std::test]
-    #[ignore]
+    #[ignore = "need to have vcan setup"]
     async fn publish() {
         let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();
@@ -73,7 +73,7 @@ mod test {
     }
 
     #[async_std::test]
-    #[ignore]
+    #[ignore = "need to have vcan setup"]
     async fn publish_multi_frame() {
         let socket = CanSocket::new("vcan0").unwrap();
         let mut transport = CanTransport::new(socket).unwrap();

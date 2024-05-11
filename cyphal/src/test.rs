@@ -173,27 +173,27 @@ impl Default for TestTransferId {
 }
 
 pub struct TestTransport {
-    pub transfer_id: TestTransferId,
+    pub transfer: TestTransferId,
 }
 
 impl TestTransport {
     pub fn new() -> Self {
         TestTransport {
-            transfer_id: TestTransferId::default(),
+            transfer: TestTransferId::default(),
         }
     }
 
-    fn next_transfer_id(&mut self) -> TestTransferId {
-        self.transfer_id = self.transfer_id.next();
+    fn next_transfer(&mut self) -> TestTransferId {
+        self.transfer = self.transfer.next();
 
-        self.transfer_id
+        self.transfer
     }
 }
 
 impl Transport for TestTransport {
     async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
         let _ = message.data();
-        self.next_transfer_id();
+        self.next_transfer();
         Ok(())
     }
 

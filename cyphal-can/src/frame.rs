@@ -49,7 +49,7 @@ pub trait Frame<const MAX_PAYLOAD_SIZE: usize>: Sized {
     }
 
     /// Returns the Transfer ID
-    fn transfer_id(&self) -> CanTransferId {
+    fn transfer(&self) -> CanTransferId {
         let value = if self.is_single_trame_transfer() {
             self.data()[MAX_PAYLOAD_SIZE - 1] & 0x0F
         } else {

@@ -6,18 +6,14 @@ use cyphal::{NodeId, Priority, SubjectId};
 pub struct MessageCanId {
     priority: Priority,
     anonymous: bool,
-    subject_id: SubjectId,
+    subject: SubjectId,
     source: NodeId,
 }
 
 impl MessageCanId {
     /// Constructs a new message CAN ID
-    pub fn new(
-        priority: Priority,
-        subject_id: SubjectId,
-        source: Option<NodeId>,
-    ) -> CanResult<Self> {
-        if subject_id > 8191 {
+    pub fn new(priority: Priority, subject: SubjectId, source: Option<NodeId>) -> CanResult<Self> {
+        if subject > 8191 {
             return Err(CanError::InvalidId);
         }
         if source.is_some_and(|s| s > 127) {
@@ -28,13 +24,13 @@ impl MessageCanId {
             Some(s) => Ok(MessageCanId {
                 priority,
                 anonymous: false,
-                subject_id,
+                subject,
                 source: s,
             }),
             None => Ok(MessageCanId {
                 priority,
                 anonymous: true,
-                subject_id,
+                subject,
                 //FIXME: generate a pseudorandom pseudo-ID value for source
                 source: 0,
             }),
@@ -53,7 +49,7 @@ impl MessageCanId {
 
     /// Returns the Subject ID of the message
     pub fn subject(&self) -> SubjectId {
-        self.subject_id
+        self.subject
     }
 
     /// Returns the Node ID from where the message originates.
@@ -77,7 +73,7 @@ impl MessageCanId {
         result |= 0x3 << 21;
 
         // set subject id bits 8 to 20
-        result |= (self.subject_id as u32) << 8;
+        result |= (self.subject as u32) << 8;
 
         // set source node id bits 0 to 7
         result | (self.source as u32)
@@ -117,12 +113,12 @@ impl TryFrom<u32> for MessageCanId {
 
         let anonymous = (value & 0x0100_0000) > 0;
         let source = (value & 0x7F) as NodeId;
-        let subject_id = ((value >> 8) & 0x1FFF) as SubjectId;
+        let subject = ((value >> 8) & 0x1FFF) as SubjectId;
 
         Ok(MessageCanId {
             priority,
             anonymous,
-            subject_id,
+            subject,
             source,
         })
     }
@@ -141,21 +137,21 @@ mod test {
         // Arrange
         let priority = Priority::Nominal;
         let source: NodeId = 42;
-        let subject_id: SubjectId = 7509;
+        let subject: SubjectId = 7509;
 
         // Act
-        let target = MessageCanId::new(priority, subject_id, Some(source)).unwrap();
+        let target = MessageCanId::new(priority, subject, Some(source)).unwrap();
 
         // Assert
-        assert!(!target.is_anonymous());
-        assert_eq!(target.subject(), subject_id);
         assert_eq!(target.priority(), priority);
+        assert!(!target.is_anonymous());
+        assert_eq!(target.subject(), subject);
         assert_eq!(target.source(), source);
         assert_eq!(target.as_raw(), 0x107D552A);
     }
 
-    /*
     #[test]
+    #[ignore = "need to generate a pseudorandom pseudo-ID value for source"]
     #[allow(non_snake_case)]
     fn test_0x11133775() {
         // uavcan.primitive.String.1.0 under subject-ID 4919 (133716) published by an anonymous node, the
@@ -165,18 +161,16 @@ mod test {
 
         // Arrange FIX
         let priority = Priority::Nominal;
-        let source: u8 = 117;
-        let subject_id: u16 = 4919;
+        let subject: u16 = 4919;
 
         // Act
-        let target = MessageCanId::new_anonymous(priority, source, subject_id).unwrap();
+        let target = MessageCanId::new(priority, subject, None).unwrap();
 
         // Assert
-        assert!(!target.anonymous());
-        assert_eq!(target.subject_id(), subject_id);
         assert_eq!(target.priority(), priority);
-        assert_eq!(target.source(), source);
-        assert_eq!(target.as_raw(), 0x107D552A);
+        assert!(target.is_anonymous());
+        assert_eq!(target.subject(), subject);
+        //FIXME: generate a pseudorandom pseudo-ID value for source
+        //assert_eq!(target.as_raw() & 0xFFFFFF00, 0x11133775 & 0xFFFFFF00);
     }
-    */
 }

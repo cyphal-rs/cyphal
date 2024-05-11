@@ -5,11 +5,11 @@ pub trait Message<const N: usize>: Sized {
     /// The Priority of the message
     fn priority(&self) -> Priority;
 
-    /// Returns the Node ID of the sender.  Anonymous messages can be sent using `None`
-    fn source(&self) -> Option<NodeId>;
-
     /// Returns the Subject ID of the message
     fn subject(&self) -> SubjectId;
+
+    /// Returns the Node ID of the sender.  Anonymous messages can be sent using `None`
+    fn source(&self) -> Option<NodeId>;
 
     /// Return the message payload
     fn data(&self) -> &[u8; N];

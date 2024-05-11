@@ -26,6 +26,3 @@ pub trait Response<const N: usize>: Sized {
     /// Returns the payload of the response
     fn data(&self) -> &[u8; N];
 }
-
-#[cfg(test)]
-mod test {}

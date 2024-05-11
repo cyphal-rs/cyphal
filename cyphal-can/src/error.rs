@@ -1,6 +1,5 @@
 /// Represents a CAN Error
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[non_exhaustive]
 pub enum CanError {
     /// Invalid CAN ID
     InvalidId,

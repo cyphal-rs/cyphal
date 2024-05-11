@@ -1,5 +1,5 @@
 /// Cyphal Error
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum CyphalError {
     /// An error caused by the underlying transport
     Transport,

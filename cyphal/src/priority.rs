@@ -1,6 +1,7 @@
 use crate::{CyphalError, CyphalResult};
 
 /// The priority level of a transmission
+#[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum Priority {
     /// Exceptional is the highest priority level and should only be sent when a total system failure has occurred.
