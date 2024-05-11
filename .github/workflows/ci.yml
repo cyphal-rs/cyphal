@@ -30,16 +30,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        toolchain:
+          - 1.75
+          - stable
+          - nightly
         target:
           - thumbv7em-none-eabi
           - thumbv7m-none-eabi
           - thumbv6m-none-eabi
           - thumbv7em-none-eabihf
           - thumbv8m.main-none-eabihf
-        toolchain:
-          - 1.75
-          - stable
-          - nightly
 
     steps:
     - name: Checkout code
@@ -62,14 +62,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - armv7-unknown-linux-gnueabihf
-          - aarch64-unknown-linux-gnu
-          - x86_64-unknown-linux-gnu
         toolchain:
           - 1.75
           - stable
           - nightly
+        target:
+          - armv7-unknown-linux-gnueabihf
+          - aarch64-unknown-linux-gnu
+          - x86_64-unknown-linux-gnu
 
     steps:
     - name: Checkout code
