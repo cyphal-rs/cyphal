@@ -30,16 +30,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - TARGET: thumbv7em-none-eabi
-
-          - TARGET: thumbv7m-none-eabi
-
-          - TARGET: thumbv6m-none-eabi
-
-          - TARGET: thumbv7em-none-eabihf
-
-          - TARGET: thumbv8m.main-none-eabihf
+        target:
+          - thumbv7em-none-eabi
+          - thumbv7m-none-eabi
+          - thumbv6m-none-eabi
+          - thumbv7em-none-eabihf
+          - thumbv8m.main-none-eabihf
+        toolchain:
+          - 1.75
+          - stable
+          - nightly
 
     steps:
     - name: Checkout code
@@ -48,11 +48,11 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
-        target: ${{ matrix.TARGET }}
+        toolchain: ${{ matrix.toolchain }}
+        target: ${{ matrix.target }}
 
     - name: Check
-      run: cargo check --workspace --target ${{ matrix.TARGET }} --exclude cyphal-socketcan --exclude cyphal-udpsocket --exclude dsdl
+      run: cargo check --workspace --target ${{ matrix.target }} --exclude cyphal-socketcan --exclude cyphal-udpsocket --exclude dsdl
 
   linux:
     name: Linux
@@ -62,12 +62,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - TARGET: armv7-unknown-linux-gnueabihf
+        target:
+          - armv7-unknown-linux-gnueabihf
+          - aarch64-unknown-linux-gnu
+          - x86_64-unknown-linux-gnu
+        toolchain:
+          - 1.75
+          - stable
+          - nightly
 
-          - TARGET: aarch64-unknown-linux-gnu
-
-          - TARGET: x86_64-unknown-linux-gnu
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -75,8 +78,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
-        target: ${{ matrix.TARGET }}
+        toolchain: ${{ matrix.toolchain }}
+        target: ${{ matrix.target }}
 
     - name: Check
       run: cargo check
