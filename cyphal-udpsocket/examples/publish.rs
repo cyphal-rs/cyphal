@@ -3,10 +3,11 @@ use cyphal_udp::UdpTransport;
 use cyphal_udpsocket::UdpSocket;
 
 const MESSAGE_SIZE: usize = 65;
+const MAX_PAYLOAD_SIZE: usize = 565;
 
 #[async_std::main]
 async fn main() {
-    let socket = UdpSocket::new("vcan0").unwrap();
+    let socket: UdpSocket<MAX_PAYLOAD_SIZE> = UdpSocket::new("127.0.0.1:8080").unwrap();
     let mut transport = UdpTransport::new(socket).unwrap();
 
     let data: Vec<u8> = (1..(MESSAGE_SIZE + 1) as u8).collect();

@@ -1,7 +1,7 @@
 use crate::UdpResult;
 
 /// Trait representing a UDP interface
-pub trait Udp {
+pub trait Udp<const MAX_PAYLOAD_SIZE: usize> {
     /// Sends data on the socket to the given address.
     ///
     /// On success, returns the number of bytes written.

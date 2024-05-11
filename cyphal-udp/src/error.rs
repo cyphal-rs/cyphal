@@ -8,6 +8,9 @@ pub enum UdpError {
 
     /// Connection
     Connection,
+
+    /// The transmission data is above the maximum allowed size
+    MaxPayloadExceded,
 }
 
 impl Display for UdpError {
@@ -15,6 +18,9 @@ impl Display for UdpError {
         match self {
             Self::InvalidAddress => write!(f, "The address is invalid"),
             Self::Connection => write!(f, "A connection failure has occured"),
+            Self::MaxPayloadExceded => {
+                write!(f, "The transmission data is above the maximum allowed size")
+            }
         }
     }
 }
