@@ -5,7 +5,7 @@ members = [
     "cyphal-can", "cyphal-fdcan",
     "cyphal-serial",
     "cyphal-socketcan",
-    "cyphal-udp",
+    "cyphal-udp", "cyphal-udpsocket",
     "dsdl",
 ]
 resolver = "2"

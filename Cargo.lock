@@ -320,6 +320,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cyphal-udpsocket"
+version = "0.0.0"
+
+[[package]]
 name = "dsdl"
 version = "0.0.7"
 dependencies = [
