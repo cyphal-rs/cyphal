@@ -2,7 +2,7 @@ use crate::{CanResult, MessageCanId, ServiceCanId};
 use core::cmp::Ordering;
 use cyphal::Priority;
 
-/// Represets an Extended CAN ID
+/// Represents an Extended CAN ID
 #[derive(Debug, Copy, Clone)]
 pub enum CanId {
     /// Extended CAN ID used for messages

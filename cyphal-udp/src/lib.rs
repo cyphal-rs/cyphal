@@ -7,6 +7,15 @@
 mod error;
 pub use error::{UdpError, UdpResult};
 
+mod header;
+pub use header::Header;
+
+mod message_header;
+pub use message_header::MessageHeader;
+
+mod service_header;
+pub use service_header::ServiceHeader;
+
 mod transport;
 pub use transport::UdpTransport;
 
