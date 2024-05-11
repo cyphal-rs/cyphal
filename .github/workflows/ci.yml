@@ -52,7 +52,7 @@ jobs:
         target: ${{ matrix.TARGET }}
 
     - name: Check
-      run: cargo check --workspace --target ${{ matrix.TARGET }} --exclude cyphal-socketcan --exclude dsdl
+      run: cargo check --workspace --target ${{ matrix.TARGET }} --exclude cyphal-socketcan --exclude cyphal-udpsocket --exclude dsdl
 
   linux:
     name: Linux
