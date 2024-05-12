@@ -1,4 +1,4 @@
-use core::fmt::{write, Display};
+use core::fmt::Display;
 
 use crate::{CyphalError, CyphalResult};
 
