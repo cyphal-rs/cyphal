@@ -2,7 +2,7 @@
 
 Open Cyphal UDP Transport Rust Implementation
 
-🚧 *Work in progress*
+🚧 ***Work in progress*** 🚧
 
 ## Minimum Supported Rust Version (MSRV)
 

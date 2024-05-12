@@ -2,7 +2,7 @@
 
 Open Cyphal SocketCAN Rust Implementation
 
-🚧 *Work in progress*
+🚧 ***Work in progress*** 🚧
 
 ## Environment
 

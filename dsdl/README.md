@@ -2,7 +2,7 @@
 
 Rust library for manipulating OpenCyphal DSDL (data structure description language) files
 
-🚧 *Work in progress*
+🚧 ***Work in progress*** 🚧
 
 ## Minimum Supported Rust Version (MSRV)
 

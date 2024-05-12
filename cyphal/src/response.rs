@@ -1,7 +1,7 @@
 use crate::{CyphalResult, NodeId, Priority, ServiceId};
 
 /// Represents a response returned by a service
-pub trait Response<const RESPONSE_SIZE: usize, N: NodeId, S: ServiceId>: Sized {
+pub trait Response<const RESPONSE_SIZE: usize, S: ServiceId, N: NodeId>: Sized {
     /// Constructs a new response
     fn new(
         priority: Priority,

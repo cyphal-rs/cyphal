@@ -1,11 +1,11 @@
 use crate::{NodeId, Priority, Response, ServiceId};
 
 /// Represents a resquest sent to a service
-pub trait Request<const REQUEST_SIZE: usize, const RESPONSE_SIZE: usize, N: NodeId, S: ServiceId>:
+pub trait Request<const REQUEST_SIZE: usize, const RESPONSE_SIZE: usize, S: ServiceId, N: NodeId>:
     Sized
 {
     /// Type representing the response returned by the service
-    type Response: Response<RESPONSE_SIZE, N, S>;
+    type Response: Response<RESPONSE_SIZE, S, N>;
 
     /// Returns the priority level of the request
     fn priority(&self) -> Priority;

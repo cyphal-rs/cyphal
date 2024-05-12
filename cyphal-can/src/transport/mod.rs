@@ -187,7 +187,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     type ServiceId = CanServiceId;
     type SubjectId = CanSubjectId;
 
-    async fn publish<const N: usize, M: Message<N, Self::NodeId, Self::SubjectId>>(
+    async fn publish<const N: usize, M: Message<N, Self::SubjectId, Self::NodeId>>(
         &mut self,
         message: &M,
     ) -> CyphalResult<()> {
@@ -208,7 +208,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     async fn invoque<
         const N: usize,
         const M: usize,
-        R: Request<N, M, Self::NodeId, Self::ServiceId>,
+        R: Request<N, M, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         request: &R,

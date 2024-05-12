@@ -43,7 +43,7 @@ impl TestMessage {
     }
 }
 
-impl Message<MESSAGE_SIZE, UdpNodeId, UdpSubjectId> for TestMessage {
+impl Message<MESSAGE_SIZE, UdpSubjectId, UdpNodeId> for TestMessage {
     fn source(&self) -> Option<UdpNodeId> {
         self.source
     }

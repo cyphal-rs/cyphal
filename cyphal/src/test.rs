@@ -31,7 +31,7 @@ impl TestMessage {
     }
 }
 
-impl Message<TEST_MESSAGE_SIZE, TestNodeId, TestSubjectId> for TestMessage {
+impl Message<TEST_MESSAGE_SIZE, TestSubjectId, TestNodeId> for TestMessage {
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -75,7 +75,7 @@ impl TestRequest {
     }
 }
 
-impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, TestNodeId, TestServiceId> for TestRequest {
+impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestRequest {
     type Response = TestResponse;
 
     fn priority(&self) -> Priority {
@@ -107,7 +107,7 @@ pub struct TestResponse {
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<TEST_RESPONSE_SIZE, TestNodeId, TestServiceId> for TestResponse {
+impl Response<TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestResponse {
     fn new(
         priority: Priority,
         service: TestServiceId,
@@ -282,7 +282,7 @@ impl Transport for TestTransport {
     type ServiceId = TestServiceId;
     type SubjectId = TestSubjectId;
 
-    async fn publish<const N: usize, M: Message<N, Self::NodeId, Self::SubjectId>>(
+    async fn publish<const N: usize, M: Message<N, Self::SubjectId, Self::NodeId>>(
         &mut self,
         message: &M,
     ) -> CyphalResult<()> {
@@ -294,7 +294,7 @@ impl Transport for TestTransport {
     async fn invoque<
         const N: usize,
         const M: usize,
-        R: Request<N, M, Self::NodeId, Self::ServiceId>,
+        R: Request<N, M, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         request: &R,

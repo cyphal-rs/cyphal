@@ -27,7 +27,7 @@ impl TestSmallMessage {
     }
 }
 
-impl Message<SMALL_MESSAGE_SIZE, CanNodeId, CanSubjectId> for TestSmallMessage {
+impl Message<SMALL_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestSmallMessage {
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -68,7 +68,7 @@ impl TestLargeMessage {
     }
 }
 
-impl Message<LARGE_MESSAGE_SIZE, CanNodeId, CanSubjectId> for TestLargeMessage {
+impl Message<LARGE_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestLargeMessage {
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }

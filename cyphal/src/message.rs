@@ -1,7 +1,7 @@
 use crate::{NodeId, Priority, SubjectId};
 
 /// Trait representing a message
-pub trait Message<const SIZE: usize, N: NodeId, S: SubjectId>: Sized {
+pub trait Message<const SIZE: usize, S: SubjectId, N: NodeId>: Sized {
     /// The Priority of the message
     fn priority(&self) -> Priority;
 

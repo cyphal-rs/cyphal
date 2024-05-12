@@ -21,7 +21,7 @@ impl<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> Transport
     type ServiceId = UdpServiceId;
     type SubjectId = UdpSubjectId;
 
-    async fn publish<const N: usize, M: cyphal::Message<N, Self::NodeId, Self::SubjectId>>(
+    async fn publish<const N: usize, M: cyphal::Message<N, Self::SubjectId, Self::NodeId>>(
         &mut self,
         _message: &M,
     ) -> cyphal::CyphalResult<()> {
@@ -31,7 +31,7 @@ impl<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> Transport
     async fn invoque<
         const N: usize,
         const M: usize,
-        R: cyphal::Request<N, M, Self::NodeId, Self::ServiceId>,
+        R: cyphal::Request<N, M, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         _request: &R,

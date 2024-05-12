@@ -30,7 +30,7 @@ impl TestRequest {
     }
 }
 
-impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, CanNodeId, CanServiceId> for TestRequest {
+impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for TestRequest {
     type Response = TestResponse;
 
     fn priority(&self) -> Priority {
@@ -62,7 +62,7 @@ pub struct TestResponse {
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<TEST_RESPONSE_SIZE, CanNodeId, CanServiceId> for TestResponse {
+impl Response<TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for TestResponse {
     fn new(
         priority: Priority,
         service: CanServiceId,

@@ -42,7 +42,7 @@ impl TestMessage {
     }
 }
 
-impl Message<MESSAGE_SIZE, CanNodeId, CanSubjectId> for TestMessage {
+impl Message<MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestMessage {
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }

@@ -27,7 +27,7 @@ impl SingleFrameMessage {
     }
 }
 
-impl Message<SINGLE_SIZE, CanNodeId, CanSubjectId> for SingleFrameMessage {
+impl Message<SINGLE_SIZE, CanSubjectId, CanNodeId> for SingleFrameMessage {
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -68,7 +68,7 @@ impl MultiFrameMessage {
     }
 }
 
-impl Message<MULTI_SIZE, CanNodeId, CanSubjectId> for MultiFrameMessage {
+impl Message<MULTI_SIZE, CanSubjectId, CanNodeId> for MultiFrameMessage {
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }

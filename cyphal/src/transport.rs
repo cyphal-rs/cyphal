@@ -12,7 +12,7 @@ pub trait Transport {
     type SubjectId: SubjectId;
 
     /// Publishes a message
-    async fn publish<const N: usize, M: Message<N, Self::NodeId, Self::SubjectId>>(
+    async fn publish<const N: usize, M: Message<N, Self::SubjectId, Self::NodeId>>(
         &mut self,
         message: &M,
     ) -> CyphalResult<()>;
@@ -21,7 +21,7 @@ pub trait Transport {
     async fn invoque<
         const N: usize,
         const M: usize,
-        R: Request<N, M, Self::NodeId, Self::ServiceId>,
+        R: Request<N, M, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         request: &R,
