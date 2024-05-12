@@ -7,14 +7,23 @@
 mod error;
 pub use error::{UdpError, UdpResult};
 
+mod group_address;
+pub use group_address::GroupAddress;
+
 mod header;
 pub use header::Header;
+
+mod message_group_address;
+pub use message_group_address::MessageGroupAddress;
 
 mod message_header;
 pub use message_header::MessageHeader;
 
 mod service_header;
 pub use service_header::ServiceHeader;
+
+mod service_group_address;
+pub use service_group_address::ServiceGroupAddress;
 
 mod transport;
 pub use transport::UdpTransport;
