@@ -1,4 +1,3 @@
-use crate::{CanError, CanResult};
 use cyphal::{CyphalError, CyphalResult, TransferId};
 
 const MAX_TRANSFER_ID: u8 = 31;
@@ -11,9 +10,9 @@ pub struct CanTransferId {
 
 impl CanTransferId {
     /// Constructs a new CAN Transfer ID
-    pub fn new(value: u8) -> CanResult<Self> {
+    pub fn new(value: u8) -> CyphalResult<Self> {
         if value > MAX_TRANSFER_ID {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
 
         Ok(CanTransferId { value })

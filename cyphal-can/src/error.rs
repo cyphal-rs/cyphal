@@ -3,9 +3,6 @@ use core::fmt::{Display, Formatter, Result as FmtResult};
 /// Represents a CAN Error
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum CanError {
-    /// Invalid CAN ID
-    InvalidId,
-
     /// Overrun error
     Overrun,
 
@@ -37,7 +34,6 @@ pub enum CanError {
 impl Display for CanError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
-            Self::InvalidId => write!(f, "Invalid CAN ID"),
             Self::Overrun => write!(f, "The peripheral receive buffer was overrun"),
             Self::Bit => write!(
                 f,

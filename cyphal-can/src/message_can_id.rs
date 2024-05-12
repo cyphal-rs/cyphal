@@ -1,5 +1,5 @@
-use crate::{CanError, CanNodeId, CanResult, CanSubjectId};
-use cyphal::{NodeId, Priority, SubjectId};
+use crate::{CanNodeId, CanResult, CanSubjectId};
+use cyphal::{CyphalError, CyphalResult, NodeId, Priority, SubjectId};
 
 /// Represents an extended CAN ID used for messages
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
@@ -78,34 +78,34 @@ impl MessageCanId {
 }
 
 impl TryFrom<u32> for MessageCanId {
-    type Error = CanError;
+    type Error = CyphalError;
 
-    fn try_from(value: u32) -> CanResult<Self> {
+    fn try_from(value: u32) -> CyphalResult<Self> {
         // make sure it's a message id
         if (value & 0x0200_0000) != 0 {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
 
         // make sure reserved bit 7 is set to zero
         if (value & 0x80) != 0 {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
         // make sure reserved bit 21 is set to one
         if (value & 0x0020_0000) == 0 {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
         // make sure reserved bit 22 is set to one
         if (value & 0x0040_0000) == 0 {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
         // make sure reserved bit 23 is set to zero
         if (value & 0x0080_0000) != 0 {
-            return Err(CanError::InvalidId);
+            return Err(CyphalError::OutOfRange);
         }
 
         let priority = match Priority::try_from((value >> 26) as u8) {
             Ok(p) => p,
-            Err(_) => return Err(CanError::InvalidId),
+            Err(_) => return Err(CyphalError::OutOfRange),
         };
 
         let anonymous = (value & 0x0100_0000) > 0;
