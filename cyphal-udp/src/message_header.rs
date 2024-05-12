@@ -1,4 +1,4 @@
-use crate::{UdpError, UdpResult};
+use crate::{UdpError, UdpNodeId, UdpResult};
 use cyphal::Priority;
 
 /// Represents a UDP payload header used for messages
@@ -6,7 +6,7 @@ use cyphal::Priority;
 pub struct MessageHeader {
     version: u8,
     priority: Priority,
-    source_: u16,
+    source: UdpNodeId,
     destination: u16,
     data_specifier_snm: u16,
     transfer: u64,

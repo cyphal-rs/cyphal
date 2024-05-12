@@ -9,6 +9,9 @@ pub use error::{CyphalError, CyphalResult};
 mod message;
 pub use message::Message;
 
+mod node_id;
+pub use node_id::NodeId;
+
 mod priority;
 pub use priority::Priority;
 
@@ -18,6 +21,12 @@ pub use request::Request;
 mod response;
 pub use response::Response;
 
+mod service_id;
+pub use service_id::ServiceId;
+
+mod subject_id;
+pub use subject_id::SubjectId;
+
 #[cfg(test)]
 pub(crate) mod test;
 
@@ -26,12 +35,3 @@ pub use transfer_id::TransferId;
 
 mod transport;
 pub use transport::Transport;
-
-/// Represents a Subject ID
-pub type SubjectId = u16;
-
-/// Represents a Node ID
-pub type NodeId = u8;
-
-/// Represents a Service ID
-pub type ServiceId = u16;

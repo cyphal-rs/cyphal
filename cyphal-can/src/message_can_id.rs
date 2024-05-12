@@ -1,25 +1,22 @@
-use crate::{CanError, CanResult};
+use crate::{CanError, CanNodeId, CanResult, CanSubjectId};
 use cyphal::{NodeId, Priority, SubjectId};
 
 /// Represents an extended CAN ID used for messages
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct MessageCanId {
     priority: Priority,
     anonymous: bool,
-    subject: SubjectId,
-    source: NodeId,
+    subject: CanSubjectId,
+    source: CanNodeId,
 }
 
 impl MessageCanId {
     /// Constructs a new message CAN ID
-    pub fn new(priority: Priority, subject: SubjectId, source: Option<NodeId>) -> CanResult<Self> {
-        if subject > 8191 {
-            return Err(CanError::InvalidId);
-        }
-        if source.is_some_and(|s| s > 127) {
-            return Err(CanError::InvalidId);
-        }
-
+    pub fn new(
+        priority: Priority,
+        subject: CanSubjectId,
+        source: Option<CanNodeId>,
+    ) -> CanResult<Self> {
         match source {
             Some(s) => Ok(MessageCanId {
                 priority,
@@ -32,7 +29,7 @@ impl MessageCanId {
                 anonymous: true,
                 subject,
                 //FIXME: generate a pseudorandom pseudo-ID value for source
-                source: 0,
+                source: 0.try_into().unwrap(),
             }),
         }
     }
@@ -48,14 +45,14 @@ impl MessageCanId {
     }
 
     /// Returns the Subject ID of the message
-    pub fn subject(&self) -> SubjectId {
+    pub fn subject(&self) -> CanSubjectId {
         self.subject
     }
 
     /// Returns the Node ID from where the message originates.
     ///
     /// Note: Anonymous messages contain a generated pseudorandom pseudo-ID value
-    pub fn source(&self) -> NodeId {
+    pub fn source(&self) -> CanNodeId {
         self.source
     }
 
@@ -73,10 +70,10 @@ impl MessageCanId {
         result |= 0x3 << 21;
 
         // set subject id bits 8 to 20
-        result |= (self.subject as u32) << 8;
+        result |= (self.subject.value() as u32) << 8;
 
         // set source node id bits 0 to 7
-        result | (self.source as u32)
+        result | (self.source.value() as u32)
     }
 }
 
@@ -112,8 +109,8 @@ impl TryFrom<u32> for MessageCanId {
         };
 
         let anonymous = (value & 0x0100_0000) > 0;
-        let source = (value & 0x7F) as NodeId;
-        let subject = ((value >> 8) & 0x1FFF) as SubjectId;
+        let source = ((value & 0x7F) as u8).try_into().unwrap();
+        let subject = (((value >> 8) & 0x1FFF) as u16).try_into().unwrap();
 
         Ok(MessageCanId {
             priority,
@@ -128,16 +125,16 @@ impl TryFrom<u32> for MessageCanId {
 mod test {
     extern crate std;
 
-    use crate::MessageCanId;
-    use cyphal::{NodeId, Priority, SubjectId};
+    use crate::{CanNodeId, CanSubjectId, MessageCanId};
+    use cyphal::{Priority, SubjectId};
 
     #[test]
     #[allow(non_snake_case)]
     fn test_0x107D552A() {
         // Arrange
         let priority = Priority::Nominal;
-        let source: NodeId = 42;
-        let subject: SubjectId = 7509;
+        let source: CanNodeId = 42.try_into().unwrap();
+        let subject: CanSubjectId = 7509.try_into().unwrap();
 
         // Act
         let target = MessageCanId::new(priority, subject, Some(source)).unwrap();
@@ -164,12 +161,12 @@ mod test {
         let subject: u16 = 4919;
 
         // Act
-        let target = MessageCanId::new(priority, subject, None).unwrap();
+        let target = MessageCanId::new(priority, subject.try_into().unwrap(), None).unwrap();
 
         // Assert
         assert_eq!(target.priority(), priority);
         assert!(target.is_anonymous());
-        assert_eq!(target.subject(), subject);
+        assert_eq!(target.subject().value(), subject);
         //FIXME: generate a pseudorandom pseudo-ID value for source
         //assert_eq!(target.as_raw() & 0xFFFFFF00, 0x11133775 & 0xFFFFFF00);
     }

@@ -15,6 +15,18 @@ pub use can::Can;
 mod can_id;
 pub use can_id::CanId;
 
+mod can_node_id;
+pub use can_node_id::CanNodeId;
+
+mod can_service_id;
+pub use can_service_id::CanServiceId;
+
+mod can_subject_id;
+pub use can_subject_id::CanSubjectId;
+
+mod can_transfer_id;
+pub use can_transfer_id::CanTransferId;
+
 mod error;
 pub use error::{CanError, CanResult};
 
@@ -32,6 +44,3 @@ pub(crate) mod test;
 
 mod transport;
 pub use transport::CanTransport;
-
-mod can_transfer_id;
-pub use can_transfer_id::CanTransferId;

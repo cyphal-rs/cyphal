@@ -7,8 +7,8 @@ use outbound_queue::OutboundQueue;
 extern crate alloc;
 
 use crate::{
-    Can, CanId, CanTransferId, Frame, MessageCanId, ServiceCanId, CLASSIC_PAYLOAD_SIZE,
-    FD_PAYLOAD_SIZE,
+    Can, CanId, CanNodeId, CanServiceId, CanSubjectId, CanTransferId, Frame, MessageCanId,
+    ServiceCanId, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
 };
 use alloc::vec::Vec;
 use core::cmp::Ordering;
@@ -183,7 +183,14 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
-    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()> {
+    type NodeId = CanNodeId;
+    type ServiceId = CanServiceId;
+    type SubjectId = CanSubjectId;
+
+    async fn publish<const N: usize, M: Message<N, Self::NodeId, Self::SubjectId>>(
+        &mut self,
+        message: &M,
+    ) -> CyphalResult<()> {
         let id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
 
@@ -198,7 +205,11 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         Ok(())
     }
 
-    async fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
+    async fn invoque<
+        const N: usize,
+        const M: usize,
+        R: Request<N, M, Self::NodeId, Self::ServiceId>,
+    >(
         &mut self,
         request: &R,
     ) -> CyphalResult<R::Response> {
@@ -328,7 +339,8 @@ mod test {
         };
         let mut transport = CanTransport::new(can).expect("Could not create transport");
 
-        let message = TestSmallMessage::new(Priority::Nominal, 1, None, [1, 2]).unwrap();
+        let message =
+            TestSmallMessage::new(Priority::Nominal, 1.try_into().unwrap(), None, [1, 2]).unwrap();
         transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 1);
@@ -346,7 +358,8 @@ mod test {
         let data: [u8; LARGE_MESSAGE_SIZE] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
-        let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message =
+            TestLargeMessage::new(Priority::Nominal, 1.try_into().unwrap(), None, data).unwrap();
         transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 10);
@@ -437,7 +450,8 @@ mod test {
         let data: [u8; 65] = data.try_into().unwrap();
         let checksum = CRC16.checksum(&data).to_be_bytes();
 
-        let message = TestLargeMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message =
+            TestLargeMessage::new(Priority::Nominal, 1.try_into().unwrap(), None, data).unwrap();
         transport.publish(&message).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 2);
@@ -461,7 +475,14 @@ mod test {
         let can = TestCan {
             sent_frames: Vec::new(),
             receive_fn: || {
-                let id = ServiceCanId::new(Priority::Nominal, false, 1, 3, 2).unwrap();
+                let id = ServiceCanId::new(
+                    Priority::Nominal,
+                    false,
+                    1.try_into().unwrap(),
+                    3.try_into().unwrap(),
+                    2.try_into().unwrap(),
+                )
+                .unwrap();
                 let frame = TestFrame::new(id, &[1, 2, 0, 0, 0, 0, 0, 0xE1]).unwrap();
 
                 Ok(frame)
@@ -472,7 +493,14 @@ mod test {
         let data: Vec<u8> = (0..TEST_REQUEST_SIZE as u8).collect();
         let data: [u8; TEST_REQUEST_SIZE] = data.try_into().unwrap();
 
-        let request = TestRequest::new(Priority::Nominal, 1, 2, 3, data).unwrap();
+        let request = TestRequest::new(
+            Priority::Nominal,
+            1.try_into().unwrap(),
+            2.try_into().unwrap(),
+            3.try_into().unwrap(),
+            data,
+        )
+        .unwrap();
         let response = transport.invoque(&request).await.unwrap();
 
         assert_eq!(transport.can.sent_frames.len(), 1);

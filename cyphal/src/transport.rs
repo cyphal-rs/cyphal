@@ -1,12 +1,28 @@
-use crate::{CyphalResult, Message, Request};
+use crate::{CyphalResult, Message, NodeId, Request, ServiceId, SubjectId};
 
 /// Trait representing the Cyphal transport
 pub trait Transport {
+    /// Node ID type used by the transport
+    type NodeId: NodeId;
+
+    /// Service ID type used by the transport
+    type ServiceId: ServiceId;
+
+    /// Subject ID type used by the transport
+    type SubjectId: SubjectId;
+
     /// Publishes a message
-    async fn publish<const N: usize, M: Message<N>>(&mut self, message: &M) -> CyphalResult<()>;
+    async fn publish<const N: usize, M: Message<N, Self::NodeId, Self::SubjectId>>(
+        &mut self,
+        message: &M,
+    ) -> CyphalResult<()>;
 
     /// Invoques a service call
-    async fn invoque<const N: usize, const M: usize, R: Request<N, M>>(
+    async fn invoque<
+        const N: usize,
+        const M: usize,
+        R: Request<N, M, Self::NodeId, Self::ServiceId>,
+    >(
         &mut self,
         request: &R,
     ) -> CyphalResult<R::Response>;
@@ -21,7 +37,13 @@ mod test {
 
     #[async_std::test]
     async fn test_publish() {
-        let message = TestMessage::new(Priority::Nominal, 1, None, [0; TEST_MESSAGE_SIZE]).unwrap();
+        let message = TestMessage::new(
+            Priority::Nominal,
+            1.try_into().unwrap(),
+            None,
+            [0; TEST_MESSAGE_SIZE],
+        )
+        .unwrap();
 
         let mut transport = TestTransport::new();
         let result = transport.publish(&message).await;
@@ -31,7 +53,14 @@ mod test {
 
     #[async_std::test]
     async fn test_invoque() {
-        let request = TestRequest::new(Priority::Nominal, 1, 2, 3, [0; TEST_REQUEST_SIZE]).unwrap();
+        let request = TestRequest::new(
+            Priority::Nominal,
+            1.try_into().unwrap(),
+            2.try_into().unwrap(),
+            3.try_into().unwrap(),
+            [0; TEST_REQUEST_SIZE],
+        )
+        .unwrap();
 
         let mut transport = TestTransport::new();
         let result = transport.invoque(&request).await;

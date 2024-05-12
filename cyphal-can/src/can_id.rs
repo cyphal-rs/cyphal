@@ -87,7 +87,7 @@ mod test {
 
     #[test]
     fn test_new_message_id() {
-        let id = MessageCanId::new(Priority::Nominal, 1, None)
+        let id = MessageCanId::new(Priority::Nominal, 1.try_into().unwrap(), None)
             .unwrap()
             .as_raw();
 
@@ -97,12 +97,18 @@ mod test {
 
     #[test]
     fn test_priority() {
-        let id1: CanId = MessageCanId::new(Priority::Nominal, 1, None)
+        let id1: CanId = MessageCanId::new(Priority::Nominal, 1.try_into().unwrap(), None)
             .unwrap()
             .into();
-        let id2: CanId = ServiceCanId::new(Priority::High, true, 1, 1, 1)
-            .unwrap()
-            .into();
+        let id2: CanId = ServiceCanId::new(
+            Priority::High,
+            true,
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+        )
+        .unwrap()
+        .into();
 
         assert_eq!(id1.priority(), Priority::Nominal);
         assert_eq!(id2.priority(), Priority::High);
@@ -117,9 +123,15 @@ mod test {
 
     #[test]
     fn test_new_service_id() {
-        let id = ServiceCanId::new(Priority::Nominal, true, 1, 1, 1)
-            .unwrap()
-            .as_raw();
+        let id = ServiceCanId::new(
+            Priority::Nominal,
+            true,
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+        )
+        .unwrap()
+        .as_raw();
 
         assert_eq!(CanId::new(id).unwrap().as_raw(), id);
     }
@@ -133,14 +145,21 @@ mod test {
 
     #[test]
     fn test_from_message_id() {
-        let id = MessageCanId::new(Priority::Nominal, 1, None).unwrap();
+        let id = MessageCanId::new(Priority::Nominal, 1.try_into().unwrap(), None).unwrap();
 
         assert_eq!(CanId::from(id), CanId::Message(id));
     }
 
     #[test]
     fn test_from_service_id() {
-        let id = ServiceCanId::new(Priority::Nominal, true, 1, 1, 1).unwrap();
+        let id = ServiceCanId::new(
+            Priority::Nominal,
+            true,
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+            1.try_into().unwrap(),
+        )
+        .unwrap();
 
         assert_eq!(CanId::from(id), CanId::Service(id));
     }

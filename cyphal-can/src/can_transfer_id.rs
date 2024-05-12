@@ -1,5 +1,5 @@
 use crate::{CanError, CanResult};
-use cyphal::TransferId;
+use cyphal::{CyphalError, CyphalResult, TransferId};
 
 const MAX_TRANSFER_ID: u8 = 31;
 
@@ -33,6 +33,18 @@ impl TransferId<u8> for CanTransferId {
         } else {
             CanTransferId { value: 0 }
         }
+    }
+}
+
+impl TryFrom<u8> for CanTransferId {
+    type Error = CyphalError;
+
+    fn try_from(value: u8) -> CyphalResult<Self> {
+        if value > MAX_TRANSFER_ID {
+            return Err(CyphalError::OutOfRange);
+        }
+
+        Ok(Self { value })
     }
 }
 

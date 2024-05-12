@@ -68,7 +68,8 @@ mod test {
 
         let data: Vec<u8> = (1..3).collect();
         let data: [u8; 2] = data.try_into().unwrap();
-        let message = SingleFrameMessage::new(Priority::Nominal, 1, None, data).unwrap();
+        let message =
+            SingleFrameMessage::new(Priority::Nominal, 1.try_into().unwrap(), None, data).unwrap();
         transport.publish(&message).await.unwrap();
     }
 
@@ -80,7 +81,13 @@ mod test {
 
         let data: Vec<u8> = (1..66).collect();
         let data: [u8; 65] = data.try_into().unwrap();
-        let message = MultiFrameMessage::new(Priority::High, 2, Some(123), data).unwrap();
+        let message = MultiFrameMessage::new(
+            Priority::High,
+            2.try_into().unwrap(),
+            Some(123.try_into().unwrap()),
+            data,
+        )
+        .unwrap();
         transport.publish(&message).await.unwrap();
     }
 }

@@ -1,18 +1,18 @@
 use crate::{NodeId, Priority, SubjectId};
 
 /// Trait representing a message
-pub trait Message<const N: usize>: Sized {
+pub trait Message<const SIZE: usize, N: NodeId, S: SubjectId>: Sized {
     /// The Priority of the message
     fn priority(&self) -> Priority;
 
     /// Returns the Subject ID of the message
-    fn subject(&self) -> SubjectId;
+    fn subject(&self) -> S;
 
     /// Returns the Node ID of the sender.  Anonymous messages can be sent using `None`
-    fn source(&self) -> Option<NodeId>;
+    fn source(&self) -> Option<N>;
 
     /// Return the message payload
-    fn data(&self) -> &[u8; N];
+    fn data(&self) -> &[u8; SIZE];
 }
 
 #[cfg(test)]
@@ -20,16 +20,16 @@ mod test {
     extern crate std;
 
     use crate::{
-        test::{TestMessage, TEST_MESSAGE_SIZE},
-        Message as _, NodeId, Priority, SubjectId,
+        test::{TestMessage, TestNodeId, TestSubjectId, TEST_MESSAGE_SIZE},
+        Message as _, Priority,
     };
     use std::vec::Vec;
 
     #[test]
     fn test_new() {
         let priority = Priority::Optional;
-        let subject_id: SubjectId = 12;
-        let source: Option<NodeId> = Some(56);
+        let subject_id: TestSubjectId = 12.try_into().unwrap();
+        let source: Option<TestNodeId> = Some(56.try_into().unwrap());
         let data: Vec<u8> = (0..(TEST_MESSAGE_SIZE as u8)).collect();
         let data: [u8; TEST_MESSAGE_SIZE] = data.try_into().unwrap();
 

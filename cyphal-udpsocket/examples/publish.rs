@@ -1,5 +1,5 @@
-use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
-use cyphal_udp::UdpTransport;
+use cyphal::{CyphalResult, Message, Priority, Transport};
+use cyphal_udp::{UdpNodeId, UdpSubjectId, UdpTransport};
 use cyphal_udpsocket::UdpSocket;
 
 const MESSAGE_SIZE: usize = 65;
@@ -12,7 +12,7 @@ async fn main() {
 
     let data: Vec<u8> = (1..(MESSAGE_SIZE + 1) as u8).collect();
     let data: [u8; MESSAGE_SIZE] = data.try_into().unwrap();
-    let message = TestMessage::new(Priority::High, 2, None, data).unwrap();
+    let message = TestMessage::new(Priority::High, 2.try_into().unwrap(), None, data).unwrap();
 
     match transport.publish(&message).await {
         Ok(_) => println!("Message sent successfully"),
@@ -22,16 +22,16 @@ async fn main() {
 
 pub struct TestMessage {
     priority: Priority,
-    subject: SubjectId,
-    source: Option<NodeId>,
+    subject: UdpSubjectId,
+    source: Option<UdpNodeId>,
     payload: [u8; MESSAGE_SIZE],
 }
 
 impl TestMessage {
     pub fn new(
         priority: Priority,
-        subject: SubjectId,
-        source: Option<NodeId>,
+        subject: UdpSubjectId,
+        source: Option<UdpNodeId>,
         payload: [u8; MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -43,12 +43,12 @@ impl TestMessage {
     }
 }
 
-impl Message<MESSAGE_SIZE> for TestMessage {
-    fn source(&self) -> Option<NodeId> {
+impl Message<MESSAGE_SIZE, UdpNodeId, UdpSubjectId> for TestMessage {
+    fn source(&self) -> Option<UdpNodeId> {
         self.source
     }
 
-    fn subject(&self) -> SubjectId {
+    fn subject(&self) -> UdpSubjectId {
         self.subject
     }
 
