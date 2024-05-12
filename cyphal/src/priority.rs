@@ -1,3 +1,5 @@
+use core::fmt::{write, Display};
+
 use crate::{CyphalError, CyphalResult};
 
 /// The priority level of a transmission
@@ -49,6 +51,21 @@ impl TryFrom<u8> for Priority {
             6 => Ok(Priority::Slow),
             7 => Ok(Priority::Optional),
             _ => Err(CyphalError::OutOfRange),
+        }
+    }
+}
+
+impl Display for Priority {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Priority::Exceptional => write!(f, "Exceptional"),
+            Priority::Immediate => write!(f, "Immediate"),
+            Priority::Fast => write!(f, "Fast"),
+            Priority::High => write!(f, "High"),
+            Priority::Nominal => write!(f, "Nominal"),
+            Priority::Low => write!(f, "Low"),
+            Priority::Slow => write!(f, "Slow"),
+            Priority::Optional => write!(f, "Optional"),
         }
     }
 }

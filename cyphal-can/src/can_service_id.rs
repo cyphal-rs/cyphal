@@ -1,6 +1,6 @@
 use cyphal::{CyphalError, CyphalResult, ServiceId};
 
-/// Represents the service ID for the CAN transport
+/// Represents the Service ID for the CAN transport
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
 pub struct CanServiceId {
     value: u16,

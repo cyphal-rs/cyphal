@@ -1,6 +1,6 @@
 use cyphal::{CyphalError, CyphalResult, SubjectId};
 
-/// Represents the subject ID for the UDP transport
+/// Represents the Subject ID for the UDP transport
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
 pub struct UdpSubjectId {
     value: u16,

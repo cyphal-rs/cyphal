@@ -1,6 +1,6 @@
 use cyphal::{CyphalError, CyphalResult, ServiceId};
 
-/// Represents the service ID for the UDP transport
+/// Represents the Service ID for the UDP transport
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
 pub struct UdpServiceId {
     value: u16,

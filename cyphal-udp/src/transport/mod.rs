@@ -1,5 +1,5 @@
 use crate::{Udp, UdpNodeId, UdpServiceId, UdpSubjectId};
-use cyphal::{CyphalResult, Transport};
+use cyphal::{CyphalResult, Message, Request, Transport};
 
 /// Represents a UDP Transport
 pub struct UdpTransport<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> {
@@ -21,21 +21,24 @@ impl<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> Transport
     type ServiceId = UdpServiceId;
     type SubjectId = UdpSubjectId;
 
-    async fn publish<const N: usize, M: cyphal::Message<N, Self::SubjectId, Self::NodeId>>(
+    async fn publish<
+        const MESSAGE_SIZE: usize,
+        M: Message<MESSAGE_SIZE, Self::SubjectId, Self::NodeId>,
+    >(
         &mut self,
         _message: &M,
-    ) -> cyphal::CyphalResult<()> {
+    ) -> CyphalResult<()> {
         todo!()
     }
 
     async fn invoque<
-        const N: usize,
-        const M: usize,
-        R: cyphal::Request<N, M, Self::ServiceId, Self::NodeId>,
+        const REQUEST_SIZE: usize,
+        const RESPONSE_SIZE: usize,
+        R: Request<REQUEST_SIZE, RESPONSE_SIZE, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         _request: &R,
-    ) -> cyphal::CyphalResult<R::Response> {
+    ) -> CyphalResult<R::Response> {
         todo!()
     }
 }

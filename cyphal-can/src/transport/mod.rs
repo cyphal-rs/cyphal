@@ -187,7 +187,10 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     type ServiceId = CanServiceId;
     type SubjectId = CanSubjectId;
 
-    async fn publish<const N: usize, M: Message<N, Self::SubjectId, Self::NodeId>>(
+    async fn publish<
+        const MESSAGE_SIZE: usize,
+        M: Message<MESSAGE_SIZE, Self::SubjectId, Self::NodeId>,
+    >(
         &mut self,
         message: &M,
     ) -> CyphalResult<()> {
@@ -206,9 +209,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     }
 
     async fn invoque<
-        const N: usize,
-        const M: usize,
-        R: Request<N, M, Self::ServiceId, Self::NodeId>,
+        const REQUEST_SIZE: usize,
+        const RESPONSE_SIZE: usize,
+        R: Request<REQUEST_SIZE, RESPONSE_SIZE, Self::ServiceId, Self::NodeId>,
     >(
         &mut self,
         request: &R,
@@ -244,8 +247,8 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                     };
 
                     if first_frame.is_single_trame_transfer() {
-                        let mut data: [u8; M] = [0; M];
-                        data.copy_from_slice(&first_frame.data()[..M]);
+                        let mut data: [u8; RESPONSE_SIZE] = [0; RESPONSE_SIZE];
+                        data.copy_from_slice(&first_frame.data()[..RESPONSE_SIZE]);
                         return R::Response::new(
                             id.priority(),
                             id.service(),
@@ -278,12 +281,12 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             toogle = !toogle
                         }
 
-                        if payload.len() != M {
+                        if payload.len() != RESPONSE_SIZE {
                             // something went wrong
                             return Err(CyphalError::Transport);
                         }
 
-                        let mut data: [u8; M] = [0; M];
+                        let mut data: [u8; RESPONSE_SIZE] = [0; RESPONSE_SIZE];
                         data.copy_from_slice(&payload);
                         return R::Response::new(
                             id.priority(),

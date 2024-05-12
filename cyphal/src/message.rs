@@ -8,7 +8,7 @@ pub trait Message<const SIZE: usize, S: SubjectId, N: NodeId>: Sized {
     /// Returns the Subject ID of the message
     fn subject(&self) -> S;
 
-    /// Returns the Node ID of the sender.  Anonymous messages can be sent using `None`
+    /// Returns the Node ID of the sender.  Anonymous messages return `None`
     fn source(&self) -> Option<N>;
 
     /// Return the message payload
