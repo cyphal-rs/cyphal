@@ -1,7 +1,7 @@
 use cyphal::{CyphalError, CyphalResult, TransferId};
 
 /// Represents the Transfer ID used by the UDP transport.
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct UdpTransferId {
     value: u64,
 }

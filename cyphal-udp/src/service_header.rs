@@ -62,7 +62,7 @@ impl ServiceHeader {
     }
 
     /// Returns the service ID
-    pub fn service_id(&self) -> UdpServiceId {
+    pub fn service(&self) -> UdpServiceId {
         self.service
     }
 
@@ -109,7 +109,7 @@ impl ServiceHeader {
 
         [
             1,
-            self.priority as u8,
+            (self.priority as u8) << 5,
             (self.source.value() >> 8) as u8,
             (self.source.value() & 0xFF) as u8,
             (self.destination.value() >> 8) as u8,
@@ -124,14 +124,14 @@ impl ServiceHeader {
             ((transfer >> 16) & 0xFF) as u8,
             ((transfer >> 8) & 0xFF) as u8,
             (transfer & 0xFF) as u8,
-            (self.index >> 7) as u8,
+            ((self.index >> 23) & 0xFF) as u8,
+            ((self.index >> 15) & 0xFF) as u8,
+            ((self.index >> 7) & 0xFF) as u8,
             ((self.index & 0x7F) << 1) as u8 | index_mask,
             0,
             0,
             self.crc16[0],
             self.crc16[1],
-            0,
-            0,
         ]
     }
 }
@@ -145,30 +145,30 @@ impl TryFrom<&[u8; 24]> for ServiceHeader {
             return Err(CyphalError::OutOfRange);
         }
 
-        let priority = Priority::try_from(value[1] << 5)?;
-        let service_id = ((value[6] as u16) << 3) & ((value[7] as u16) >> 1);
+        let priority = Priority::try_from(value[1] >> 5)?;
+        let service_id = ((value[6] as u16) << 7) | ((value[7] as u16) >> 1);
         let service: UdpServiceId = (service_id & 0x3FFF).try_into()?;
         let is_request = service_id & 0x4000 > 0;
         let transfer: UdpTransferId = (((value[8] as u64) << 56)
-            & ((value[9] as u64) << 48)
-            & ((value[10] as u64) << 40)
-            & ((value[11] as u64) << 32)
-            & ((value[12] as u64) << 24)
-            & ((value[13] as u64) << 16)
-            & ((value[14] as u64) << 8)
-            & (value[15] as u64))
+            | ((value[9] as u64) << 48)
+            | ((value[10] as u64) << 40)
+            | ((value[11] as u64) << 32)
+            | ((value[12] as u64) << 24)
+            | ((value[13] as u64) << 16)
+            | ((value[14] as u64) << 8)
+            | (value[15] as u64))
             .try_into()?;
         let index = ((value[16] as u32) << 23)
-            & ((value[17] as u32) << 15)
-            & ((value[18] as u32) << 7)
-            & ((value[19] as u32) >> 1);
+            | ((value[17] as u32) << 15)
+            | ((value[18] as u32) << 7)
+            | ((value[19] as u32) >> 1);
         let end_of_transfer = value[19] & 0x01 == 1;
-        let crc16 = [value[20], value[21]];
+        let crc16 = [value[22], value[23]];
 
         Ok(Self {
             priority,
-            source: (((value[2] as u16) << 8) & (value[3] as u16)).try_into()?,
-            destination: (((value[4] as u16) << 8) & (value[5] as u16)).try_into()?,
+            source: (((value[2] as u16) << 8) | (value[3] as u16)).try_into()?,
+            destination: (((value[4] as u16) << 8) | (value[5] as u16)).try_into()?,
             service,
             is_request,
             transfer,
@@ -176,5 +176,53 @@ impl TryFrom<&[u8; 24]> for ServiceHeader {
             end_of_transfer,
             crc16,
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use cyphal::Priority;
+
+    use crate::{ServiceHeader, UdpNodeId, UdpServiceId, UdpTransferId};
+
+    #[test]
+    fn test() {
+        let priority = Priority::High;
+        let source: UdpNodeId = 1.try_into().unwrap();
+        let destination: UdpNodeId = 2.try_into().unwrap();
+        let is_request: bool = true;
+        let service: UdpServiceId = 3.try_into().unwrap();
+        let transfer: UdpTransferId = 4.try_into().unwrap();
+        let index: u32 = 5;
+        let end_of_transfer = false;
+        let crc16: [u8; 2] = [6, 7];
+
+        let header = ServiceHeader::new(
+            priority,
+            source,
+            destination,
+            is_request,
+            service,
+            transfer,
+            index,
+            end_of_transfer,
+            crc16,
+        )
+        .unwrap();
+
+        let raw = &header.as_raw();
+
+        let target: ServiceHeader = raw.try_into().unwrap();
+
+        assert_eq!(target.priority(), priority);
+        assert_eq!(target.source(), source);
+        assert_eq!(target.destination(), destination);
+        assert_eq!(target.is_request(), is_request);
+        assert_eq!(target.service(), service);
+        assert_eq!(target.transfer(), transfer);
+        assert_eq!(target.index(), index);
+        assert_eq!(target.end_of_transfer(), end_of_transfer);
+        assert_eq!(target.crc16()[0], crc16[0]);
+        assert_eq!(target.crc16()[1], crc16[1]);
     }
 }

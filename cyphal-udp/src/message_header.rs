@@ -86,11 +86,11 @@ impl MessageHeader {
     /// Returns a `&[u8; 24]` representation of the message header
     pub fn as_raw(&self) -> [u8; 24] {
         let source: [u8; 2] = match self.source {
-            Some(i) => [(i.value() >> 4) as u8, (i.value() & 0xFF) as u8],
+            Some(i) => [(i.value() >> 8) as u8, (i.value() & 0xFF) as u8],
             None => [0xFF, 0xFF],
         };
         let destination: [u8; 2] = match self.destination {
-            Some(i) => [(i.value() >> 4) as u8, (i.value() & 0xFF) as u8],
+            Some(i) => [(i.value() >> 8) as u8, (i.value() & 0xFF) as u8],
             None => [0xFF, 0xFF],
         };
         let transfer = self.transfer.value();
@@ -112,14 +112,14 @@ impl MessageHeader {
             ((transfer >> 16) & 0xFF) as u8,
             ((transfer >> 8) & 0xFF) as u8,
             (transfer & 0xFF) as u8,
-            (self.index >> 7) as u8,
+            ((self.index >> 23) & 0xFF) as u8,
+            ((self.index >> 15) & 0xFF) as u8,
+            ((self.index >> 7) & 0xFF) as u8,
             ((self.index & 0x7F) << 1) as u8 | index_mask,
             0,
             0,
             self.crc16[0],
             self.crc16[1],
-            0,
-            0,
         ]
     }
 }
@@ -133,34 +133,34 @@ impl TryFrom<&[u8; 24]> for MessageHeader {
             return Err(CyphalError::OutOfRange);
         }
 
-        let priority = Priority::try_from(value[1] << 5)?;
+        let priority = Priority::try_from(value[1] >> 5)?;
         let source: Option<UdpNodeId> = if value[2] == 0xFF && value[3] == 0xFF {
             None
         } else {
-            Some((((value[2] as u16) << 8) & (value[3] as u16)).try_into()?)
+            Some((((value[2] as u16) << 8) | (value[3] as u16)).try_into()?)
         };
         let destination: Option<UdpNodeId> = if value[4] == 0xFF && value[5] == 0xFF {
             None
         } else {
-            Some((((value[4] as u16) << 8) & (value[5] as u16)).try_into()?)
+            Some((((value[4] as u16) << 8) | (value[5] as u16)).try_into()?)
         };
         let subject: UdpSubjectId =
-            (((value[6] as u16) << 3) & ((value[7] as u16) >> 1)).try_into()?;
+            (((value[6] as u16) << 7) | ((value[7] as u16) >> 1)).try_into()?;
         let transfer: UdpTransferId = (((value[8] as u64) << 56)
-            & ((value[9] as u64) << 48)
-            & ((value[10] as u64) << 40)
-            & ((value[11] as u64) << 32)
-            & ((value[12] as u64) << 24)
-            & ((value[13] as u64) << 16)
-            & ((value[14] as u64) << 8)
-            & (value[15] as u64))
+            | ((value[9] as u64) << 48)
+            | ((value[10] as u64) << 40)
+            | ((value[11] as u64) << 32)
+            | ((value[12] as u64) << 24)
+            | ((value[13] as u64) << 16)
+            | ((value[14] as u64) << 8)
+            | (value[15] as u64))
             .try_into()?;
         let index = ((value[16] as u32) << 23)
-            & ((value[17] as u32) << 15)
-            & ((value[18] as u32) << 7)
-            & ((value[19] as u32) >> 1);
+            | ((value[17] as u32) << 15)
+            | ((value[18] as u32) << 7)
+            | ((value[19] as u32) >> 1);
         let end_of_transfer = value[19] & 0x01 == 1;
-        let crc16 = [value[20], value[21]];
+        let crc16 = [value[22], value[23]];
 
         Ok(Self {
             priority,
@@ -172,5 +172,50 @@ impl TryFrom<&[u8; 24]> for MessageHeader {
             end_of_transfer,
             crc16,
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use cyphal::Priority;
+
+    use crate::{MessageHeader, UdpNodeId, UdpSubjectId, UdpTransferId};
+
+    #[test]
+    fn test() {
+        let priority = Priority::High;
+        let source: Option<UdpNodeId> = Some(1.try_into().unwrap());
+        let destination: Option<UdpNodeId> = Some(2.try_into().unwrap());
+        let subject: UdpSubjectId = 3.try_into().unwrap();
+        let transfer: UdpTransferId = 4.try_into().unwrap();
+        let index: u32 = 5;
+        let end_of_transfer = false;
+        let crc16: [u8; 2] = [6, 7];
+
+        let header = MessageHeader::new(
+            priority,
+            source,
+            destination,
+            subject,
+            transfer,
+            index,
+            end_of_transfer,
+            crc16,
+        )
+        .unwrap();
+
+        let raw = &header.as_raw();
+
+        let target: MessageHeader = raw.try_into().unwrap();
+
+        assert_eq!(target.priority(), priority);
+        assert_eq!(target.source(), source);
+        assert_eq!(target.destination(), destination);
+        assert_eq!(target.subject(), subject);
+        assert_eq!(target.transfer(), transfer);
+        assert_eq!(target.index(), index);
+        assert_eq!(target.end_of_transfer(), end_of_transfer);
+        assert_eq!(target.crc16()[0], crc16[0]);
+        assert_eq!(target.crc16()[1], crc16[1]);
     }
 }
