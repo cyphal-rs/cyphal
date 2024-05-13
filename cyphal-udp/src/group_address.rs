@@ -2,6 +2,7 @@ use crate::{MessageGroupAddress, ServiceGroupAddress};
 use cyphal::{CyphalError, CyphalResult};
 
 /// Represents an IP Multicast Group Address
+#[derive(Debug, Copy, Clone)]
 pub enum GroupAddress {
     /// Represents a Message IP multicast group address
     Message(MessageGroupAddress),

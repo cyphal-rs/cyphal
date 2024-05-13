@@ -188,12 +188,12 @@ mod test {
     #[test]
     fn test() {
         let priority = Priority::High;
-        let source: UdpNodeId = 1.try_into().unwrap();
-        let destination: UdpNodeId = 2.try_into().unwrap();
+        let source: UdpNodeId = 0x0101.try_into().unwrap();
+        let destination: UdpNodeId = 0x0202.try_into().unwrap();
         let is_request: bool = true;
-        let service: UdpServiceId = 3.try_into().unwrap();
-        let transfer: UdpTransferId = 4.try_into().unwrap();
-        let index: u32 = 5;
+        let service: UdpServiceId = 0x0303.try_into().unwrap();
+        let transfer: UdpTransferId = 0x0404040404040404.try_into().unwrap();
+        let index: u32 = 0x05050505;
         let end_of_transfer = false;
         let crc16: [u8; 2] = [6, 7];
 

@@ -1,7 +1,12 @@
 /// Represents a Transfer ID
-pub trait TransferId<T>: Sized + Copy + Clone + Default + TryFrom<T> {
+pub trait TransferId:
+    Sized + Clone + Copy + Default + Eq + PartialEq + Ord + PartialOrd + TryFrom<Self::T>
+{
+    /// Underlying type on the Transfer ID
+    type T;
+
     /// Returns the value of the Transfer ID
-    fn value(&self) -> T;
+    fn value(&self) -> Self::T;
 
     /// Returns the next Transfer ID
     fn next(&self) -> Self;

@@ -3,7 +3,7 @@ use cyphal::{CyphalError, CyphalResult, TransferId};
 const MAX_TRANSFER_ID: u8 = 31;
 
 /// Represents the Transfer ID used by the CAN transport.
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub struct CanTransferId {
     value: u8,
 }
@@ -19,7 +19,9 @@ impl CanTransferId {
     }
 }
 
-impl TransferId<u8> for CanTransferId {
+impl TransferId for CanTransferId {
+    type T = u8;
+
     fn value(&self) -> u8 {
         self.value
     }

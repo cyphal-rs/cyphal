@@ -1,7 +1,7 @@
 use cyphal::{CyphalError, CyphalResult, SubjectId};
 
 /// Represents the Subject ID for the CAN transport
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct CanSubjectId {
     value: u16,
 }

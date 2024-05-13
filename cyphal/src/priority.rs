@@ -4,7 +4,7 @@ use crate::{CyphalError, CyphalResult};
 
 /// The priority level of a transmission
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub enum Priority {
     /// Exceptional is the highest priority level and should only be sent when a total system failure has occurred.
     Exceptional = 0,
@@ -74,21 +74,21 @@ impl Display for Priority {
 mod test {
     extern crate std;
 
-    use std::collections::HashMap;
+    use std::vec::Vec;
 
     use super::Priority;
 
-    fn create_priorities_hashmap() -> HashMap<Priority, u8> {
+    fn get_priorities() -> Vec<(Priority, u8)> {
         // Arrange
-        let mut values: HashMap<Priority, u8> = HashMap::new();
-        values.insert(Priority::Exceptional, 0);
-        values.insert(Priority::Immediate, 1);
-        values.insert(Priority::Fast, 2);
-        values.insert(Priority::High, 3);
-        values.insert(Priority::Nominal, 4);
-        values.insert(Priority::Low, 5);
-        values.insert(Priority::Slow, 6);
-        values.insert(Priority::Optional, 7);
+        let mut values: Vec<(Priority, u8)> = Vec::new();
+        values.push((Priority::Exceptional, 0));
+        values.push((Priority::Immediate, 1));
+        values.push((Priority::Fast, 2));
+        values.push((Priority::High, 3));
+        values.push((Priority::Nominal, 4));
+        values.push((Priority::Low, 5));
+        values.push((Priority::Slow, 6));
+        values.push((Priority::Optional, 7));
 
         values
     }
@@ -96,7 +96,7 @@ mod test {
     #[test]
     fn u8_from_priority() {
         // Arrange
-        let values = create_priorities_hashmap();
+        let values = get_priorities();
 
         for (priority, value) in values.iter() {
             // Act
@@ -110,7 +110,7 @@ mod test {
     #[test]
     fn priority_from_u8_valid() {
         // Arrange
-        let values = create_priorities_hashmap();
+        let values = get_priorities();
 
         for (priority, value) in values.iter() {
             // Act

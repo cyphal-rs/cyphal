@@ -3,6 +3,7 @@ use cyphal::{CyphalError, CyphalResult, SubjectId};
 use crate::UdpSubjectId;
 
 /// Represents a Message IP multicast group address
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct MessageGroupAddress {
     subject: UdpSubjectId,
 }

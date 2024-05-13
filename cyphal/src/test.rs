@@ -145,7 +145,7 @@ impl Response<TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestResponse {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct TestNodeId {
     value: u8,
 }
@@ -170,7 +170,7 @@ impl TryFrom<u8> for TestNodeId {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct TestSubjectId {
     value: u16,
 }
@@ -195,7 +195,7 @@ impl TryFrom<u16> for TestSubjectId {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct TestServiceId {
     value: u8,
 }
@@ -220,12 +220,14 @@ impl TryFrom<u8> for TestServiceId {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub struct TestTransferId {
     value: u8,
 }
 
-impl TransferId<u8> for TestTransferId {
+impl TransferId for TestTransferId {
+    type T = u8;
+
     fn value(&self) -> u8 {
         self.value
     }
@@ -238,12 +240,6 @@ impl TransferId<u8> for TestTransferId {
                 value: self.value + 1,
             }
         }
-    }
-}
-
-impl Default for TestTransferId {
-    fn default() -> Self {
-        TestTransferId { value: 0 }
     }
 }
 

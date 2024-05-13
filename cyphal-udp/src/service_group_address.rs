@@ -2,6 +2,7 @@ use crate::UdpNodeId;
 use cyphal::{CyphalError, CyphalResult, NodeId};
 
 /// Represents a Service IP multicast group address
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct ServiceGroupAddress {
     destination: UdpNodeId,
 }

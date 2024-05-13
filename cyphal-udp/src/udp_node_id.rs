@@ -1,7 +1,7 @@
 use cyphal::{CyphalError, CyphalResult, NodeId};
 
 /// Respresents a UDP Node ID
-#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, Default)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct UdpNodeId {
     value: u16,
 }
