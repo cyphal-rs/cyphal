@@ -1,6 +1,6 @@
-use crate::{MessageHeader, ServiceHeader, UdpResult};
+use crate::{MessageHeader, ServiceHeader};
 use core::cmp::Ordering;
-use cyphal::Priority;
+use cyphal::{CyphalResult, Priority};
 
 /// Represents a payload header
 #[derive(Debug, Copy, Clone)]
@@ -14,7 +14,7 @@ pub enum Header {
 
 impl Header {
     /// Constructs a new `Header`
-    pub fn new(header: &[u8; 24]) -> UdpResult<Header> {
+    pub fn new(header: &[u8; 24]) -> CyphalResult<Header> {
         // check bit 25 to see what type of Id this is
         if (header[9] & 0x01) == 0 {
             match MessageHeader::try_from(header) {

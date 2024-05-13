@@ -1,4 +1,4 @@
-use crate::{UdpError, UdpNodeId, UdpResult, UdpServiceId, UdpTransferId};
+use crate::{UdpNodeId, UdpServiceId, UdpTransferId};
 use cyphal::{CyphalError, CyphalResult, Priority};
 
 /// Represents a payload header used for services
@@ -98,9 +98,9 @@ impl ServiceHeader {
 }
 
 impl TryFrom<&[u8; 24]> for ServiceHeader {
-    type Error = UdpError;
+    type Error = CyphalError;
 
-    fn try_from(_value: &[u8; 24]) -> UdpResult<Self> {
+    fn try_from(_value: &[u8; 24]) -> CyphalResult<Self> {
         todo!()
     }
 }

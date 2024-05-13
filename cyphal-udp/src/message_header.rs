@@ -1,4 +1,4 @@
-use crate::{UdpError, UdpNodeId, UdpResult, UdpSubjectId, UdpTransferId};
+use crate::{UdpNodeId, UdpSubjectId, UdpTransferId};
 use cyphal::{CyphalError, CyphalResult, NodeId, Priority, SubjectId, TransferId};
 
 /// Represents a UDP payload header used for messages
@@ -97,7 +97,7 @@ impl MessageHeader {
         let index_mask: u8 = if self.end_of_transfer { 1 } else { 0 };
         [
             1,
-            self.priority as u8,
+            (self.priority as u8) << 5,
             source[0],
             source[1],
             destination[0],
@@ -125,9 +125,52 @@ impl MessageHeader {
 }
 
 impl TryFrom<&[u8; 24]> for MessageHeader {
-    type Error = UdpError;
+    type Error = CyphalError;
 
-    fn try_from(_value: &[u8; 24]) -> UdpResult<Self> {
-        todo!()
+    fn try_from(value: &[u8; 24]) -> CyphalResult<Self> {
+        // ensure version = 1, not a service,
+        if value[0] != 1 || (value[7] & 1) == 1 {
+            return Err(CyphalError::OutOfRange);
+        }
+
+        let priority = Priority::try_from(value[1] << 5)?;
+        let source: Option<UdpNodeId> = if value[2] == 0xFF && value[3] == 0xFF {
+            None
+        } else {
+            Some((((value[2] as u16) << 8) & (value[3] as u16)).try_into()?)
+        };
+        let destination: Option<UdpNodeId> = if value[4] == 0xFF && value[5] == 0xFF {
+            None
+        } else {
+            Some((((value[4] as u16) << 8) & (value[5] as u16)).try_into()?)
+        };
+        let subject: UdpSubjectId =
+            (((value[6] as u16) << 3) & ((value[7] as u16) >> 1)).try_into()?;
+        let transfer: UdpTransferId = (((value[8] as u64) << 56)
+            & ((value[9] as u64) << 48)
+            & ((value[10] as u64) << 40)
+            & ((value[11] as u64) << 32)
+            & ((value[12] as u64) << 24)
+            & ((value[13] as u64) << 16)
+            & ((value[14] as u64) << 8)
+            & (value[15] as u64))
+            .try_into()?;
+        let index = ((value[16] as u32) << 23)
+            & ((value[17] as u32) << 15)
+            & ((value[18] as u32) << 7)
+            & ((value[19] as u32) >> 1);
+        let end_of_transfer = value[19] & 0x01 == 1;
+        let crc16 = [value[20], value[21]];
+
+        Ok(Self {
+            priority,
+            source,
+            destination,
+            subject,
+            transfer,
+            index,
+            end_of_transfer,
+            crc16,
+        })
     }
 }
