@@ -1,5 +1,5 @@
 ![CI](https://github.com/cyphal-rs/cyphal/actions/workflows/ci.yml/badge.svg?branch=master)
-![MSRV](https://img.shields.io/badge/rustc-1.75+-blue.svg)
+![MSRV](https://img.shields.io/badge/rustc-+-blue.svg)
 
 # Cyphal
 
