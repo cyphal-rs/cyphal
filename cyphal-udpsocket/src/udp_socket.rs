@@ -1,5 +1,7 @@
+use std::net::{Ipv4Addr, SocketAddrV4};
+
 use async_std::{net::UdpSocket as Socket, task::block_on};
-use cyphal_udp::{Udp, UdpError, UdpResult};
+use cyphal_udp::{GroupAddress, Udp, UdpError, UdpResult, MULTIGROUP_ADDRESS_PORT};
 
 /// Represents a UDP Socket
 pub struct UdpSocket<const MAX_PAYLOAD_SIZE: usize> {
@@ -8,9 +10,13 @@ pub struct UdpSocket<const MAX_PAYLOAD_SIZE: usize> {
 
 impl<const MAX_PAYLOAD_SIZE: usize> UdpSocket<MAX_PAYLOAD_SIZE> {
     /// Constructs a new UDP Socket Socket
-    pub fn new(address: &str) -> UdpResult<Self> {
-        match block_on(Socket::bind(address)) {
-            Ok(socket) => Ok(UdpSocket { socket }),
+    pub fn new(address: GroupAddress) -> UdpResult<Self> {
+        let socketaddr = SocketAddrV4::new(address.into(), MULTIGROUP_ADDRESS_PORT);
+        match block_on(Socket::bind(socketaddr)) {
+            Ok(socket) => match socket.join_multicast_v4(address.into(), Ipv4Addr::UNSPECIFIED) {
+                Ok(_) => Ok(UdpSocket { socket }),
+                Err(_) => Err(UdpError::InvalidAddress),
+            },
             Err(_) => Err(UdpError::InvalidAddress),
         }
     }

@@ -9,6 +9,11 @@ pub struct ServiceGroupAddress {
 }
 
 impl ServiceGroupAddress {
+    /// Constructs a new Service Group Address
+    pub fn new(destination: UdpNodeId) -> Self {
+        Self { destination }
+    }
+
     /// Returns the Service Destination Node ID
     pub fn destination(&self) -> UdpNodeId {
         self.destination

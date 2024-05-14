@@ -153,6 +153,10 @@ pub struct TestNodeId {
 impl NodeId for TestNodeId {
     type T = u8;
 
+    fn new(value: Self::T) -> CyphalResult<Self> {
+        value.try_into()
+    }
+
     fn value(&self) -> Self::T {
         self.value
     }
@@ -178,6 +182,10 @@ pub struct TestSubjectId {
 impl SubjectId for TestSubjectId {
     type T = u16;
 
+    fn new(value: Self::T) -> CyphalResult<Self> {
+        value.try_into()
+    }
+
     fn value(&self) -> Self::T {
         self.value
     }
@@ -202,6 +210,10 @@ pub struct TestServiceId {
 
 impl ServiceId for TestServiceId {
     type T = u8;
+
+    fn new(value: Self::T) -> CyphalResult<Self> {
+        value.try_into()
+    }
 
     fn value(&self) -> Self::T {
         self.value

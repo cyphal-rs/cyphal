@@ -4,6 +4,9 @@
 #![allow(async_fn_in_trait)]
 #![warn(missing_docs)]
 
+/// Multigroup Address Port used by Cyphal
+pub const MULTIGROUP_ADDRESS_PORT: u16 = 9382;
+
 mod error;
 pub use error::{UdpError, UdpResult};
 

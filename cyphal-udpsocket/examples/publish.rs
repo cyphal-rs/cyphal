@@ -1,5 +1,5 @@
-use cyphal::{CyphalResult, Message, Priority, Transport};
-use cyphal_udp::{UdpNodeId, UdpSubjectId, UdpTransport};
+use cyphal::{CyphalResult, Message, Priority, SubjectId, Transport};
+use cyphal_udp::{MessageGroupAddress, UdpNodeId, UdpSubjectId, UdpTransport};
 use cyphal_udpsocket::UdpSocket;
 
 const MESSAGE_SIZE: usize = 65;
@@ -7,7 +7,9 @@ const MAX_PAYLOAD_SIZE: usize = 565;
 
 #[async_std::main]
 async fn main() {
-    let socket: UdpSocket<MAX_PAYLOAD_SIZE> = UdpSocket::new("127.0.0.1:8080").unwrap();
+    let subject = UdpSubjectId::new(123).unwrap();
+    let address = MessageGroupAddress::new(subject);
+    let socket: UdpSocket<MAX_PAYLOAD_SIZE> = UdpSocket::new(address.into()).unwrap();
     let mut transport = UdpTransport::new(socket).unwrap();
 
     let data: Vec<u8> = (1..(MESSAGE_SIZE + 1) as u8).collect();

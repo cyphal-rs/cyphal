@@ -9,6 +9,10 @@ pub struct CanNodeId {
 impl NodeId for CanNodeId {
     type T = u8;
 
+    fn new(value: Self::T) -> CyphalResult<Self> {
+        value.try_into()
+    }
+
     fn value(&self) -> Self::T {
         self.value
     }

@@ -9,6 +9,10 @@ pub struct UdpServiceId {
 impl ServiceId for UdpServiceId {
     type T = u16;
 
+    fn new(value: Self::T) -> CyphalResult<Self> {
+        value.try_into()
+    }
+
     fn value(&self) -> Self::T {
         self.value
     }

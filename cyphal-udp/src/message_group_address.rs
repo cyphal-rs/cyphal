@@ -9,6 +9,11 @@ pub struct MessageGroupAddress {
 }
 
 impl MessageGroupAddress {
+    /// Constructs a new Message Group Address
+    pub fn new(subject: UdpSubjectId) -> Self {
+        Self { subject }
+    }
+
     /// Returns the Message Subject ID
     pub fn subject(&self) -> UdpSubjectId {
         self.subject
