@@ -30,6 +30,7 @@ impl TryFrom<u32> for ServiceGroupAddress {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Ipv4Addr> for ServiceGroupAddress {
     fn into(self) -> Ipv4Addr {
         let id = self.destination.value();

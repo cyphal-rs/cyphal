@@ -48,6 +48,7 @@ impl From<ServiceGroupAddress> for GroupAddress {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Ipv4Addr> for GroupAddress {
     fn into(self) -> Ipv4Addr {
         match self {

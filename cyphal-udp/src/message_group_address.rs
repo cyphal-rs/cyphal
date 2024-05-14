@@ -30,6 +30,7 @@ impl TryFrom<u32> for MessageGroupAddress {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Ipv4Addr> for MessageGroupAddress {
     fn into(self) -> Ipv4Addr {
         let id = self.subject.value();
