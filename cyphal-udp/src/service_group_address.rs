@@ -1,4 +1,5 @@
 use crate::UdpNodeId;
+use core::net::Ipv4Addr;
 use cyphal::{CyphalError, CyphalResult, NodeId};
 
 /// Represents a Service IP multicast group address
@@ -11,11 +12,6 @@ impl ServiceGroupAddress {
     /// Returns the Service Destination Node ID
     pub fn destination(&self) -> UdpNodeId {
         self.destination
-    }
-
-    /// Returns a `u32` representation of the group address
-    pub fn as_raw(&self) -> u32 {
-        0xEF010000 | self.destination.value() as u32
     }
 }
 
@@ -31,5 +27,12 @@ impl TryFrom<u32> for ServiceGroupAddress {
         Ok(Self {
             destination: ((address & 0xFFFF) as u16).try_into()?,
         })
+    }
+}
+
+impl Into<Ipv4Addr> for ServiceGroupAddress {
+    fn into(self) -> Ipv4Addr {
+        let id = self.destination.value();
+        Ipv4Addr::new(0xEF, 0x01, (id >> 8) as u8, (id & 0xFF) as u8)
     }
 }

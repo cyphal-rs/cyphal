@@ -1,4 +1,5 @@
 use crate::{MessageGroupAddress, ServiceGroupAddress};
+use core::net::Ipv4Addr;
 use cyphal::{CyphalError, CyphalResult};
 
 /// Represents an IP Multicast Group Address
@@ -31,14 +32,6 @@ impl GroupAddress {
             }
         }
     }
-
-    /// Returns a `u32` representation of the group address
-    pub fn as_raw(&self) -> u32 {
-        match self {
-            GroupAddress::Message(m) => m.as_raw(),
-            GroupAddress::Service(s) => s.as_raw(),
-        }
-    }
 }
 
 impl From<MessageGroupAddress> for GroupAddress {
@@ -52,5 +45,14 @@ impl From<ServiceGroupAddress> for GroupAddress {
     #[inline]
     fn from(address: ServiceGroupAddress) -> Self {
         GroupAddress::Service(address)
+    }
+}
+
+impl Into<Ipv4Addr> for GroupAddress {
+    fn into(self) -> Ipv4Addr {
+        match self {
+            GroupAddress::Message(m) => m.into(),
+            GroupAddress::Service(s) => s.into(),
+        }
     }
 }

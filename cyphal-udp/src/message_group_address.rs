@@ -1,6 +1,6 @@
-use cyphal::{CyphalError, CyphalResult, SubjectId};
-
 use crate::UdpSubjectId;
+use core::net::Ipv4Addr;
+use cyphal::{CyphalError, CyphalResult, SubjectId};
 
 /// Represents a Message IP multicast group address
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
@@ -12,11 +12,6 @@ impl MessageGroupAddress {
     /// Returns the Message Subject ID
     pub fn subject(&self) -> UdpSubjectId {
         self.subject
-    }
-
-    /// Returns a `u32` representation of the group address
-    pub fn as_raw(&self) -> u32 {
-        0xEF000000 | self.subject.value() as u32
     }
 }
 
@@ -32,5 +27,12 @@ impl TryFrom<u32> for MessageGroupAddress {
         Ok(Self {
             subject: ((address & 0x1FFF) as u16).try_into()?,
         })
+    }
+}
+
+impl Into<Ipv4Addr> for MessageGroupAddress {
+    fn into(self) -> Ipv4Addr {
+        let id = self.subject.value();
+        Ipv4Addr::new(0xEF, 0x00, (id >> 8) as u8, (id & 0xFF) as u8)
     }
 }
