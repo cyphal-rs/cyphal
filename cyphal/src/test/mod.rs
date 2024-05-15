@@ -15,9 +15,6 @@ pub use request::TestRequest;
 mod response;
 pub use response::TestResponse;
 
-mod router;
-pub use router::TestRouter;
-
 mod service_id;
 pub use service_id::TestServiceId;
 
