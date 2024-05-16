@@ -1,5 +1,5 @@
 use crate::{CanNodeId, CanServiceId};
-use cyphal::{CyphalResult, Priority, Request, Response};
+use cyphal::{CyphalError, CyphalResult, Priority, Request, Response};
 
 pub const TEST_REQUEST_SIZE: usize = 0;
 pub const TEST_RESPONSE_SIZE: usize = 2;
@@ -30,7 +30,9 @@ impl TestRequest {
     }
 }
 
-impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for TestRequest {
+impl Request<CanServiceId, CanNodeId> for TestRequest {
+    const SIZE: usize = TEST_REQUEST_SIZE;
+
     type Response = TestResponse;
 
     fn priority(&self) -> Priority {
@@ -49,7 +51,7 @@ impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for
         self.source
     }
 
-    fn data(&self) -> &[u8; TEST_REQUEST_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }
@@ -62,20 +64,29 @@ pub struct TestResponse {
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for TestResponse {
+impl Response<CanServiceId, CanNodeId> for TestResponse {
+    const SIZE: usize = TEST_RESPONSE_SIZE;
+
     fn new(
         priority: Priority,
         service: CanServiceId,
         destination: CanNodeId,
         source: CanNodeId,
-        data: [u8; TEST_RESPONSE_SIZE],
+        data: &[u8],
     ) -> CyphalResult<Self> {
+        if data.len() != Self::SIZE {
+            return Err(CyphalError::OutOfRange);
+        }
+
+        let mut d: [u8; Self::SIZE] = [0; Self::SIZE];
+        d.copy_from_slice(data);
+
         Ok(Self {
             priority,
             service,
             destination,
             source,
-            data,
+            data: d,
         })
     }
 
@@ -95,7 +106,7 @@ impl Response<TEST_RESPONSE_SIZE, CanServiceId, CanNodeId> for TestResponse {
         self.source
     }
 
-    fn data(&self) -> &[u8; TEST_RESPONSE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }

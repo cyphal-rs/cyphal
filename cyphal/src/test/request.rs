@@ -1,4 +1,4 @@
-use super::{TestNodeId, TestResponse, TestServiceId, TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE};
+use super::{TestNodeId, TestResponse, TestServiceId, TEST_REQUEST_SIZE};
 use crate::{CyphalResult, Priority, Request};
 
 pub struct TestRequest {
@@ -27,7 +27,8 @@ impl TestRequest {
     }
 }
 
-impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestRequest {
+impl Request<TestServiceId, TestNodeId> for TestRequest {
+    const SIZE: usize = TEST_REQUEST_SIZE;
     type Response = TestResponse;
 
     fn priority(&self) -> Priority {
@@ -46,7 +47,7 @@ impl Request<TEST_REQUEST_SIZE, TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> f
         self.source
     }
 
-    fn data(&self) -> &[u8; TEST_REQUEST_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }

@@ -24,7 +24,9 @@ impl TestMessage {
     }
 }
 
-impl Message<TEST_MESSAGE_SIZE, TestSubjectId, TestNodeId> for TestMessage {
+impl Message<TestSubjectId, TestNodeId> for TestMessage {
+    const SIZE: usize = TEST_MESSAGE_SIZE;
+
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -37,7 +39,7 @@ impl Message<TEST_MESSAGE_SIZE, TestSubjectId, TestNodeId> for TestMessage {
         self.source
     }
 
-    fn data(&self) -> &[u8; TEST_MESSAGE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }

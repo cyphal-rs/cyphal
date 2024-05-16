@@ -187,13 +187,10 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     type ServiceId = CanServiceId;
     type SubjectId = CanSubjectId;
 
-    async fn publish<
-        const MESSAGE_SIZE: usize,
-        M: Message<MESSAGE_SIZE, Self::SubjectId, Self::NodeId>,
-    >(
-        &mut self,
-        message: &M,
-    ) -> CyphalResult<()> {
+    async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
+    where
+        M: Message<Self::SubjectId, Self::NodeId>,
+    {
         let id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
 
@@ -208,14 +205,10 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         Ok(())
     }
 
-    async fn invoque<
-        const REQUEST_SIZE: usize,
-        const RESPONSE_SIZE: usize,
-        R: Request<REQUEST_SIZE, RESPONSE_SIZE, Self::ServiceId, Self::NodeId>,
-    >(
-        &mut self,
-        request: &R,
-    ) -> CyphalResult<R::Response> {
+    async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
+    where
+        R: Request<Self::ServiceId, Self::NodeId>,
+    {
         let id = ServiceCanId::new(
             request.priority(),
             true,
@@ -246,15 +239,25 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         CanId::Service(id) => id,
                     };
 
+                    let mut payload: Vec<u8> = Vec::new();
+
                     if first_frame.is_single_trame_transfer() {
-                        let mut data: [u8; RESPONSE_SIZE] = [0; RESPONSE_SIZE];
-                        data.copy_from_slice(&first_frame.data()[..RESPONSE_SIZE]);
+                        if R::Response::SIZE > PAYLOAD_SIZE - 1 {
+                            // something went wrong
+                            return Err(CyphalError::Transport);
+                        }
+
+                        let data = first_frame.data();
+                        for value in data.iter().take(R::Response::SIZE) {
+                            payload.push(*value);
+                        }
+
                         return R::Response::new(
                             id.priority(),
                             id.service(),
                             id.destination(),
                             id.source(),
-                            data,
+                            &payload,
                         );
                     } else {
                         if !first_frame.is_start_of_transfer() || !first_frame.is_toggle_bit_set() {
@@ -262,7 +265,6 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             return Err(CyphalError::Transport);
                         }
 
-                        let mut payload: Vec<u8> = Vec::new();
                         payload.extend_from_slice(&first_frame.data()[..first_frame.dlc() - 2]);
 
                         let mut toogle = false;
@@ -281,19 +283,17 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             toogle = !toogle
                         }
 
-                        if payload.len() != RESPONSE_SIZE {
+                        if payload.len() != R::Response::SIZE {
                             // something went wrong
                             return Err(CyphalError::Transport);
                         }
 
-                        let mut data: [u8; RESPONSE_SIZE] = [0; RESPONSE_SIZE];
-                        data.copy_from_slice(&payload);
                         return R::Response::new(
                             id.priority(),
                             id.service(),
                             id.destination(),
                             id.source(),
-                            data,
+                            &payload,
                         );
                     }
                 }

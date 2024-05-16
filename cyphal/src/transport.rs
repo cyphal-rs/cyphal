@@ -12,23 +12,14 @@ pub trait Transport {
     type SubjectId: SubjectId;
 
     /// Publishes a message
-    async fn publish<
-        const MESSAGE_SIZE: usize,
-        M: Message<MESSAGE_SIZE, Self::SubjectId, Self::NodeId>,
-    >(
-        &mut self,
-        message: &M,
-    ) -> CyphalResult<()>;
+    async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
+    where
+        M: Message<Self::SubjectId, Self::NodeId>;
 
     /// Invoques a service call
-    async fn invoque<
-        const REQUEST_SIZE: usize,
-        const RESPONSE_SIZE: usize,
-        R: Request<REQUEST_SIZE, RESPONSE_SIZE, Self::ServiceId, Self::NodeId>,
-    >(
-        &mut self,
-        request: &R,
-    ) -> CyphalResult<R::Response>;
+    async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
+    where
+        R: Request<Self::ServiceId, Self::NodeId>;
 }
 
 #[cfg(test)]

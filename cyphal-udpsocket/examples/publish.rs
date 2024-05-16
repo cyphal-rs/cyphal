@@ -45,7 +45,9 @@ impl TestMessage {
     }
 }
 
-impl Message<MESSAGE_SIZE, UdpSubjectId, UdpNodeId> for TestMessage {
+impl Message<UdpSubjectId, UdpNodeId> for TestMessage {
+    const SIZE: usize = MESSAGE_SIZE;
+
     fn source(&self) -> Option<UdpNodeId> {
         self.source
     }
@@ -58,7 +60,7 @@ impl Message<MESSAGE_SIZE, UdpSubjectId, UdpNodeId> for TestMessage {
         self.priority
     }
 
-    fn data(&self) -> &[u8; MESSAGE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.payload
     }
 }

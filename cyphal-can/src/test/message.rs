@@ -27,7 +27,9 @@ impl TestSmallMessage {
     }
 }
 
-impl Message<SMALL_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestSmallMessage {
+impl Message<CanSubjectId, CanNodeId> for TestSmallMessage {
+    const SIZE: usize = SMALL_MESSAGE_SIZE;
+
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -40,7 +42,7 @@ impl Message<SMALL_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestSmallMessage {
         self.source
     }
 
-    fn data(&self) -> &[u8; SMALL_MESSAGE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }
@@ -68,7 +70,9 @@ impl TestLargeMessage {
     }
 }
 
-impl Message<LARGE_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestLargeMessage {
+impl Message<CanSubjectId, CanNodeId> for TestLargeMessage {
+    const SIZE: usize = LARGE_MESSAGE_SIZE;
+
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }
@@ -81,7 +85,7 @@ impl Message<LARGE_MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestLargeMessage {
         self.priority
     }
 
-    fn data(&self) -> &[u8; LARGE_MESSAGE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }

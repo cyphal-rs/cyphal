@@ -21,24 +21,17 @@ impl<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> Transport
     type ServiceId = UdpServiceId;
     type SubjectId = UdpSubjectId;
 
-    async fn publish<
-        const MESSAGE_SIZE: usize,
-        M: Message<MESSAGE_SIZE, Self::SubjectId, Self::NodeId>,
-    >(
-        &mut self,
-        _message: &M,
-    ) -> CyphalResult<()> {
+    async fn publish<M>(&mut self, _message: &M) -> CyphalResult<()>
+    where
+        M: Message<Self::SubjectId, Self::NodeId>,
+    {
         todo!()
     }
 
-    async fn invoque<
-        const REQUEST_SIZE: usize,
-        const RESPONSE_SIZE: usize,
-        R: Request<REQUEST_SIZE, RESPONSE_SIZE, Self::ServiceId, Self::NodeId>,
-    >(
-        &mut self,
-        _request: &R,
-    ) -> CyphalResult<R::Response> {
+    async fn invoque<R>(&mut self, _request: &R) -> CyphalResult<R::Response>
+    where
+        R: Request<Self::ServiceId, Self::NodeId>,
+    {
         todo!()
     }
 }

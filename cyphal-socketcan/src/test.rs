@@ -27,7 +27,9 @@ impl SingleFrameMessage {
     }
 }
 
-impl Message<SINGLE_SIZE, CanSubjectId, CanNodeId> for SingleFrameMessage {
+impl Message<CanSubjectId, CanNodeId> for SingleFrameMessage {
+    const SIZE: usize = SINGLE_SIZE;
+
     fn priority(&self) -> Priority {
         self.priority
     }
@@ -40,7 +42,7 @@ impl Message<SINGLE_SIZE, CanSubjectId, CanNodeId> for SingleFrameMessage {
         self.source
     }
 
-    fn data(&self) -> &[u8; SINGLE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.payload
     }
 }
@@ -68,7 +70,9 @@ impl MultiFrameMessage {
     }
 }
 
-impl Message<MULTI_SIZE, CanSubjectId, CanNodeId> for MultiFrameMessage {
+impl Message<CanSubjectId, CanNodeId> for MultiFrameMessage {
+    const SIZE: usize = MULTI_SIZE;
+
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }
@@ -81,7 +85,7 @@ impl Message<MULTI_SIZE, CanSubjectId, CanNodeId> for MultiFrameMessage {
         self.priority
     }
 
-    fn data(&self) -> &[u8; MULTI_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.payload
     }
 }

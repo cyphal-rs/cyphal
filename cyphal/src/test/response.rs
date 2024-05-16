@@ -1,5 +1,5 @@
 use super::{TestNodeId, TestServiceId, TEST_RESPONSE_SIZE};
-use crate::{CyphalResult, Priority, Response};
+use crate::{CyphalError, CyphalResult, Priority, Response};
 
 pub struct TestResponse {
     priority: Priority,
@@ -9,20 +9,29 @@ pub struct TestResponse {
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestResponse {
+impl Response<TestServiceId, TestNodeId> for TestResponse {
+    const SIZE: usize = TEST_RESPONSE_SIZE;
+
     fn new(
         priority: Priority,
         service: TestServiceId,
         destination: TestNodeId,
         source: TestNodeId,
-        data: [u8; TEST_RESPONSE_SIZE],
+        data: &[u8],
     ) -> CyphalResult<Self> {
+        if data.len() != Self::SIZE {
+            return Err(CyphalError::OutOfRange);
+        }
+
+        let mut d: [u8; Self::SIZE] = [0; Self::SIZE];
+        d.copy_from_slice(data);
+
         Ok(Self {
             priority,
             service,
             destination,
             source,
-            data,
+            data: d,
         })
     }
 
@@ -42,7 +51,7 @@ impl Response<TEST_RESPONSE_SIZE, TestServiceId, TestNodeId> for TestResponse {
         self.source
     }
 
-    fn data(&self) -> &[u8; TEST_RESPONSE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.data
     }
 }

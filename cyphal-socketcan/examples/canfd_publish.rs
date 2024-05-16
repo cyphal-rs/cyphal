@@ -42,7 +42,9 @@ impl TestMessage {
     }
 }
 
-impl Message<MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestMessage {
+impl Message<CanSubjectId, CanNodeId> for TestMessage {
+    const SIZE: usize = MESSAGE_SIZE;
+
     fn source(&self) -> Option<CanNodeId> {
         self.source
     }
@@ -55,7 +57,7 @@ impl Message<MESSAGE_SIZE, CanSubjectId, CanNodeId> for TestMessage {
         self.priority
     }
 
-    fn data(&self) -> &[u8; MESSAGE_SIZE] {
+    fn data(&self) -> &[u8] {
         &self.payload
     }
 }
