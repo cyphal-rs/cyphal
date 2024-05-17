@@ -13,7 +13,9 @@ use crate::{
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 use crc::Crc;
-use cyphal::{CyphalError, CyphalResult, Message, Request, Response, TransferId, Transport};
+use cyphal::{
+    CyphalError, CyphalResult, Message, Request, Response, Router, TransferId, Transport,
+};
 
 const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
 
@@ -230,35 +232,99 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         while let Ok(frame) = self.can.receive().await {
             self.inbound_queue.push(frame);
 
-            match self.inbound_queue.get_transfer_frames(transfer) {
-                None => {}
-                Some(mut queue) => {
-                    let first_frame = queue.pop_front().unwrap();
-                    let id = match first_frame.id() {
-                        CanId::Message(_) => return Err(CyphalError::Transport),
-                        CanId::Service(id) => id,
-                    };
+            if let Some(mut queue) = self.inbound_queue.get_response_frames(transfer) {
+                let first_frame = queue.pop_front().unwrap();
+                let id = match first_frame.id() {
+                    CanId::Message(_) => return Err(CyphalError::Transport),
+                    CanId::Service(id) => id,
+                };
 
-                    let mut payload: Vec<u8> = Vec::new();
+                if id.is_request() {
+                    return Err(CyphalError::Transport);
+                }
 
-                    if first_frame.is_single_trame_transfer() {
-                        if R::Response::SIZE > PAYLOAD_SIZE - 1 {
+                let mut payload: Vec<u8> = Vec::new();
+
+                if first_frame.is_single_trame_transfer() {
+                    if R::Response::SIZE > PAYLOAD_SIZE - 1 {
+                        // something went wrong
+                        return Err(CyphalError::Transport);
+                    }
+
+                    let data = first_frame.data();
+                    for value in data.iter().take(R::Response::SIZE) {
+                        payload.push(*value);
+                    }
+
+                    return R::Response::new(
+                        id.priority(),
+                        id.service(),
+                        id.destination(),
+                        id.source(),
+                        &payload,
+                    );
+                } else {
+                    if !first_frame.is_start_of_transfer() || !first_frame.is_toggle_bit_set() {
+                        // something went wrong
+                        return Err(CyphalError::Transport);
+                    }
+
+                    payload.extend_from_slice(&first_frame.data()[..first_frame.dlc() - 2]);
+
+                    let mut toogle = false;
+
+                    while let Some(frame) = queue.pop_front() {
+                        if frame.is_start_of_transfer() || frame.is_toggle_bit_set() != toogle {
+                            // something went wrong
+                            return Err(CyphalError::Transport);
+                        }
+                        if frame.is_end_of_transfer() && !queue.is_empty() {
                             // something went wrong
                             return Err(CyphalError::Transport);
                         }
 
-                        let data = first_frame.data();
-                        for value in data.iter().take(R::Response::SIZE) {
-                            payload.push(*value);
-                        }
+                        payload.extend_from_slice(&frame.data()[..frame.dlc() - 2]);
+                        toogle = !toogle
+                    }
 
-                        return R::Response::new(
-                            id.priority(),
-                            id.service(),
-                            id.destination(),
-                            id.source(),
-                            &payload,
-                        );
+                    if payload.len() != R::Response::SIZE {
+                        // something went wrong
+                        return Err(CyphalError::Transport);
+                    }
+
+                    return R::Response::new(
+                        id.priority(),
+                        id.service(),
+                        id.destination(),
+                        id.source(),
+                        &payload,
+                    );
+                }
+            }
+        }
+
+        Err(CyphalError::Transport)
+    }
+
+    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    where
+        R: Router<Self::SubjectId, Self::ServiceId, Self::NodeId>,
+    {
+        while let Ok(frame) = self.can.receive().await {
+            self.inbound_queue.push(frame);
+
+            if let Some(messages) = self.inbound_queue.get_message_frames() {
+                for kvp in messages {
+                    let mut queue = kvp.1;
+                    let mut payload: Vec<u8> = Vec::new();
+                    let first_frame = queue.pop_front().unwrap();
+                    let id = match first_frame.id() {
+                        CanId::Message(id) => id,
+                        CanId::Service(_) => return Err(CyphalError::Transport),
+                    };
+
+                    if first_frame.is_single_trame_transfer() {
+                        payload.extend_from_slice(first_frame.data());
                     } else {
                         if !first_frame.is_start_of_transfer() || !first_frame.is_toggle_bit_set() {
                             // something went wrong
@@ -282,25 +348,69 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             payload.extend_from_slice(&frame.data()[..frame.dlc() - 2]);
                             toogle = !toogle
                         }
+                    }
 
-                        if payload.len() != R::Response::SIZE {
+                    router
+                        .process_message(id.priority(), id.subject(), id.source(), &payload)
+                        .await;
+                }
+            }
+
+            if let Some(requests) = self.inbound_queue.get_request_frames() {
+                for kvp in requests {
+                    let mut queue = kvp.1;
+                    let mut payload: Vec<u8> = Vec::new();
+                    let first_frame = queue.pop_front().unwrap();
+                    let id = match first_frame.id() {
+                        CanId::Message(_) => return Err(CyphalError::Transport),
+                        CanId::Service(id) => id,
+                    };
+
+                    if !id.is_request() {
+                        return Err(CyphalError::Transport);
+                    }
+
+                    if first_frame.is_single_trame_transfer() {
+                        payload.extend_from_slice(first_frame.data());
+                    } else {
+                        if !first_frame.is_start_of_transfer() || !first_frame.is_toggle_bit_set() {
                             // something went wrong
                             return Err(CyphalError::Transport);
                         }
 
-                        return R::Response::new(
+                        payload.extend_from_slice(&first_frame.data()[..first_frame.dlc() - 2]);
+
+                        let mut toogle = false;
+
+                        while let Some(frame) = queue.pop_front() {
+                            if frame.is_start_of_transfer() || frame.is_toggle_bit_set() != toogle {
+                                // something went wrong
+                                return Err(CyphalError::Transport);
+                            }
+                            if frame.is_end_of_transfer() && !queue.is_empty() {
+                                // something went wrong
+                                return Err(CyphalError::Transport);
+                            }
+
+                            payload.extend_from_slice(&frame.data()[..frame.dlc() - 2]);
+                            toogle = !toogle
+                        }
+                    }
+
+                    router
+                        .process_request(
                             id.priority(),
                             id.service(),
-                            id.destination(),
                             id.source(),
+                            id.destination(),
                             &payload,
-                        );
-                    }
+                        )
+                        .await;
                 }
             }
         }
 
-        Err(CyphalError::Transport)
+        Ok(())
     }
 }
 

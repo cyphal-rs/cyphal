@@ -1,7 +1,11 @@
 use crate::{NodeId, Priority, Response, ServiceId};
 
 /// Represents a resquest sent to a service
-pub trait Request<S: ServiceId, N: NodeId>: Sized {
+pub trait Request<S, N>: Sized
+where
+    S: ServiceId,
+    N: NodeId,
+{
     /// Size of the request payload
     const SIZE: usize;
 
@@ -22,9 +26,4 @@ pub trait Request<S: ServiceId, N: NodeId>: Sized {
 
     /// Returns the payload of the request
     fn data(&self) -> &[u8];
-
-    /// Returns th size of the request payload
-    fn size() -> usize {
-        Self::SIZE
-    }
 }

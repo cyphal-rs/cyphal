@@ -1,7 +1,11 @@
 use crate::{CyphalResult, NodeId, Priority, ServiceId};
 
 /// Represents a response returned by a service
-pub trait Response<S: ServiceId, N: NodeId>: Sized {
+pub trait Response<S, N>: Sized
+where
+    S: ServiceId,
+    N: NodeId,
+{
     /// Size of the response payload
     const SIZE: usize;
 
@@ -28,9 +32,4 @@ pub trait Response<S: ServiceId, N: NodeId>: Sized {
 
     /// Returns the payload of the response
     fn data(&self) -> &[u8];
-
-    /// Returns th size of the response payload
-    fn size() -> usize {
-        Self::SIZE
-    }
 }

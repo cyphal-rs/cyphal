@@ -1,7 +1,11 @@
 use crate::{NodeId, Priority, SubjectId};
 
 /// Trait representing a message
-pub trait Message<S: SubjectId, N: NodeId>: Sized {
+pub trait Message<S, N>: Sized
+where
+    S: SubjectId,
+    N: NodeId,
+{
     /// Size of the message payload
     const SIZE: usize;
 
@@ -16,11 +20,6 @@ pub trait Message<S: SubjectId, N: NodeId>: Sized {
 
     /// Return the message payload
     fn data(&self) -> &[u8];
-
-    /// Returns th size of the message payload
-    fn size() -> usize {
-        Self::SIZE
-    }
 }
 
 #[cfg(test)]

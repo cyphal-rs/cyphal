@@ -1,7 +1,10 @@
 extern crate alloc;
 
 use super::{TestNodeId, TestServiceId, TestSubjectId, TestTransferId};
-use crate::{CyphalResult, Message, Request, Response, TransferId, Transport};
+use crate::{
+    test::{TestRequest, TEST_REQUEST_SIZE},
+    CyphalResult, Message, Priority, Request, Response, TransferId, Transport,
+};
 use alloc::vec::Vec;
 
 pub struct TestTransport {
@@ -52,5 +55,23 @@ impl Transport for TestTransport {
             request.source(),
             &data,
         )?)
+    }
+
+    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    where
+        R: crate::Router<Self::SubjectId, Self::ServiceId, Self::NodeId>,
+    {
+        let data: [u8; TEST_REQUEST_SIZE] = [1; TEST_REQUEST_SIZE];
+        let _response = router
+            .process_request(
+                Priority::High,
+                1.try_into().unwrap(),
+                2.try_into().unwrap(),
+                3.try_into().unwrap(),
+                &data,
+            )
+            .await;
+
+        Ok(())
     }
 }

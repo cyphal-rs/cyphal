@@ -1,4 +1,4 @@
-use crate::{CyphalResult, Message, NodeId, Request, ServiceId, SubjectId};
+use crate::{CyphalResult, Message, NodeId, Request, Router, ServiceId, SubjectId};
 
 /// Trait representing the Cyphal transport
 pub trait Transport {
@@ -20,6 +20,11 @@ pub trait Transport {
     async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
     where
         R: Request<Self::ServiceId, Self::NodeId>;
+
+    /// Listen to incoming traffic
+    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    where
+        R: Router<Self::SubjectId, Self::ServiceId, Self::NodeId>;
 }
 
 #[cfg(test)]

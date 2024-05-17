@@ -21,6 +21,9 @@ pub use request::Request;
 mod response;
 pub use response::Response;
 
+mod router;
+pub use router::Router;
+
 mod service_id;
 pub use service_id::ServiceId;
 
