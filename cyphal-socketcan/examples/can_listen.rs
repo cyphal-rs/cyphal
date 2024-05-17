@@ -24,10 +24,10 @@ pub struct TestRouter {}
 impl Router<CanSubjectId, CanServiceId, CanNodeId> for TestRouter {
     async fn process_message(
         &self,
-        priority: Priority,
-        subject: CanSubjectId,
-        source: CanNodeId,
-        data: &[u8],
+        _priority: Priority,
+        _subject: CanSubjectId,
+        _source: CanNodeId,
+        _data: &[u8],
     ) {
         todo!()
     }

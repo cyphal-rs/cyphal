@@ -2,8 +2,8 @@ extern crate alloc;
 
 use super::{TestNodeId, TestServiceId, TestSubjectId, TestTransferId};
 use crate::{
-    test::{TestRequest, TEST_REQUEST_SIZE},
-    CyphalResult, Message, Priority, Request, Response, TransferId, Transport,
+    test::TEST_REQUEST_SIZE, CyphalResult, Message, Priority, Request, Response, TransferId,
+    Transport,
 };
 use alloc::vec::Vec;
 
