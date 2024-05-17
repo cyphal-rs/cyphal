@@ -1,6 +1,6 @@
-//! Open Cyphal SocketCAN Rust Implementation
-#![allow(async_fn_in_trait)]
+#![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
+#![allow(async_fn_in_trait)]
 
 mod can_socket;
 pub use can_socket::CanSocket;

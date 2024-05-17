@@ -1,7 +1,7 @@
-//! Open Cyphal CAN Transport Rust Implementation
 #![no_std]
-#![allow(async_fn_in_trait)]
+#![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
+#![allow(async_fn_in_trait)]
 
 /// Payload size for CAN 2.0
 pub const CLASSIC_PAYLOAD_SIZE: usize = 8;

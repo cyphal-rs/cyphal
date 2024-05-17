@@ -1,8 +1,7 @@
-//! Open Cyphal UDP Rust Implementation
-//!
 #![no_std]
-#![allow(async_fn_in_trait)]
+#![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
+#![allow(async_fn_in_trait)]
 
 /// Multigroup Address Port used by Cyphal
 pub const MULTIGROUP_ADDRESS_PORT: u16 = 9382;

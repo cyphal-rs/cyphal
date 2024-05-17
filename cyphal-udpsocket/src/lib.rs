@@ -1,6 +1,6 @@
-//! Open Cyphal UDP Socket Rust Implementation
-#![allow(async_fn_in_trait)]
+#![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
+#![allow(async_fn_in_trait)]
 
 mod udp_socket;
 pub use udp_socket::UdpSocket;
