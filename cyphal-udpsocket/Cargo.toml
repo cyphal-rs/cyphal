@@ -5,11 +5,11 @@ readme = "README.md"
 repository = "https://github.com/cyphal-rs/cyphal"
 license = "MIT OR Apache-2.0"
 edition = "2021"
-version = "0.0.7"
+version = "0.0.8"
 
 [dependencies]
-cyphal = { version = "0.0.7", path = "../cyphal" }
-cyphal-udp = { version = "0.0.7", path = "../cyphal-udp" }
+cyphal = { version = "0.0.8", path = "../cyphal" }
+cyphal-udp = { version = "0.0.8", path = "../cyphal-udp" }
 async-std = "1.12.0"
 
 [dev-dependencies]
