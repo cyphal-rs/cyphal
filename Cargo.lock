@@ -288,6 +288,9 @@ dependencies = [
 [[package]]
 name = "cyphal-dsdl"
 version = "0.0.0"
+dependencies = [
+ "thiserror",
+]
 
 [[package]]
 name = "cyphal-fdcan"

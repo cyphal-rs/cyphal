@@ -10,3 +10,4 @@ license = "MIT OR Apache-2.0"
 version = "0.0.0"
 
 [dependencies]
+thiserror = "1.0.60"
