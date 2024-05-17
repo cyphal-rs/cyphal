@@ -286,6 +286,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cyphal-dsdl"
+version = "0.0.0"
+
+[[package]]
 name = "cyphal-fdcan"
 version = "0.0.7"
 dependencies = [
