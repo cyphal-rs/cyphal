@@ -1,12 +1,28 @@
 # Open Cyphal DSDL Rust implementation
 
-Rust CLI for OpenCyphal Data Structure Description Language (DSDL) files
+Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files
 
 🚧 ***Work in progress*** 🚧
 
+## Install CLI
+
+This CLI published to crates.io as a binary crate and can as such be installed with cargo as such:
+
+```bash
+cargo install dsdl
+```
+
+**Note:** You can update the CLI to the latest version by repeating the same command.
+
+To uninstall, simply run:
+
+```bash
+cargo uninstall dsdl
+```
+
 ## Minimum Supported Rust Version (MSRV)
 
-This app is guaranteed to compile on stable Rust 1.78 and up. It *might*
+This CLI is guaranteed to compile on stable Rust 1.78 and up. It *might*
 compile with older versions but that may change in any new patch release.
 
 ## License

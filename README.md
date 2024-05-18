@@ -28,9 +28,9 @@ Documentation is available in the [cyphal book](./book).
 
 ## Utilities
 
-| Source | Description |
-|-|-|
-| [dsdl](./cyphal-dsdl) | Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files |
+| Source | crates.io | Docs | Description |
+|-|-|-|-|
+| [dsdl](./dsdl) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | [![Documentation](https://docs.rs/dsdl/badge.svg)](https://docs.rs/dsdl) | CLI for OpenCyphal DSDL files |
 
 ## License
 
