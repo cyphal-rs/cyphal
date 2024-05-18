@@ -1,11 +1,11 @@
 [package]
 name = "cyphal-socketcan"
 description = "Open Cyphal SocketCAN Rust Implementation"
-readme = "README.md"
-repository = "https://github.com/cyphal-rs/cyphal"
-license = "MIT OR Apache-2.0"
-edition = "2021"
-version = "0.0.8"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
 
 [dependencies]
 cyphal = { version = "0.0.8", path = "../cyphal" }
@@ -14,7 +14,7 @@ embedded-can = "0.4.1"
 socketcan = { version = "3.3.0", features = ["async-std"] }
 
 [dev-dependencies]
-async-std = { version = "1.12.0", features = ["attributes"] }
+async-std = { workspace = true, features = ["attributes"] }
 
 [[example]]
 name = "can_publish"

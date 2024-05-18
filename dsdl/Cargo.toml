@@ -3,11 +3,11 @@ name = "dsdl"
 description = "Open Cyphal DSDL Rust Implementation"
 categories = ["embedded", "hardware-support"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
-edition = "2021"
-readme = "README.md"
-repository = "https://github.com/cyphal-rs/cyphal"
-license = "MIT OR Apache-2.0"
-version = "0.0.8"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
 
 [dependencies]
 cyphal = { version = "0.0.8", path = "../cyphal" }

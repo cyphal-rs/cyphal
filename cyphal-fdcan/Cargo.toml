@@ -1,11 +1,11 @@
 [package]
 name = "cyphal-fdcan"
 description = "Open Cyphal FDCAN Rust Implementation"
-readme = "README.md"
-repository = "https://github.com/cyphal-rs/cyphal"
-license = "MIT OR Apache-2.0"
-edition = "2021"
-version = "0.0.8"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
 
 [package.metadata.docs.rs]
 features = ["fdcan_g0_g4_l5"]

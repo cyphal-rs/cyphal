@@ -1,11 +1,11 @@
 [package]
 name = "cyphal-bxcan"
 description = "Open Cyphal BXCAN Rust Implementation"
-readme = "README.md"
-repository = "https://github.com/cyphal-rs/cyphal"
-license = "MIT OR Apache-2.0"
-edition = "2021"
-version = "0.0.8"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
 
 [dependencies]
 cyphal = { version = "0.0.8", path = "../cyphal" }

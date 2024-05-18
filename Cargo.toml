@@ -2,10 +2,24 @@
 members = [
     "cyphal",
     "cyphal-bxcan",
-    "cyphal-can", "cyphal-dsdl", "cyphal-fdcan",
+    "cyphal-can",
+    "cyphal-dsdl",
+    "cyphal-fdcan",
     "cyphal-serial",
     "cyphal-socketcan",
-    "cyphal-udp", "cyphal-udpsocket",
+    "cyphal-udp",
+    "cyphal-udpsocket",
     "dsdl",
 ]
 resolver = "2"
+
+[workspace.package]
+edition = "2021"
+readme = "README.md"
+repository = "https://github.com/cyphal-rs/cyphal"
+license = "MIT OR Apache-2.0"
+version = "0.0.8"
+
+[workspace.dependencies]
+async-std = "1.12.0"
+thiserror = "1.0.60"

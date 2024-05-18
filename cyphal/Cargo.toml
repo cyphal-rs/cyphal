@@ -3,11 +3,11 @@ name = "cyphal"
 description = "Open Cyphal Rust Implementation"
 categories = ["embedded", "hardware-support", "no-std"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
-edition = "2021"
-readme = "README.md"
-repository = "https://github.com/cyphal-rs/cyphal"
-license = "MIT OR Apache-2.0"
-version = "0.0.8"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
 
 [dev-dependencies]
-async-std = { version = "1.12.0", features = ["attributes"] }
+async-std = { workspace = true, features = ["attributes"] }
