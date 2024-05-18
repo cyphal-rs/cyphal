@@ -1,40 +1,44 @@
-use clap::Args;
+pub mod message;
+
+use clap::{
+    error::{Error, ErrorKind, Result as ClapResult},
+    Args,
+};
+use cyphal_dsdl::Parser;
+use message::MessageGenerator;
 use std::path::PathBuf;
 
-const MESSAGE: &str = r#"pub struct {NAME} {
-    priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
-    payload: [u8; {SIZE}],
-}"#;
-
 #[derive(Debug, Clone, Args)]
-pub struct GenerateArgs {
+pub struct Generate {
     /// The DSDL file used to generate code
-    #[arg(value_name = "DSDL PATH")]
-    dsdl_path: PathBuf,
+    #[arg()]
+    path: PathBuf,
 
-    /// The location to output the generated code
-    #[arg(value_name = "OUTPUT PATH")]
+    /// The directory to output the generated code
+    #[arg(short, long)]
     output: Option<PathBuf>,
 
     /// Manually set the generated struct's name
-    #[arg(short, long, value_name = "STRUCT NAME")]
+    #[arg(short, long)]
     name: Option<String>,
 }
 
-impl GenerateArgs {
-    pub fn execute(&self) {
-        let name = match &self.name {
-            Some(n) => n.clone(),
-            None => "DefaultName".to_string(),
+impl Generate {
+    pub fn execute(&self) -> ClapResult<()> {
+        let _parser = match Parser::new() {
+            Ok(p) => p,
+            Err(_) => return Err(Error::raw(ErrorKind::Io, "Could not create parser")),
         };
 
-        let message = MESSAGE.replace("{NAME}", &name).replace("{SIZE}", "16");
+        let generator = MessageGenerator::new(self.name.clone())?;
+        let code = generator.generate_code();
 
         match self.output {
-            Some(_) => todo!(),
-            None => println!("{}", message),
+            Some(_) => Err(Error::raw(ErrorKind::Io, "Not implemented")),
+            None => {
+                println!("{}", code);
+                Ok(())
+            }
         }
     }
 }

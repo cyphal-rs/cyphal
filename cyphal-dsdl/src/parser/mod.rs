@@ -71,7 +71,7 @@ impl Parser {
             } else {
                 return Err(DsdlError::InvalidStatement(
                     line_number,
-                    "Could not understand the statement".to_string(),
+                    "Could not parse the statement".to_string(),
                 ));
             }
 

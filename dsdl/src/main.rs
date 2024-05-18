@@ -2,9 +2,19 @@
 #![warn(missing_docs)]
 
 mod generate;
-use generate::GenerateArgs;
+use generate::Generate;
 
-use clap::{Parser, Subcommand};
+use clap::{error::Result as ClapResult, Parser, Subcommand};
+
+fn main() -> ClapResult<()> {
+    let cli = DsdlCli::parse();
+
+    match cli.command {
+        Commands::Generate(a) => a.execute()?,
+    }
+
+    Ok(())
+}
 
 #[derive(Debug, Parser)]
 #[command(name = "dsdl")]
@@ -26,13 +36,5 @@ enum Commands {
         about = "Generate Rust code from a DSDL file",
         long_about = "Generates Rust code from an OpenCyphal Data Structure Description Language (DSDL) file"
     )]
-    Generate(GenerateArgs),
-}
-
-fn main() {
-    let cli = DsdlCli::parse();
-
-    match cli.command {
-        Commands::Generate(a) => a.execute(),
-    }
+    Generate(Generate),
 }

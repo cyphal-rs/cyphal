@@ -434,6 +434,7 @@ name = "dsdl"
 version = "0.0.8"
 dependencies = [
  "clap",
+ "cyphal-dsdl",
  "thiserror",
 ]
 
