@@ -1,6 +1,6 @@
 [package]
 name = "dsdl"
-description = "Open Cyphal DSDL Rust Implementation"
+description = "Rust CLI for OpenCyphal Data Structure Description Language (DSDL) files"
 categories = ["embedded", "hardware-support"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
 edition.workspace = true
@@ -10,4 +10,5 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-cyphal = { version = "0.0.8", path = "../cyphal" }
+clap = { version = "4.5.4", features = ["derive"] }
+thiserror.workspace = true

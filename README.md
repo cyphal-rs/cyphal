@@ -1,7 +1,9 @@
-![CI](https://github.com/cyphal-rs/cyphal/actions/workflows/ci.yml/badge.svg?branch=master)
-![MSRV](https://img.shields.io/badge/rustc-1.78+-blue.svg)
-
 # Cyphal
+
+![CI](https://github.com/cyphal-rs/cyphal/actions/workflows/ci.yml/badge.svg?branch=master)
+![LICENSE-APACHE](https://img.shields.io/badge/license-Apache%202.0-blue)
+![LICENSE-MIT](https://img.shields.io/badge/license-MIT-blue)
+![MSRV](https://img.shields.io/badge/rustc-1.78+-blue.svg)
 
 Open Cyphal Rust Implementation
 

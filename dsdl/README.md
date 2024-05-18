@@ -1,12 +1,12 @@
 # Open Cyphal DSDL Rust implementation
 
-Rust library for manipulating OpenCyphal DSDL (data structure description language) files
+Rust CLI for OpenCyphal Data Structure Description Language (DSDL) files
 
 🚧 ***Work in progress*** 🚧
 
 ## Minimum Supported Rust Version (MSRV)
 
-This crate is guaranteed to compile on stable Rust 1.78 and up. It *might*
+This app is guaranteed to compile on stable Rust 1.78 and up. It *might*
 compile with older versions but that may change in any new patch release.
 
 ## License
