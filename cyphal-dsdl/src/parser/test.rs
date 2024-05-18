@@ -5,9 +5,12 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 #[ignore = "not implemented"]
 fn test_7509_heartbeat_1_0() {
     let dsdl = "assets/7509.Heartbeat.1.0.dsdl";
-    let result = parse_dsdl(dsdl);
 
-    assert!(result.is_ok())
+    let result = parse_dsdl(dsdl);
+    assert!(result.is_ok());
+
+    let statements = result.unwrap();
+    assert_eq!(statements.len(), 37);
 }
 
 #[test]

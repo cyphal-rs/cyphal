@@ -1,29 +1,30 @@
+use super::{parse_comment, parse_name};
 use crate::{BoolPrimitive, DsdlError, DsdlResult, Primitive, UintPrimitive};
-
-use super::parse_comment;
 
 pub fn parse_primitive(line: &str) -> DsdlResult<Primitive> {
     if line.starts_with("int") {
         Err(DsdlError::NotImplemented)
     } else if let Some(s) = line.strip_prefix("uint") {
-        let r = parse_bits(s)?;
-        let bits = r.0;
-        let r = if let Some(s) = r.1 {
+        let result = parse_bits(s)?;
+        let bits = result.0;
+        let result = if let Some(s) = result.1 {
             parse_name(s)?
         } else {
-            return Err(DsdlError::Parse("Primitive is missing a name".to_string()));
+            return Err(DsdlError::Parse(
+                "Primitive type is missing a name".to_string(),
+            ));
         };
-        let name = r.0.to_string();
+        let name = result.0.to_string();
 
-        match r.1 {
+        match result.1 {
             None => {
                 let primitive = UintPrimitive::new(bits, name, None, None)?;
                 Ok(Primitive::Uint(primitive))
             }
             Some(s) => {
-                let r = parse_uint_value(s)?;
-                let value = r.0;
-                let comment = match r.1 {
+                let result = parse_uint_value(s)?;
+                let value = result.0;
+                let comment = match result.1 {
                     Some(s) => parse_comment(s)?,
                     None => None,
                 };
@@ -34,17 +35,17 @@ pub fn parse_primitive(line: &str) -> DsdlResult<Primitive> {
     } else if line.starts_with("float") {
         Err(DsdlError::NotImplemented)
     } else if let Some(s) = line.strip_prefix("bool") {
-        let r = parse_name(s)?;
-        let name = r.0.to_string();
-        match r.1 {
+        let result = parse_name(s)?;
+        let name = result.0.to_string();
+        match result.1 {
             None => {
                 let primitive = BoolPrimitive::new(name, None, None)?;
                 Ok(Primitive::Bolean(primitive))
             }
             Some(s) => {
-                let r = parse_bool_value(s)?;
-                let value = r.0;
-                let comment = match r.1 {
+                let result = parse_bool_value(s)?;
+                let value = result.0;
+                let comment = match result.1 {
                     Some(s) => parse_comment(s)?,
                     None => None,
                 };
@@ -103,21 +104,6 @@ fn parse_bits(line: &str) -> DsdlResult<(u8, Option<&str>)> {
     let line = if line.is_empty() { None } else { Some(line) };
 
     Ok((value, line))
-}
-
-fn parse_name(line: &str) -> DsdlResult<(&str, Option<&str>)> {
-    let line = line.trim_start();
-    if line.is_empty() {
-        return Err(DsdlError::Parse("Could not find name".to_string()));
-    }
-
-    let result = match line.split_once(' ') {
-        None => (line, None),
-        Some(r) => (r.0, Some(r.1)),
-    };
-
-    //TODO: make sure it's a valid name
-    Ok(result)
 }
 
 fn parse_bool_value(line: &str) -> DsdlResult<(Option<bool>, Option<&str>)> {

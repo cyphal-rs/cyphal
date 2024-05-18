@@ -1,4 +1,4 @@
-use crate::{Directive, Primitive};
+use crate::{Composite, Directive, Primitive};
 
 /// Represents a DSDL statement
 #[derive(Debug, PartialEq)]
@@ -6,7 +6,10 @@ pub enum Statement {
     /// Represents a comment
     Comment(String),
 
-    /// Represents a primitive
+    /// Represets a composite type
+    Composite(Composite),
+
+    /// Represents a primitive type
     Primitive(Primitive),
 
     /// Represents a directive

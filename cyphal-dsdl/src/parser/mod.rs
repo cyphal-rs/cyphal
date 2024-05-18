@@ -1,8 +1,17 @@
 mod comment;
 use comment::parse_comment;
 
+mod composite;
+use composite::parse_composite;
+
 mod directive;
 use directive::parse_directive;
+
+mod expression;
+use expression::parse_expression;
+
+mod name;
+use name::parse_name;
 
 mod primitive;
 use primitive::parse_primitive;
@@ -69,10 +78,12 @@ impl Parser {
                     }
                 }
             } else {
-                return Err(DsdlError::InvalidStatement(
-                    line_number,
-                    "Could not parse the statement".to_string(),
-                ));
+                match parse_composite(&line) {
+                    Ok(c) => statements.push(Statement::Composite(c)),
+                    Err(e) => {
+                        return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
+                    }
+                }
             }
 
             line_number += 1;

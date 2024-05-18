@@ -2,8 +2,11 @@
 #![warn(missing_docs)]
 #![allow(async_fn_in_trait)]
 
+mod composite;
+pub use composite::Composite;
+
 mod directive;
-pub use directive::Directive;
+pub use directive::{AssertDirective, Directive, ExtentDirective};
 
 mod error;
 pub use error::{DsdlError, DsdlResult};
