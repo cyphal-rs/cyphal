@@ -26,6 +26,12 @@ Documentation is available in the [cyphal book](./book).
 | [cyphal-udpsocket](./cyphal-udpsocket) | [![crates.io](https://img.shields.io/crates/v/cyphal-udpsocket.svg)](https://crates.io/crates/cyphal-udpsocket) | [![Documentation](https://docs.rs/cyphal-udpsocket/badge.svg)](https://docs.rs/cyphal-udpsocket) | OpenCyphal UDP Socket Rust Implementation |
 | [cyphal-dsdl](./cyphal-dsdl) | [![crates.io](https://img.shields.io/crates/v/cyphal-dsdl.svg)](https://crates.io/crates/cyphal-dsdl) | [![Documentation](https://docs.rs/cyphal-dsdl/badge.svg)](https://docs.rs/cyphal-dsdl) | OpenCyphal DSDL Rust Implementation |
 
+## Utilities
+
+| Source | Description |
+|-|-|
+| [dsdl](./cyphal-dsdl) | Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files |
+
 ## License
 
 Licensed under either of
