@@ -8,4 +8,4 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-cyphal = { version = "0.0.8", path = "../cyphal" }
+cyphal = { version = "0.0.9", path = "../cyphal" }

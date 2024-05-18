@@ -8,6 +8,6 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-cyphal = { version = "0.0.8", path = "../cyphal" }
-cyphal-can = { version = "0.0.8", path = "../cyphal-can" }
+cyphal = { version = "0.0.9", path = "../cyphal" }
+cyphal-can = { version = "0.0.9", path = "../cyphal-can" }
 bxcan = "0.7.0"

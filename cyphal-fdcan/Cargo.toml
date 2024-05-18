@@ -13,8 +13,8 @@ targets = ["thumbv7em-none-eabihf"]
 
 [dependencies]
 fdcan = "0.2.0"
-cyphal = { version = "0.0.8", path = "../cyphal" }
-cyphal-can = { version = "0.0.8", path = "../cyphal-can" }
+cyphal = { version = "0.0.9", path = "../cyphal" }
+cyphal-can = { version = "0.0.9", path = "../cyphal-can" }
 
 [features]
 default = ["fdcan_g0_g4_l5"]

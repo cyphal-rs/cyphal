@@ -356,14 +356,14 @@ checksum = "248e3bacc7dc6baa3b21e405ee045c3047101a49145e7e9eca583ab4c2ca5345"
 
 [[package]]
 name = "cyphal"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "async-std",
 ]
 
 [[package]]
 name = "cyphal-bxcan"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "bxcan",
  "cyphal",
@@ -372,7 +372,7 @@ dependencies = [
 
 [[package]]
 name = "cyphal-can"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "async-std",
  "crc",
@@ -381,14 +381,14 @@ dependencies = [
 
 [[package]]
 name = "cyphal-dsdl"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "cyphal-fdcan"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "cyphal",
  "cyphal-can",
@@ -397,14 +397,14 @@ dependencies = [
 
 [[package]]
 name = "cyphal-serial"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "cyphal",
 ]
 
 [[package]]
 name = "cyphal-socketcan"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "async-std",
  "cyphal",
@@ -415,14 +415,14 @@ dependencies = [
 
 [[package]]
 name = "cyphal-udp"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "cyphal",
 ]
 
 [[package]]
 name = "cyphal-udpsocket"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "async-std",
  "cyphal",
@@ -431,7 +431,7 @@ dependencies = [
 
 [[package]]
 name = "dsdl"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "clap",
  "cyphal-dsdl",

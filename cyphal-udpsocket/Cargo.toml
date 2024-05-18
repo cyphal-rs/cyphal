@@ -8,8 +8,8 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-cyphal = { version = "0.0.8", path = "../cyphal" }
-cyphal-udp = { version = "0.0.8", path = "../cyphal-udp" }
+cyphal = { version = "0.0.9", path = "../cyphal" }
+cyphal-udp = { version = "0.0.9", path = "../cyphal-udp" }
 async-std.workspace = true
 
 [dev-dependencies]
