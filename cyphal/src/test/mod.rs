@@ -1,9 +1,6 @@
 mod message;
 pub use message::TestMessage;
 
-mod node_id;
-pub use node_id::TestNodeId;
-
 mod request;
 pub use request::TestRequest;
 
@@ -12,12 +9,6 @@ pub use response::TestResponse;
 
 mod router;
 pub use router::TestRouter;
-
-mod service_id;
-pub use service_id::TestServiceId;
-
-mod subject_id;
-pub use subject_id::TestSubjectId;
 
 mod transfer_id;
 pub use transfer_id::TestTransferId;

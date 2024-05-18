@@ -1,14 +1,14 @@
-use crate::{UdpNodeId, UdpServiceId, UdpTransferId};
+use crate::UdpTransferId;
 use cyphal::{CyphalError, CyphalResult, NodeId, Priority, ServiceId, TransferId};
 
 /// Represents a payload header used for services
 #[derive(Debug, Copy, Clone)]
 pub struct ServiceHeader {
     priority: Priority,
-    source: UdpNodeId,
-    destination: UdpNodeId,
+    source: NodeId,
+    destination: NodeId,
     is_request: bool,
-    service: UdpServiceId,
+    service: ServiceId,
     transfer: UdpTransferId,
     index: u32,
     end_of_transfer: bool,
@@ -20,10 +20,10 @@ impl ServiceHeader {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         priority: Priority,
-        source: UdpNodeId,
-        destination: UdpNodeId,
+        source: NodeId,
+        destination: NodeId,
         is_request: bool,
-        service: UdpServiceId,
+        service: ServiceId,
         transfer: UdpTransferId,
         index: u32,
         end_of_transfer: bool,
@@ -52,17 +52,17 @@ impl ServiceHeader {
     }
 
     /// Returns the source of the service
-    pub fn source(&self) -> UdpNodeId {
+    pub fn source(&self) -> NodeId {
         self.source
     }
 
     /// Returns the destination of the service
-    pub fn destination(&self) -> UdpNodeId {
+    pub fn destination(&self) -> NodeId {
         self.destination
     }
 
     /// Returns the service ID
-    pub fn service(&self) -> UdpServiceId {
+    pub fn service(&self) -> ServiceId {
         self.service
     }
 
@@ -97,9 +97,9 @@ impl ServiceHeader {
         // If this is a service response transfer, this value equals the service-ID.
         // If this is a service request transfer, this value equals 16384 + service-ID.
         let service_id = if self.is_request {
-            self.service.value() + 16384
+            self.service + 16384
         } else {
-            self.service.value()
+            self.service
         };
         let specifier = [
             (service_id >> 7) as u8,
@@ -110,10 +110,10 @@ impl ServiceHeader {
         [
             1,
             (self.priority as u8) << 5,
-            (self.source.value() >> 8) as u8,
-            (self.source.value() & 0xFF) as u8,
-            (self.destination.value() >> 8) as u8,
-            self.destination.value() as u8,
+            (self.source >> 8) as u8,
+            (self.source & 0xFF) as u8,
+            (self.destination >> 8) as u8,
+            self.destination as u8,
             specifier[0],
             specifier[1],
             (transfer >> 56) as u8,
@@ -147,7 +147,7 @@ impl TryFrom<&[u8; 24]> for ServiceHeader {
 
         let priority = Priority::try_from(value[1] >> 5)?;
         let service_id = ((value[6] as u16) << 7) | ((value[7] as u16) >> 1);
-        let service: UdpServiceId = (service_id & 0x3FFF).try_into()?;
+        let service: ServiceId = service_id & 0x3FFF;
         let is_request = service_id & 0x4000 > 0;
         let transfer: UdpTransferId = (((value[8] as u64) << 56)
             | ((value[9] as u64) << 48)
@@ -167,8 +167,8 @@ impl TryFrom<&[u8; 24]> for ServiceHeader {
 
         Ok(Self {
             priority,
-            source: (((value[2] as u16) << 8) | (value[3] as u16)).try_into()?,
-            destination: (((value[4] as u16) << 8) | (value[5] as u16)).try_into()?,
+            source: ((value[2] as u16) << 8) | (value[3] as u16),
+            destination: ((value[4] as u16) << 8) | (value[5] as u16),
             service,
             is_request,
             transfer,
@@ -181,17 +181,16 @@ impl TryFrom<&[u8; 24]> for ServiceHeader {
 
 #[cfg(test)]
 mod test {
-    use cyphal::Priority;
-
-    use crate::{ServiceHeader, UdpNodeId, UdpServiceId, UdpTransferId};
+    use crate::{ServiceHeader, UdpTransferId};
+    use cyphal::{NodeId, Priority, ServiceId};
 
     #[test]
     fn test() {
         let priority = Priority::High;
-        let source: UdpNodeId = 0x0101.try_into().unwrap();
-        let destination: UdpNodeId = 0x0202.try_into().unwrap();
+        let source: NodeId = 0x0101.try_into().unwrap();
+        let destination: NodeId = 0x0202.try_into().unwrap();
         let is_request: bool = true;
-        let service: UdpServiceId = 0x0303.try_into().unwrap();
+        let service: ServiceId = 0x0303.try_into().unwrap();
         let transfer: UdpTransferId = 0x0404040404040404.try_into().unwrap();
         let index: u32 = 0x05050505;
         let end_of_transfer = false;

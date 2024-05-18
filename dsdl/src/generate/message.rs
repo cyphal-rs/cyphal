@@ -2,8 +2,8 @@ use clap::error::Result as ClapResult;
 
 const MESSAGE: &str = r#"pub struct {NAME} {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     payload: [u8; {SIZE}],
 }"#;
 

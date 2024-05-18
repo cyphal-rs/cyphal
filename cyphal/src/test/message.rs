@@ -1,18 +1,18 @@
-use super::{TestNodeId, TestSubjectId, TEST_MESSAGE_SIZE};
-use crate::{CyphalResult, Message, Priority};
+use super::TEST_MESSAGE_SIZE;
+use crate::{CyphalResult, Message, NodeId, Priority, SubjectId};
 
 pub struct TestMessage {
     priority: Priority,
-    subject: TestSubjectId,
-    source: Option<TestNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     data: [u8; TEST_MESSAGE_SIZE],
 }
 
 impl TestMessage {
     pub fn new(
         priority: Priority,
-        subject: TestSubjectId,
-        source: Option<TestNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         data: [u8; TEST_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -24,18 +24,18 @@ impl TestMessage {
     }
 }
 
-impl Message<TestSubjectId, TestNodeId> for TestMessage {
+impl Message for TestMessage {
     const SIZE: usize = TEST_MESSAGE_SIZE;
 
     fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn subject(&self) -> TestSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 
-    fn source(&self) -> Option<TestNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 

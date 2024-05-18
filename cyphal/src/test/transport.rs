@@ -1,9 +1,9 @@
 extern crate alloc;
 
-use super::{TestNodeId, TestServiceId, TestSubjectId, TestTransferId};
+use super::TestTransferId;
 use crate::{
-    test::TEST_REQUEST_SIZE, CyphalResult, Message, Priority, Request, Response, TransferId,
-    Transport,
+    test::TEST_REQUEST_SIZE, CyphalResult, Message, Priority, Request, Response, Router,
+    TransferId, Transport,
 };
 use alloc::vec::Vec;
 
@@ -26,13 +26,9 @@ impl TestTransport {
 }
 
 impl Transport for TestTransport {
-    type NodeId = TestNodeId;
-    type ServiceId = TestServiceId;
-    type SubjectId = TestSubjectId;
-
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where
-        M: Message<Self::SubjectId, Self::NodeId>,
+        M: Message,
     {
         let _ = message.data();
         self.next_transfer();
@@ -41,7 +37,7 @@ impl Transport for TestTransport {
 
     async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
     where
-        R: Request<Self::ServiceId, Self::NodeId>,
+        R: Request,
     {
         let mut data: Vec<u8> = Vec::new();
         for i in 0..(R::Response::SIZE as u8) {
@@ -59,7 +55,7 @@ impl Transport for TestTransport {
 
     async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
     where
-        R: crate::Router<Self::SubjectId, Self::ServiceId, Self::NodeId>,
+        R: Router,
     {
         let data: [u8; TEST_REQUEST_SIZE] = [1; TEST_REQUEST_SIZE];
         let _response = router

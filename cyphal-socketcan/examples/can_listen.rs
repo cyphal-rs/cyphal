@@ -1,5 +1,5 @@
-use cyphal::{CyphalResult, Message, Priority, Router, Transport};
-use cyphal_can::{CanNodeId, CanServiceId, CanSubjectId, CanTransport};
+use cyphal::{CyphalResult, Message, NodeId, Priority, Router, ServiceId, SubjectId, Transport};
+use cyphal_can::CanTransport;
 use cyphal_socketcan::CanSocket;
 
 const MESSAGE_SIZE: usize = 65;
@@ -21,12 +21,12 @@ async fn main() {
 
 pub struct TestRouter {}
 
-impl Router<CanSubjectId, CanServiceId, CanNodeId> for TestRouter {
+impl Router for TestRouter {
     async fn process_message(
         &self,
         _priority: Priority,
-        _subject: CanSubjectId,
-        _source: CanNodeId,
+        _subject: SubjectId,
+        _source: NodeId,
         _data: &[u8],
     ) {
         todo!()
@@ -35,9 +35,9 @@ impl Router<CanSubjectId, CanServiceId, CanNodeId> for TestRouter {
     async fn process_request(
         &self,
         _priority: Priority,
-        _service: CanServiceId,
-        _source: CanNodeId,
-        _destination: CanNodeId,
+        _service: ServiceId,
+        _source: NodeId,
+        _destination: NodeId,
         _data: &[u8],
     ) {
         todo!()
@@ -46,16 +46,16 @@ impl Router<CanSubjectId, CanServiceId, CanNodeId> for TestRouter {
 
 pub struct TestMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     payload: [u8; MESSAGE_SIZE],
 }
 
 impl TestMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         payload: [u8; MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -67,14 +67,14 @@ impl TestMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for TestMessage {
+impl Message for TestMessage {
     const SIZE: usize = MESSAGE_SIZE;
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 

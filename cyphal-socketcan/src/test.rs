@@ -1,21 +1,20 @@
-use cyphal::{CyphalResult, Message, Priority};
-use cyphal_can::{CanNodeId, CanSubjectId};
+use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId};
 
 const SINGLE_SIZE: usize = 2;
 const MULTI_SIZE: usize = 65;
 
 pub struct SingleFrameMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     payload: [u8; SINGLE_SIZE],
 }
 
 impl SingleFrameMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         payload: [u8; SINGLE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -27,18 +26,18 @@ impl SingleFrameMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for SingleFrameMessage {
+impl Message for SingleFrameMessage {
     const SIZE: usize = SINGLE_SIZE;
 
     fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
@@ -49,16 +48,16 @@ impl Message<CanSubjectId, CanNodeId> for SingleFrameMessage {
 
 pub struct MultiFrameMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     payload: [u8; MULTI_SIZE],
 }
 
 impl MultiFrameMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         payload: [u8; MULTI_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -70,14 +69,14 @@ impl MultiFrameMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for MultiFrameMessage {
+impl Message for MultiFrameMessage {
     const SIZE: usize = MULTI_SIZE;
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 

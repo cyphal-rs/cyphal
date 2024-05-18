@@ -1,23 +1,22 @@
-use crate::{CanNodeId, CanServiceId};
-use cyphal::{CyphalError, CyphalResult, Priority, Request, Response};
+use cyphal::{CyphalError, CyphalResult, NodeId, Priority, Request, Response, ServiceId};
 
 pub const TEST_REQUEST_SIZE: usize = 0;
 pub const TEST_RESPONSE_SIZE: usize = 2;
 
 pub struct TestRequest {
     priority: Priority,
-    service: CanServiceId,
-    destination: CanNodeId,
-    source: CanNodeId,
+    service: ServiceId,
+    destination: NodeId,
+    source: NodeId,
     data: [u8; TEST_REQUEST_SIZE],
 }
 
 impl TestRequest {
     pub fn new(
         priority: Priority,
-        service: CanServiceId,
-        destination: CanNodeId,
-        source: CanNodeId,
+        service: ServiceId,
+        destination: NodeId,
+        source: NodeId,
         data: [u8; TEST_REQUEST_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -30,7 +29,7 @@ impl TestRequest {
     }
 }
 
-impl Request<CanServiceId, CanNodeId> for TestRequest {
+impl Request for TestRequest {
     const SIZE: usize = TEST_REQUEST_SIZE;
 
     type Response = TestResponse;
@@ -39,15 +38,15 @@ impl Request<CanServiceId, CanNodeId> for TestRequest {
         self.priority
     }
 
-    fn service(&self) -> CanServiceId {
+    fn service(&self) -> ServiceId {
         self.service
     }
 
-    fn destination(&self) -> CanNodeId {
+    fn destination(&self) -> NodeId {
         self.destination
     }
 
-    fn source(&self) -> CanNodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 
@@ -58,20 +57,20 @@ impl Request<CanServiceId, CanNodeId> for TestRequest {
 
 pub struct TestResponse {
     priority: Priority,
-    service: CanServiceId,
-    destination: CanNodeId,
-    source: CanNodeId,
+    service: ServiceId,
+    destination: NodeId,
+    source: NodeId,
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<CanServiceId, CanNodeId> for TestResponse {
+impl Response for TestResponse {
     const SIZE: usize = TEST_RESPONSE_SIZE;
 
     fn new(
         priority: Priority,
-        service: CanServiceId,
-        destination: CanNodeId,
-        source: CanNodeId,
+        service: ServiceId,
+        destination: NodeId,
+        source: NodeId,
         data: &[u8],
     ) -> CyphalResult<Self> {
         if data.len() != Self::SIZE {
@@ -94,15 +93,15 @@ impl Response<CanServiceId, CanNodeId> for TestResponse {
         self.priority
     }
 
-    fn service(&self) -> CanServiceId {
+    fn service(&self) -> ServiceId {
         self.service
     }
 
-    fn destination(&self) -> CanNodeId {
+    fn destination(&self) -> NodeId {
         self.destination
     }
 
-    fn source(&self) -> CanNodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 

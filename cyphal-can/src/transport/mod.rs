@@ -7,8 +7,8 @@ use outbound_queue::OutboundQueue;
 extern crate alloc;
 
 use crate::{
-    Can, CanId, CanNodeId, CanServiceId, CanSubjectId, CanTransferId, Frame, MessageCanId,
-    ServiceCanId, CLASSIC_PAYLOAD_SIZE, FD_PAYLOAD_SIZE,
+    Can, CanId, CanTransferId, Frame, MessageCanId, ServiceCanId, CLASSIC_PAYLOAD_SIZE,
+    FD_PAYLOAD_SIZE, MAX_NODE_ID, MAX_SERVICE_ID, MAX_SUBJECT_ID,
 };
 use alloc::vec::Vec;
 use core::cmp::Ordering;
@@ -185,14 +185,15 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
-    type NodeId = CanNodeId;
-    type ServiceId = CanServiceId;
-    type SubjectId = CanSubjectId;
-
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where
-        M: Message<Self::SubjectId, Self::NodeId>,
+        M: Message,
     {
+        if message.subject() > MAX_SUBJECT_ID || message.source().is_some_and(|id| id > MAX_NODE_ID)
+        {
+            return Err(CyphalError::OutOfRange);
+        }
+
         let id =
             MessageCanId::new(message.priority(), message.subject(), message.source()).unwrap();
 
@@ -209,8 +210,15 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
 
     async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
     where
-        R: Request<Self::ServiceId, Self::NodeId>,
+        R: Request,
     {
+        if request.service() > MAX_SERVICE_ID
+            || request.source() > MAX_NODE_ID
+            || request.destination() > MAX_NODE_ID
+        {
+            return Err(CyphalError::OutOfRange);
+        }
+
         let id = ServiceCanId::new(
             request.priority(),
             true,
@@ -308,7 +316,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
 
     async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
     where
-        R: Router<Self::SubjectId, Self::ServiceId, Self::NodeId>,
+        R: Router,
     {
         while let Ok(frame) = self.can.receive().await {
             self.inbound_queue.push(frame);

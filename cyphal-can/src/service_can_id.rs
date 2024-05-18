@@ -1,4 +1,4 @@
-use crate::{CanNodeId, CanResult, CanServiceId};
+use crate::CanResult;
 use cyphal::{CyphalError, CyphalResult, NodeId, Priority, ServiceId};
 
 /// Represents an extended CAN ID used for services
@@ -6,9 +6,9 @@ use cyphal::{CyphalError, CyphalResult, NodeId, Priority, ServiceId};
 pub struct ServiceCanId {
     priority: Priority,
     is_request: bool,
-    service: CanServiceId,
-    destination: CanNodeId,
-    source: CanNodeId,
+    service: ServiceId,
+    destination: NodeId,
+    source: NodeId,
 }
 
 impl ServiceCanId {
@@ -16,9 +16,9 @@ impl ServiceCanId {
     pub fn new(
         priority: Priority,
         is_request: bool,
-        service: CanServiceId,
-        destination: CanNodeId,
-        source: CanNodeId,
+        service: ServiceId,
+        destination: NodeId,
+        source: NodeId,
     ) -> CanResult<Self> {
         Ok(ServiceCanId {
             priority,
@@ -40,17 +40,17 @@ impl ServiceCanId {
     }
 
     /// Returns the Service ID.
-    pub fn service(&self) -> CanServiceId {
+    pub fn service(&self) -> ServiceId {
         self.service
     }
 
     /// Returns the Node ID of the destination.
-    pub fn destination(&self) -> CanNodeId {
+    pub fn destination(&self) -> NodeId {
         self.destination
     }
 
     /// Returns the Node ID from where the service call originates.
-    pub fn source(&self) -> CanNodeId {
+    pub fn source(&self) -> NodeId {
         self.source
     }
 
@@ -67,13 +67,13 @@ impl ServiceCanId {
         }
 
         // set service id bits 14 to 22
-        result |= (self.service.value() as u32) << 14;
+        result |= (self.service as u32) << 14;
 
         // set subject id bits 8 to 20
-        result |= (self.destination.value() as u32) << 7;
+        result |= (self.destination as u32) << 7;
 
         // set source node id bits 0 to 7
-        result | (self.source.value() as u32)
+        result | (self.source as u32)
     }
 }
 
@@ -96,9 +96,9 @@ impl TryFrom<u32> for ServiceCanId {
             Err(_) => return Err(CyphalError::OutOfRange),
         };
         let is_request = (value & 0x0100_0000) > 0;
-        let service_id = (((value >> 14) & 0x01FF) as u16).try_into().unwrap();
-        let destination = (((value >> 7) & 0x7F) as u8).try_into().unwrap();
-        let source = ((value & 0x7F) as u8).try_into().unwrap();
+        let service_id = ((value >> 14) & 0x01FF) as ServiceId;
+        let destination = ((value >> 7) & 0x7F) as NodeId;
+        let source = (value & 0x7F) as NodeId;
 
         Ok(ServiceCanId {
             priority,

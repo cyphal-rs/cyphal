@@ -1,13 +1,13 @@
-use crate::{UdpNodeId, UdpSubjectId, UdpTransferId};
+use crate::UdpTransferId;
 use cyphal::{CyphalError, CyphalResult, NodeId, Priority, SubjectId, TransferId};
 
 /// Represents a UDP payload header used for messages
 #[derive(Debug, Copy, Clone)]
 pub struct MessageHeader {
     priority: Priority,
-    source: Option<UdpNodeId>,
-    destination: Option<UdpNodeId>,
-    subject: UdpSubjectId,
+    source: Option<NodeId>,
+    destination: Option<NodeId>,
+    subject: SubjectId,
     transfer: UdpTransferId,
     index: u32,
     end_of_transfer: bool,
@@ -19,9 +19,9 @@ impl MessageHeader {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         priority: Priority,
-        source: Option<UdpNodeId>,
-        destination: Option<UdpNodeId>,
-        subject: UdpSubjectId,
+        source: Option<NodeId>,
+        destination: Option<NodeId>,
+        subject: SubjectId,
         transfer: UdpTransferId,
         index: u32,
         end_of_transfer: bool,
@@ -49,17 +49,17 @@ impl MessageHeader {
     }
 
     /// Returns the source of the message  'None' is returned if it's anonymous
-    pub fn source(&self) -> Option<UdpNodeId> {
+    pub fn source(&self) -> Option<NodeId> {
         self.source
     }
 
     /// Returns the destination of the message.  'None' is returned if it's a broadcast
-    pub fn destination(&self) -> Option<UdpNodeId> {
+    pub fn destination(&self) -> Option<NodeId> {
         self.destination
     }
 
     /// Returns the subject of the message
-    pub fn subject(&self) -> UdpSubjectId {
+    pub fn subject(&self) -> SubjectId {
         self.subject
     }
 
@@ -86,11 +86,11 @@ impl MessageHeader {
     /// Returns a `&[u8; 24]` representation of the message header
     pub fn as_raw(&self) -> [u8; 24] {
         let source: [u8; 2] = match self.source {
-            Some(i) => [(i.value() >> 8) as u8, (i.value() & 0xFF) as u8],
+            Some(i) => [(i >> 8) as u8, (i & 0xFF) as u8],
             None => [0xFF, 0xFF],
         };
         let destination: [u8; 2] = match self.destination {
-            Some(i) => [(i.value() >> 8) as u8, (i.value() & 0xFF) as u8],
+            Some(i) => [(i >> 8) as u8, (i & 0xFF) as u8],
             None => [0xFF, 0xFF],
         };
         let transfer = self.transfer.value();
@@ -102,8 +102,8 @@ impl MessageHeader {
             source[1],
             destination[0],
             destination[1],
-            (self.subject.value() >> 7) as u8,
-            ((self.subject.value() & 0x7F) << 1) as u8,
+            (self.subject >> 7) as u8,
+            ((self.subject & 0x7F) << 1) as u8,
             (transfer >> 56) as u8,
             ((transfer >> 48) & 0xFF) as u8,
             ((transfer >> 40) & 0xFF) as u8,
@@ -134,18 +134,17 @@ impl TryFrom<&[u8; 24]> for MessageHeader {
         }
 
         let priority = Priority::try_from(value[1] >> 5)?;
-        let source: Option<UdpNodeId> = if value[2] == 0xFF && value[3] == 0xFF {
+        let source: Option<NodeId> = if value[2] == 0xFF && value[3] == 0xFF {
             None
         } else {
-            Some((((value[2] as u16) << 8) | (value[3] as u16)).try_into()?)
+            Some(((value[2] as u16) << 8) | (value[3] as u16))
         };
-        let destination: Option<UdpNodeId> = if value[4] == 0xFF && value[5] == 0xFF {
+        let destination: Option<NodeId> = if value[4] == 0xFF && value[5] == 0xFF {
             None
         } else {
-            Some((((value[4] as u16) << 8) | (value[5] as u16)).try_into()?)
+            Some(((value[4] as u16) << 8) | (value[5] as u16))
         };
-        let subject: UdpSubjectId =
-            (((value[6] as u16) << 7) | ((value[7] as u16) >> 1)).try_into()?;
+        let subject: SubjectId = ((value[6] as u16) << 7) | ((value[7] as u16) >> 1);
         let transfer: UdpTransferId = (((value[8] as u64) << 56)
             | ((value[9] as u64) << 48)
             | ((value[10] as u64) << 40)
@@ -177,16 +176,15 @@ impl TryFrom<&[u8; 24]> for MessageHeader {
 
 #[cfg(test)]
 mod test {
-    use cyphal::Priority;
-
-    use crate::{MessageHeader, UdpNodeId, UdpSubjectId, UdpTransferId};
+    use crate::{MessageHeader, UdpTransferId};
+    use cyphal::{NodeId, Priority, SubjectId};
 
     #[test]
     fn test() {
         let priority = Priority::High;
-        let source: Option<UdpNodeId> = Some(0x0101.try_into().unwrap());
-        let destination: Option<UdpNodeId> = Some(0x0202.try_into().unwrap());
-        let subject: UdpSubjectId = 0x0303.try_into().unwrap();
+        let source: Option<NodeId> = Some(0x0101.try_into().unwrap());
+        let destination: Option<NodeId> = Some(0x0202.try_into().unwrap());
+        let subject: SubjectId = 0x0303.try_into().unwrap();
         let transfer: UdpTransferId = 0x0404040404040404.try_into().unwrap();
         let index: u32 = 0x05050505;
         let end_of_transfer = false;

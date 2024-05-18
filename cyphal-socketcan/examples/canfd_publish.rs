@@ -1,5 +1,5 @@
-use cyphal::{CyphalResult, Message, Priority, Transport};
-use cyphal_can::{CanNodeId, CanSubjectId, CanTransport};
+use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId, Transport};
+use cyphal_can::CanTransport;
 use cyphal_socketcan::CanFdSocket;
 
 const MESSAGE_SIZE: usize = 65;
@@ -21,16 +21,16 @@ async fn main() {
 
 pub struct TestMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     payload: [u8; MESSAGE_SIZE],
 }
 
 impl TestMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         payload: [u8; MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -42,14 +42,14 @@ impl TestMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for TestMessage {
+impl Message for TestMessage {
     const SIZE: usize = MESSAGE_SIZE;
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 

@@ -1,30 +1,21 @@
-use crate::{CyphalResult, Message, NodeId, Request, Router, ServiceId, SubjectId};
+use crate::{CyphalResult, Message, Request, Router};
 
 /// Trait representing the Cyphal transport
 pub trait Transport {
-    /// Node ID type used by the transport
-    type NodeId: NodeId;
-
-    /// Service ID type used by the transport
-    type ServiceId: ServiceId;
-
-    /// Subject ID type used by the transport
-    type SubjectId: SubjectId;
-
     /// Publishes a message
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where
-        M: Message<Self::SubjectId, Self::NodeId>;
+        M: Message;
 
     /// Invoques a service call
     async fn invoque<R>(&mut self, request: &R) -> CyphalResult<R::Response>
     where
-        R: Request<Self::ServiceId, Self::NodeId>;
+        R: Request;
 
     /// Listen to incoming traffic
     async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
     where
-        R: Router<Self::SubjectId, Self::ServiceId, Self::NodeId>;
+        R: Router;
 }
 
 #[cfg(test)]

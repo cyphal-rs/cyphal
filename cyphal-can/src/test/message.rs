@@ -1,21 +1,20 @@
-use crate::{CanNodeId, CanSubjectId};
-use cyphal::{CyphalResult, Message, Priority};
+use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId};
 
 pub const SMALL_MESSAGE_SIZE: usize = 2;
 pub const LARGE_MESSAGE_SIZE: usize = 65;
 
 pub struct TestSmallMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     data: [u8; SMALL_MESSAGE_SIZE],
 }
 
 impl TestSmallMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         data: [u8; SMALL_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -27,18 +26,18 @@ impl TestSmallMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for TestSmallMessage {
+impl Message for TestSmallMessage {
     const SIZE: usize = SMALL_MESSAGE_SIZE;
 
     fn priority(&self) -> Priority {
         self.priority
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
@@ -49,16 +48,16 @@ impl Message<CanSubjectId, CanNodeId> for TestSmallMessage {
 
 pub struct TestLargeMessage {
     priority: Priority,
-    subject: CanSubjectId,
-    source: Option<CanNodeId>,
+    subject: SubjectId,
+    source: Option<NodeId>,
     data: [u8; LARGE_MESSAGE_SIZE],
 }
 
 impl TestLargeMessage {
     pub fn new(
         priority: Priority,
-        subject: CanSubjectId,
-        source: Option<CanNodeId>,
+        subject: SubjectId,
+        source: Option<NodeId>,
         data: [u8; LARGE_MESSAGE_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -70,14 +69,14 @@ impl TestLargeMessage {
     }
 }
 
-impl Message<CanSubjectId, CanNodeId> for TestLargeMessage {
+impl Message for TestLargeMessage {
     const SIZE: usize = LARGE_MESSAGE_SIZE;
 
-    fn source(&self) -> Option<CanNodeId> {
+    fn source(&self) -> Option<NodeId> {
         self.source
     }
 
-    fn subject(&self) -> CanSubjectId {
+    fn subject(&self) -> SubjectId {
         self.subject
     }
 

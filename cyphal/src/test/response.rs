@@ -1,22 +1,22 @@
-use super::{TestNodeId, TestServiceId, TEST_RESPONSE_SIZE};
-use crate::{CyphalError, CyphalResult, Priority, Response};
+use super::TEST_RESPONSE_SIZE;
+use crate::{CyphalError, CyphalResult, NodeId, Priority, Response, ServiceId};
 
 pub struct TestResponse {
     priority: Priority,
-    service: TestServiceId,
-    destination: TestNodeId,
-    source: TestNodeId,
+    service: ServiceId,
+    destination: NodeId,
+    source: NodeId,
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
-impl Response<TestServiceId, TestNodeId> for TestResponse {
+impl Response for TestResponse {
     const SIZE: usize = TEST_RESPONSE_SIZE;
 
     fn new(
         priority: Priority,
-        service: TestServiceId,
-        destination: TestNodeId,
-        source: TestNodeId,
+        service: ServiceId,
+        destination: NodeId,
+        source: NodeId,
         data: &[u8],
     ) -> CyphalResult<Self> {
         if data.len() != Self::SIZE {
@@ -39,15 +39,15 @@ impl Response<TestServiceId, TestNodeId> for TestResponse {
         self.priority
     }
 
-    fn service(&self) -> TestServiceId {
+    fn service(&self) -> ServiceId {
         self.service
     }
 
-    fn destination(&self) -> TestNodeId {
+    fn destination(&self) -> NodeId {
         self.destination
     }
 
-    fn source(&self) -> TestNodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 

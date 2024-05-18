@@ -1,20 +1,20 @@
-use super::{TestNodeId, TestResponse, TestServiceId, TEST_REQUEST_SIZE};
-use crate::{CyphalResult, Priority, Request};
+use super::{TestResponse, TEST_REQUEST_SIZE};
+use crate::{CyphalResult, NodeId, Priority, Request, ServiceId};
 
 pub struct TestRequest {
     priority: Priority,
-    service: TestServiceId,
-    destination: TestNodeId,
-    source: TestNodeId,
+    service: ServiceId,
+    destination: NodeId,
+    source: NodeId,
     data: [u8; TEST_REQUEST_SIZE],
 }
 
 impl TestRequest {
     pub fn new(
         priority: Priority,
-        service: TestServiceId,
-        destination: TestNodeId,
-        source: TestNodeId,
+        service: ServiceId,
+        destination: NodeId,
+        source: NodeId,
         data: [u8; TEST_REQUEST_SIZE],
     ) -> CyphalResult<Self> {
         Ok(Self {
@@ -27,7 +27,7 @@ impl TestRequest {
     }
 }
 
-impl Request<TestServiceId, TestNodeId> for TestRequest {
+impl Request for TestRequest {
     const SIZE: usize = TEST_REQUEST_SIZE;
     type Response = TestResponse;
 
@@ -35,15 +35,15 @@ impl Request<TestServiceId, TestNodeId> for TestRequest {
         self.priority
     }
 
-    fn service(&self) -> TestServiceId {
+    fn service(&self) -> ServiceId {
         self.service
     }
 
-    fn destination(&self) -> TestNodeId {
+    fn destination(&self) -> NodeId {
         self.destination
     }
 
-    fn source(&self) -> TestNodeId {
+    fn source(&self) -> NodeId {
         self.source
     }
 
