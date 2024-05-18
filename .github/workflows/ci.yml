@@ -125,3 +125,6 @@ jobs:
 
     - name: Publish cyphal-dsdl package
       run: cargo publish --package cyphal-dsdl --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+    - name: Publish dsdl package
+      run: cargo publish --package dsdl --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
