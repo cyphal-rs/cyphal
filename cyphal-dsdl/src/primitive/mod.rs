@@ -10,6 +10,9 @@ pub use int_primitive::IntPrimitive;
 mod uint_primitive;
 pub use uint_primitive::UintPrimitive;
 
+mod void_primitive;
+pub use void_primitive::VoidPrimitive;
+
 use crate::{DsdlError, DsdlResult};
 
 /// Represents the primitive's type
@@ -26,6 +29,9 @@ pub enum Primitive {
 
     /// floating point
     Float(FloatPrimitive),
+
+    /// void (padding field)
+    Void(VoidPrimitive),
 }
 
 impl Primitive {
@@ -41,6 +47,9 @@ impl Primitive {
         } else if line.starts_with("bool") {
             let primitive = BoolPrimitive::parse(line)?;
             Ok(Primitive::Bool(primitive))
+        } else if line.starts_with("void") {
+            let primitive = VoidPrimitive::parse(line)?;
+            Ok(Primitive::Void(primitive))
         } else {
             Err(DsdlError::OutOfRange("Unrecognized primitive".to_string()))
         }

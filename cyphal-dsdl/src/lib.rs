@@ -25,7 +25,9 @@ mod parser;
 pub use parser::Parser;
 
 mod primitive;
-pub use primitive::{BoolPrimitive, FloatPrimitive, IntPrimitive, Primitive, UintPrimitive};
+pub use primitive::{
+    BoolPrimitive, FloatPrimitive, IntPrimitive, Primitive, UintPrimitive, VoidPrimitive,
+};
 
 mod statement;
 pub use statement::Statement;

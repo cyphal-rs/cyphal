@@ -26,41 +26,54 @@ impl Parser {
                 break;
             }
 
+            // remove new lines
             if line.ends_with('\n') {
                 line.pop();
                 if line.ends_with('\r') {
                     line.pop();
                 }
             }
-            let line = line.trim().to_string();
+
+            // ignore leading empty spaces
+            let line = line.trim_start().to_string();
 
             if line.is_empty() {
                 statements.push(Statement::Empty)
             } else if let Some(s) = line.strip_prefix('#') {
                 statements.push(Statement::Comment(s.to_string()))
-            } else if line.starts_with("int")
-                || line.starts_with("uint")
+            } else if line.starts_with("bool")
                 || line.starts_with("float")
-                || line.starts_with("bool")
+                || line.starts_with("int")
+                || line.starts_with("uint")
+                || line.starts_with("void")
             {
                 match Primitive::parse(&line) {
                     Ok(p) => statements.push(Statement::Primitive(p)),
                     Err(e) => {
-                        return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
+                        return Err(DsdlError::InvalidStatement(
+                            line_number,
+                            format!("Could not parse primitive: {}", e),
+                        ))
                     }
                 }
             } else if line.starts_with('@') {
                 match Directive::parse(&line) {
                     Ok(d) => statements.push(Statement::Directive(d)),
                     Err(e) => {
-                        return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
+                        return Err(DsdlError::InvalidStatement(
+                            line_number,
+                            format!("Could not parse directive: {}", e),
+                        ))
                     }
                 }
             } else {
                 match Composite::parse(&line) {
                     Ok(c) => statements.push(Statement::Composite(c)),
                     Err(e) => {
-                        return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
+                        return Err(DsdlError::InvalidStatement(
+                            line_number,
+                            format!("Could not parse composite type: {}", e),
+                        ))
                     }
                 }
             }
