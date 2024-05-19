@@ -1,6 +1,6 @@
 # Cyphal/CAN
 
-Open Cyphal CAN Transport Implementation
+Open Cyphal CAN Transport implementation
 
 🚧 ***Work in progress*** 🚧
 

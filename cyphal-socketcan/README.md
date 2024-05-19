@@ -1,6 +1,6 @@
 # Cyphal/CAN Socketcan
 
-Open Cyphal SocketCAN Implementation
+Open Cyphal CAN implementation for Linux SocketCAN devices
 
 🚧 ***Work in progress*** 🚧
 

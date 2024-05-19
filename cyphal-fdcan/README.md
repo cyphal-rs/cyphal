@@ -1,6 +1,6 @@
 # Cyphal/CAN BXCAN
 
-Open Cyphal FDCAN Implementation
+Open Cyphal CAN implementation for STM32 fdcan devices
 
 🚧 ***Work in progress*** 🚧
 

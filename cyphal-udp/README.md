@@ -1,6 +1,6 @@
 # Cyphal/UDP
 
-Open Cyphal UDP Transport Rust Implementation
+Open Cyphal UDP Transport Rust implementation
 
 🚧 ***Work in progress*** 🚧
 

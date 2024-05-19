@@ -1,6 +1,6 @@
 # Cyphal/Serial
 
-Open Cyphal Serial Transport Implementation
+Open Cyphal Serial Transport implementation
 
 🚧 ***Work in progress*** 🚧
 

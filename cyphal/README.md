@@ -1,6 +1,6 @@
 # Cyphal
 
-Open Cyphal Rust Implementation
+Open Cyphal Rust implementation
 
 🚧 ***Work in progress*** 🚧
 

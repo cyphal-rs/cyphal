@@ -1,6 +1,6 @@
 # Cyphal/UDP
 
-Open Cyphal UDP Socket Rust Implementation
+Open Cyphal UDP Socket Rust implementation
 
 🚧 ***Work in progress*** 🚧
 

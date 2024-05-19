@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-embassy"
-description = "Open Cyphal CAN Transport Implementation for embassy]"
+description = "Open Cyphal CAN Transport implementation for embassy]"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

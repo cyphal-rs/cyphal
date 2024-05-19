@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-socketcan"
-description = "Open Cyphal SocketCAN Implementation"
+description = "Open Cyphal CAN implementation for Linux SocketCAN devices"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

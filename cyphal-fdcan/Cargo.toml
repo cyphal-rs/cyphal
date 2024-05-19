@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-fdcan"
-description = "Open Cyphal FDCAN Implementation"
+description = "Open Cyphal CAN implementation for STM32 fdcan devices"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true
