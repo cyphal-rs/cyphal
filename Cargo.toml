@@ -4,6 +4,7 @@ members = [
     "cyphal-bxcan",
     "cyphal-can",
     "cyphal-dsdl",
+    "cyphal-embassy",
     "cyphal-fdcan",
     "cyphal-serial",
     "cyphal-socketcan",

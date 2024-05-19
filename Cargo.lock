@@ -387,6 +387,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cyphal-embassy"
+version = "0.0.0"
+
+[[package]]
 name = "cyphal-fdcan"
 version = "0.0.9"
 dependencies = [

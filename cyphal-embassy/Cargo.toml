@@ -1,0 +1,10 @@
+[package]
+name = "cyphal-embassy"
+description = "Open Cyphal CAN Transport Rust Implementation for embassy]"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version = "0.0.0"
+
+[dependencies]
