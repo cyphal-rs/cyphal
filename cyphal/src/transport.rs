@@ -21,7 +21,10 @@ pub trait Transport {
 #[cfg(test)]
 mod test {
     use crate::{
-        test::{TestMessage, TestRequest, TestTransport, TEST_MESSAGE_SIZE, TEST_REQUEST_SIZE},
+        test::{
+            TestMessage, TestRequest, TestRouter, TestTransport, TEST_MESSAGE_SIZE,
+            TEST_REQUEST_SIZE,
+        },
         Priority, Transport,
     };
 
@@ -31,7 +34,7 @@ mod test {
             Priority::Nominal,
             1.try_into().unwrap(),
             None,
-            [0; TEST_MESSAGE_SIZE],
+            [1; TEST_MESSAGE_SIZE],
         )
         .unwrap();
 
@@ -54,6 +57,16 @@ mod test {
 
         let mut transport = TestTransport::new();
         let result = transport.invoque(&request).await;
+
+        assert!(result.is_ok())
+    }
+
+    #[async_std::test]
+    async fn tesr_router() {
+        let router = TestRouter {};
+
+        let mut transport = TestTransport::new();
+        let result = transport.listen(router).await;
 
         assert!(result.is_ok())
     }
