@@ -3,6 +3,10 @@ use thiserror::Error;
 /// Represents a DSDL error
 #[derive(Error, Debug)]
 pub enum DsdlError {
+    /// File
+    #[error("File error: `{0}`")]
+    File(String),
+
     /// The DSDL statement at line is not valid error
     #[error("The DSDL statement at line `{0}` is not valid: {1}")]
     InvalidStatement(u32, String),

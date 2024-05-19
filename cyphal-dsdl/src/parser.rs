@@ -1,94 +1,33 @@
-use crate::{Composite, Directive, DsdlError, DsdlResult, Primitive, Statement};
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
+use crate::{DsdlResult, File, Statement};
+use std::{collections::HashMap, path::Path};
 
 /// Represents a DSDL parser
-pub struct Parser {}
+#[derive(Debug)]
+pub struct Parser {
+    files: HashMap<File, Vec<Statement>>,
+}
 
 impl Parser {
     /// Constructs a new DSDL Parser
     pub fn new() -> DsdlResult<Self> {
-        Ok(Self {})
+        Ok(Self {
+            files: HashMap::new(),
+        })
     }
 
     /// Reads a DSDL file
-    pub fn read_dsdl(&self, reader: &mut BufReader<File>) -> DsdlResult<Vec<Statement>> {
-        let mut statements: Vec<Statement> = Vec::new();
-        let mut line_number = 1;
+    pub fn parse_dsdl(&mut self, path: &Path) -> DsdlResult<Vec<Statement>> {
+        let tuple = File::parse(path)?;
+        self.files.insert(tuple.0, tuple.1.clone());
 
-        loop {
-            let mut line = String::new();
-            let len = reader.read_line(&mut line)?;
-            if len == 0 {
-                // reached EoF
-                break;
-            }
-
-            // remove new lines
-            if line.ends_with('\n') {
-                line.pop();
-                if line.ends_with('\r') {
-                    line.pop();
-                }
-            }
-
-            // ignore leading empty spaces
-            let line = line.trim_start().to_string();
-
-            if line.is_empty() {
-                statements.push(Statement::Empty)
-            } else if let Some(s) = line.strip_prefix('#') {
-                statements.push(Statement::Comment(s.to_string()))
-            } else if line.starts_with("bool")
-                || line.starts_with("float")
-                || line.starts_with("int")
-                || line.starts_with("uint")
-                || line.starts_with("void")
-            {
-                match Primitive::parse(&line) {
-                    Ok(p) => statements.push(Statement::Primitive(p)),
-                    Err(e) => {
-                        return Err(DsdlError::InvalidStatement(
-                            line_number,
-                            format!("Could not parse primitive: {}", e),
-                        ))
-                    }
-                }
-            } else if line.starts_with('@') {
-                match Directive::parse(&line) {
-                    Ok(d) => statements.push(Statement::Directive(d)),
-                    Err(e) => {
-                        return Err(DsdlError::InvalidStatement(
-                            line_number,
-                            format!("Could not parse directive: {}", e),
-                        ))
-                    }
-                }
-            } else {
-                match Composite::parse(&line) {
-                    Ok(c) => statements.push(Statement::Composite(c)),
-                    Err(e) => {
-                        return Err(DsdlError::InvalidStatement(
-                            line_number,
-                            format!("Could not parse composite type: {}", e),
-                        ))
-                    }
-                }
-            }
-
-            line_number += 1;
-        }
-
-        Ok(statements)
+        Ok(tuple.1)
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::{DsdlResult, Parser, Statement};
-    use std::{fs::File, io::BufReader, path::PathBuf};
+    use std::path::PathBuf;
 
     #[test]
     #[ignore = "not implemented"]
@@ -139,10 +78,7 @@ mod test {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(dsdl);
 
-        let file = File::open(path).expect("Could not open file");
-        let mut reader = BufReader::new(file);
-
-        let parser = Parser::new().expect("Could not construct parser");
-        parser.read_dsdl(&mut reader)
+        let mut parser = Parser::new().expect("Could not construct parser");
+        parser.parse_dsdl(&path)
     }
 }

@@ -18,6 +18,9 @@ pub use error::{DsdlError, DsdlResult};
 mod expression;
 pub use expression::Expression;
 
+mod file;
+pub use file::File;
+
 mod name;
 pub use name::Name;
 
