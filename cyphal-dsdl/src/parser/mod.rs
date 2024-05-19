@@ -1,25 +1,7 @@
-mod comment;
-use comment::parse_comment;
-
-mod composite;
-use composite::parse_composite;
-
-mod directive;
-use directive::parse_directive;
-
-mod expression;
-use expression::parse_expression;
-
-mod name;
-use name::parse_name;
-
-mod primitive;
-use primitive::parse_primitive;
-
 #[cfg(test)]
 mod test;
 
-use crate::{DsdlError, DsdlResult, Statement};
+use crate::{Composite, Directive, DsdlError, DsdlResult, Primitive, Statement};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -64,21 +46,21 @@ impl Parser {
                 || line.starts_with("float")
                 || line.starts_with("bool")
             {
-                match parse_primitive(&line) {
+                match Primitive::parse(&line) {
                     Ok(p) => statements.push(Statement::Primitive(p)),
                     Err(e) => {
                         return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
                     }
                 }
             } else if line.starts_with('@') {
-                match parse_directive(&line) {
+                match Directive::parse(&line) {
                     Ok(d) => statements.push(Statement::Directive(d)),
                     Err(e) => {
                         return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))
                     }
                 }
             } else {
-                match parse_composite(&line) {
+                match Composite::parse(&line) {
                     Ok(c) => statements.push(Statement::Composite(c)),
                     Err(e) => {
                         return Err(DsdlError::InvalidStatement(line_number, format!("{}", e)))

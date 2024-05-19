@@ -1,4 +1,4 @@
-use crate::{DsdlError, DsdlResult};
+use crate::{Comment, DsdlError, DsdlResult, Name};
 
 /// Represents the primitive's type
 #[derive(Debug, PartialEq)]
@@ -16,17 +16,183 @@ pub enum Primitive {
     Float(FloatPrimitive),
 }
 
+impl Primitive {
+    pub(crate) fn parse(line: &str) -> DsdlResult<Primitive> {
+        if line.starts_with("int") {
+            Err(DsdlError::NotImplemented)
+        } else if let Some(s) = line.strip_prefix("uint") {
+            let result = parse_bits(s)?;
+            let bits = result.0;
+            let result = if let Some(s) = result.1 {
+                Name::parse(s)?
+            } else {
+                return Err(DsdlError::Parse(
+                    "Primitive type is missing a name".to_string(),
+                ));
+            };
+            let name = result.0;
+
+            match result.1 {
+                None => {
+                    let primitive = UintPrimitive::new(bits, name, None, None)?;
+                    Ok(Primitive::Uint(primitive))
+                }
+                Some(s) => {
+                    let result = parse_uint_value(s)?;
+                    let value = result.0;
+                    let comment = match result.1 {
+                        Some(s) => Comment::parse(s)?,
+                        None => None,
+                    };
+                    let primitive = UintPrimitive::new(bits, name, value, comment)?;
+                    Ok(Primitive::Uint(primitive))
+                }
+            }
+        } else if line.starts_with("float") {
+            Err(DsdlError::NotImplemented)
+        } else if let Some(s) = line.strip_prefix("bool") {
+            let result = Name::parse(s)?;
+            let name = result.0;
+            match result.1 {
+                None => {
+                    let primitive = BoolPrimitive::new(name, None, None)?;
+                    Ok(Primitive::Bolean(primitive))
+                }
+                Some(s) => {
+                    let result = parse_bool_value(s)?;
+                    let value = result.0;
+                    let comment = match result.1 {
+                        Some(s) => Comment::parse(s)?,
+                        None => None,
+                    };
+                    let primitive = BoolPrimitive::new(name, value, comment)?;
+                    Ok(Primitive::Bolean(primitive))
+                }
+            }
+        } else {
+            Err(DsdlError::OutOfRange("Unrecognized primitive".to_string()))
+        }
+    }
+}
+
+fn parse_bits(line: &str) -> DsdlResult<(u8, Option<&str>)> {
+    let mut chars = line.chars();
+    let mut v: Vec<char> = Vec::new();
+    let mut bits_length = 0;
+    if let Some(c) = chars.next() {
+        if c.is_numeric() {
+            v.push(c);
+            bits_length += 1;
+        } else {
+            return Err(DsdlError::Parse(
+                "Found non numeric value after the '=' sign".to_string(),
+            ));
+        }
+    } else {
+        return Err(DsdlError::Parse("Bit length not found".to_string()));
+    }
+
+    if let Some(c) = chars.next() {
+        if c.is_numeric() {
+            v.push(c);
+            bits_length += 1;
+            if let Some(c) = chars.next() {
+                if c.is_numeric() {
+                    return Err(DsdlError::Parse(
+                        "Found three digit bit value after the '=' sign".to_string(),
+                    ));
+                } else if c != ' ' {
+                    return Err(DsdlError::Parse(
+                        "Found non numeric value after the '=' sign".to_string(),
+                    ));
+                }
+            }
+        } else if c != ' ' {
+            return Err(DsdlError::Parse(
+                "Found non numeric value after the '=' sign".to_string(),
+            ));
+        }
+    }
+
+    let value: String = v.into_iter().collect();
+    let value = value.parse::<u8>().unwrap();
+
+    let line = &line[bits_length..];
+    let line = if line.is_empty() { None } else { Some(line) };
+
+    Ok((value, line))
+}
+
+fn parse_bool_value(line: &str) -> DsdlResult<(Option<bool>, Option<&str>)> {
+    let mut line = line.trim_start();
+    if line.is_empty() {
+        return Ok((None, None));
+    }
+
+    if line.starts_with('=') {
+        line = line[1..].trim_start();
+        let value = if line.starts_with("true") {
+            line = &line[4..];
+            Some(true)
+        } else if line.starts_with("false") {
+            line = &line[5..];
+            Some(false)
+        } else {
+            return Err(DsdlError::Parse("Could not find a bool value".to_string()));
+        };
+
+        let line = if line.is_empty() { None } else { Some(line) };
+
+        Ok((value, line))
+    } else {
+        Ok((None, Some(line)))
+    }
+}
+
+fn parse_uint_value(line: &str) -> DsdlResult<(Option<u64>, Option<&str>)> {
+    let mut line = line.trim_start();
+    if line.is_empty() {
+        return Ok((None, None));
+    }
+
+    if line.starts_with('=') {
+        line = line[1..].trim_start();
+        let chars = line.chars();
+        let mut v: Vec<char> = Vec::new();
+        let mut bits_length = 0;
+        for c in chars {
+            if c.is_numeric() {
+                v.push(c);
+                bits_length += 1;
+            } else if c != ' ' {
+                bits_length += 1;
+                break;
+            }
+        }
+
+        let value: String = v.into_iter().collect();
+        let value = value.parse::<u64>()?;
+
+        let line = &line[bits_length..];
+        let line = if line.is_empty() { None } else { Some(line) };
+
+        Ok((Some(value), line))
+    } else {
+        Ok((None, Some(line)))
+    }
+}
+
 /// Represents a bolean Primitive Type
 #[derive(Debug, PartialEq)]
 pub struct BoolPrimitive {
-    name: String,
+    name: Name,
     value: Option<bool>,
-    comment: Option<String>,
+    comment: Option<Comment>,
 }
 
 impl BoolPrimitive {
     /// Constructs a new int primitive
-    pub fn new(name: String, value: Option<bool>, comment: Option<String>) -> DsdlResult<Self> {
+    pub fn new(name: Name, value: Option<bool>, comment: Option<Comment>) -> DsdlResult<Self> {
         Ok(Self {
             name,
             value,
@@ -35,7 +201,7 @@ impl BoolPrimitive {
     }
 
     /// Returns the name of the primnitive
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &Name {
         &self.name
     }
 
@@ -45,8 +211,8 @@ impl BoolPrimitive {
     }
 
     /// Returns the comment if it has one
-    pub fn comment(&self) -> Option<String> {
-        self.comment.clone()
+    pub fn comment(&self) -> &Option<Comment> {
+        &self.comment
     }
 }
 
@@ -54,18 +220,18 @@ impl BoolPrimitive {
 #[derive(Debug, PartialEq)]
 pub struct IntPrimitive {
     bits: u8,
-    name: String,
+    name: Name,
     value: Option<i64>,
-    comment: Option<String>,
+    comment: Option<Comment>,
 }
 
 impl IntPrimitive {
     /// Constructs a new int primitive
     pub fn new(
         bits: u8,
-        name: String,
+        name: Name,
         value: Option<i64>,
-        comment: Option<String>,
+        comment: Option<Comment>,
     ) -> DsdlResult<Self> {
         if bits > 64 {
             return Err(DsdlError::OutOfRange(
@@ -96,7 +262,7 @@ impl IntPrimitive {
     }
 
     /// Returns the name of the primnitive
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &Name {
         &self.name
     }
 
@@ -106,8 +272,8 @@ impl IntPrimitive {
     }
 
     /// Returns the comment if it has one
-    pub fn comment(&self) -> Option<String> {
-        self.comment.clone()
+    pub fn comment(&self) -> &Option<Comment> {
+        &self.comment
     }
 }
 
@@ -115,18 +281,18 @@ impl IntPrimitive {
 #[derive(Debug, PartialEq)]
 pub struct UintPrimitive {
     bits: u8,
-    name: String,
+    name: Name,
     value: Option<u64>,
-    comment: Option<String>,
+    comment: Option<Comment>,
 }
 
 impl UintPrimitive {
     /// Constructs a new int primitive
     pub fn new(
         bits: u8,
-        name: String,
+        name: Name,
         value: Option<u64>,
-        comment: Option<String>,
+        comment: Option<Comment>,
     ) -> DsdlResult<Self> {
         if bits > 64 {
             return Err(DsdlError::OutOfRange(
@@ -157,7 +323,7 @@ impl UintPrimitive {
     }
 
     /// Returns the name of the primnitive
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &Name {
         &self.name
     }
 
@@ -167,8 +333,8 @@ impl UintPrimitive {
     }
 
     /// Returns the comment if it has one
-    pub fn comment(&self) -> Option<String> {
-        self.comment.clone()
+    pub fn comment(&self) -> &Option<Comment> {
+        &self.comment
     }
 }
 
@@ -176,7 +342,7 @@ impl UintPrimitive {
 #[derive(Debug, PartialEq)]
 pub struct FloatPrimitive {
     bits: u8,
-    name: String,
+    name: Name,
     value: Option<f64>,
     comment: Option<String>,
 }
@@ -185,7 +351,7 @@ impl FloatPrimitive {
     /// Constructs a new int primitive
     pub fn new(
         bits: u8,
-        name: String,
+        name: Name,
         value: Option<f64>,
         comment: Option<String>,
     ) -> DsdlResult<Self> {
@@ -220,7 +386,7 @@ impl FloatPrimitive {
     }
 
     /// Returns the name of the primnitive
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &Name {
         &self.name
     }
 
