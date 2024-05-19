@@ -10,4 +10,4 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-thiserror.workspace = true
+thiserror = "1.0.60"
