@@ -17,20 +17,21 @@ Documentation is available in the [cyphal book](./book).
 
 | Source | crates.io | Docs | Description |
 |-|-|-|-|
-| [cyphal](./cyphal) | [![crates.io](https://img.shields.io/crates/v/cyphal.svg)](https://crates.io/crates/cyphal) | [![Documentation](https://docs.rs/cyphal/badge.svg)](https://docs.rs/cyphal) | Open Cyphal Rust Implementation |
-| [cyphal-can](./cyphal-can) | [![crates.io](https://img.shields.io/crates/v/cyphal-can.svg)](https://crates.io/crates/cyphal-can) | [![Documentation](https://docs.rs/cyphal-can/badge.svg)](https://docs.rs/cyphal-can) | Open Cyphal CAN Transport Rust Implementation |
-| [cyphal-bxcan](./cyphal-bxcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-bxcan.svg)](https://crates.io/crates/cyphal-bxcan) | [![Documentation](https://docs.rs/cyphal-bxcan/badge.svg)](https://docs.rs/cyphal-bxcan) | Open Cyphal BXCAN Rust Implementation |
-| [cyphal-fdcan](./cyphal-fdcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-fdcan.svg)](https://crates.io/crates/cyphal-fdcan) | [![Documentation](https://docs.rs/cyphal-fdcan/badge.svg)](https://docs.rs/cyphal-fdcan) | Open Cyphal FDCAN Rust Implementation |
-| [cyphal-socketcan](./cyphal-socketcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-socketcan.svg)](https://crates.io/crates/cyphal-socketcan) | [![Documentation](https://docs.rs/cyphal-socketcan/badge.svg)](https://docs.rs/cyphal-socketcan) | Open Cyphal SocketCAN Rust Implementation |
-| [cyphal-udp](./cyphal-udp) | [![crates.io](https://img.shields.io/crates/v/cyphal-udp.svg)](https://crates.io/crates/cyphal-udp) | [![Documentation](https://docs.rs/cyphal-udp/badge.svg)](https://docs.rs/cyphal-udp) | OpenCyphal UDP Rust Implementation |
-| [cyphal-udpsocket](./cyphal-udpsocket) | [![crates.io](https://img.shields.io/crates/v/cyphal-udpsocket.svg)](https://crates.io/crates/cyphal-udpsocket) | [![Documentation](https://docs.rs/cyphal-udpsocket/badge.svg)](https://docs.rs/cyphal-udpsocket) | OpenCyphal UDP Socket Rust Implementation |
-| [cyphal-dsdl](./cyphal-dsdl) | [![crates.io](https://img.shields.io/crates/v/cyphal-dsdl.svg)](https://crates.io/crates/cyphal-dsdl) | [![Documentation](https://docs.rs/cyphal-dsdl/badge.svg)](https://docs.rs/cyphal-dsdl) | OpenCyphal DSDL Rust Implementation |
+| [cyphal](./cyphal) | [![crates.io](https://img.shields.io/crates/v/cyphal.svg)](https://crates.io/crates/cyphal) | [![Documentation](https://docs.rs/cyphal/badge.svg)](https://docs.rs/cyphal) | Open Cyphal Implementation |
+| [cyphal-can](./cyphal-can) | [![crates.io](https://img.shields.io/crates/v/cyphal-can.svg)](https://crates.io/crates/cyphal-can) | [![Documentation](https://docs.rs/cyphal-can/badge.svg)](https://docs.rs/cyphal-can) | Open Cyphal CAN Transport Implementation |
+| [cyphal-embassy](./cyphal-embassy) | [![crates.io](https://img.shields.io/crates/v/cyphal-embassy.svg)](https://crates.io/crates/cyphal-embassy) | [![Documentation](https://docs.rs/cyphal-embassy/badge.svg)](https://docs.rs/cyphal-embassy) | Open Cyphal CAN Transport Implementation for [embassy](https://github.com/embassy-rs/embassy) |
+| [cyphal-bxcan](./cyphal-bxcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-bxcan.svg)](https://crates.io/crates/cyphal-bxcan) | [![Documentation](https://docs.rs/cyphal-bxcan/badge.svg)](https://docs.rs/cyphal-bxcan) | Open Cyphal BXCAN Implementation |
+| [cyphal-fdcan](./cyphal-fdcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-fdcan.svg)](https://crates.io/crates/cyphal-fdcan) | [![Documentation](https://docs.rs/cyphal-fdcan/badge.svg)](https://docs.rs/cyphal-fdcan) | Open Cyphal FDCAN Implementation |
+| [cyphal-socketcan](./cyphal-socketcan) | [![crates.io](https://img.shields.io/crates/v/cyphal-socketcan.svg)](https://crates.io/crates/cyphal-socketcan) | [![Documentation](https://docs.rs/cyphal-socketcan/badge.svg)](https://docs.rs/cyphal-socketcan) | Open Cyphal SocketCAN Implementation |
+| [cyphal-udp](./cyphal-udp) | [![crates.io](https://img.shields.io/crates/v/cyphal-udp.svg)](https://crates.io/crates/cyphal-udp) | [![Documentation](https://docs.rs/cyphal-udp/badge.svg)](https://docs.rs/cyphal-udp) | OpenCyphal UDP Implementation |
+| [cyphal-udpsocket](./cyphal-udpsocket) | [![crates.io](https://img.shields.io/crates/v/cyphal-udpsocket.svg)](https://crates.io/crates/cyphal-udpsocket) | [![Documentation](https://docs.rs/cyphal-udpsocket/badge.svg)](https://docs.rs/cyphal-udpsocket) | OpenCyphal UDP Socket Implementation |
+| [cyphal-dsdl](./cyphal-dsdl) | [![crates.io](https://img.shields.io/crates/v/cyphal-dsdl.svg)](https://crates.io/crates/cyphal-dsdl) | [![Documentation](https://docs.rs/cyphal-dsdl/badge.svg)](https://docs.rs/cyphal-dsdl) | OpenCyphal DSDL Implementation |
 
 ## Utilities
 
 | Source | crates.io | Description |
 |-|-|-|
-| [dsdl](./dsdl) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files |
+| [dsdl](./dsdl) | [![crates.io](https://img.shields.io/crates/v/dsdl.svg)](https://crates.io/crates/dsdl) | Command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files |
 
 ## License
 

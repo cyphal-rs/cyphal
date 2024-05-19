@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-bxcan"
-description = "Open Cyphal BXCAN Rust Implementation"
+description = "Open Cyphal BXCAN Implementation"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

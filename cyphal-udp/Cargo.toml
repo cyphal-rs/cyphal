@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-udp"
-description = "Open Cyphal UDP Transport Rust Implementation"
+description = "Open Cyphal UDP Transport Implementation"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

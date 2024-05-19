@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-serial"
-description = "Open Cyphal Serial Transport Rust Implementation"
+description = "Open Cyphal Serial Transport Implementation"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

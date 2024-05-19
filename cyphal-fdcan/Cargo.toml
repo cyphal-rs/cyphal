@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-fdcan"
-description = "Open Cyphal FDCAN Rust Implementation"
+description = "Open Cyphal FDCAN Implementation"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

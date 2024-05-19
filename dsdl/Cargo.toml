@@ -1,6 +1,6 @@
 [package]
 name = "dsdl"
-description = "Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files"
+description = "Command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files"
 categories = ["embedded", "hardware-support"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
 edition.workspace = true

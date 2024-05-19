@@ -1,6 +1,6 @@
 # Cyphal/CAN
 
-Open Cyphal CAN Transport Rust Implementation
+Open Cyphal CAN Transport Implementation
 
 🚧 ***Work in progress*** 🚧
 

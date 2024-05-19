@@ -1,6 +1,6 @@
 # Cyphal/CAN Socketcan
 
-Open Cyphal SocketCAN Rust Implementation
+Open Cyphal SocketCAN Implementation
 
 🚧 ***Work in progress*** 🚧
 

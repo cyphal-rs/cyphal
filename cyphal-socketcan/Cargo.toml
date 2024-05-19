@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-socketcan"
-description = "Open Cyphal SocketCAN Rust Implementation"
+description = "Open Cyphal SocketCAN Implementation"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true

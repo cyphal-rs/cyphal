@@ -1,6 +1,6 @@
 # Cyphal/CAN
 
-Open Cyphal CAN Transport Rust Implementation for [embassy](https://github.com/embassy-rs/embassy)
+Open Cyphal CAN Transport Implementation for [embassy](https://github.com/embassy-rs/embassy)
 
 🚧 ***Work in progress*** 🚧
 

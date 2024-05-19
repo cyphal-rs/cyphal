@@ -1,6 +1,6 @@
 # Open Cyphal DSDL Rust implementation
 
-Rust library for manipulating OpenCyphal DSDL (data structure description language) files
+Library for manipulating OpenCyphal DSDL (data structure description language) files
 
 🚧 ***Work in progress*** 🚧
 

@@ -1,6 +1,6 @@
 # Cyphal/Serial
 
-Open Cyphal Serial Transport Rust Implementation
+Open Cyphal Serial Transport Implementation
 
 🚧 ***Work in progress*** 🚧
 

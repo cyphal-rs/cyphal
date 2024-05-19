@@ -1,6 +1,6 @@
 [package]
 name = "cyphal-dsdl"
-description = "Open Cyphal DSDL Rust Implementation"
+description = "Open Cyphal DSDL Implementation"
 categories = ["embedded", "hardware-support"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
 edition.workspace = true

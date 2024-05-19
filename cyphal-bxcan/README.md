@@ -1,6 +1,6 @@
 # Cyphal/CAN BXCAN
 
-Open Cyphal BXCAN Rust Implementation
+Open Cyphal BXCAN Implementation
 
 🚧 ***Work in progress*** 🚧
 

@@ -22,7 +22,7 @@ fn main() -> ClapResult<()> {
 #[command(bin_name = "dsdl")]
 #[command(
     about = "CLI for OpenCyphal DSDL files",
-    long_about = "Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files"
+    long_about = "Command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files"
 )]
 struct DsdlCli {
     #[command(subcommand)]

@@ -1,6 +1,6 @@
 [package]
 name = "cyphal"
-description = "Open Cyphal Rust Implementation"
+description = "Open Cyphal Implementation"
 categories = ["embedded", "hardware-support", "no-std"]
 keywords = ["CAN", "Drone", "UAV", "UAVCAN", "OpenCyphal"]
 edition.workspace = true

@@ -1,6 +1,6 @@
-# Open Cyphal DSDL Rust implementation
+# Open Cyphal DSDL implementation
 
-Rust command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files
+Command line interface (CLI) for OpenCyphal Data Structure Description Language (DSDL) files
 
 🚧 ***Work in progress*** 🚧
 
