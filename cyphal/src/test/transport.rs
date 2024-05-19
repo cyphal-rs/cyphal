@@ -2,8 +2,8 @@ extern crate alloc;
 
 use super::TestTransferId;
 use crate::{
-    test::TEST_REQUEST_SIZE, CyphalResult, Message, Priority, Request, Response, Router,
-    TransferId, Transport,
+    test::TEST_REQUEST_SIZE, CyphalResult, Message, NodeId, Priority, Request, Response, Router,
+    ServiceId, SubjectId, TransferId, Transport,
 };
 use alloc::vec::Vec;
 
@@ -26,6 +26,15 @@ impl TestTransport {
 }
 
 impl Transport for TestTransport {
+    /// Maximim Subject ID
+    const MAX_SUBJECT_ID: SubjectId = 8191;
+
+    /// Maximim Subject ID
+    const MAX_SERVICE_ID: ServiceId = 511;
+
+    /// Maximim Subject ID
+    const MAX_NODE_ID: NodeId = 127;
+
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where
         M: Message,

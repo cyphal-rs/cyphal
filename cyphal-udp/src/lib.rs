@@ -36,14 +36,3 @@ pub use udp::Udp;
 
 mod udp_transfer_id;
 pub use udp_transfer_id::UdpTransferId;
-
-use cyphal::{NodeId, ServiceId, SubjectId};
-
-/// Maximim Subject ID
-pub const MAX_SUBJECT_ID: SubjectId = 8191;
-
-/// Maximim Subject ID
-pub const MAX_SERVICE_ID: ServiceId = 16383;
-
-/// Maximim Subject ID
-pub const MAX_NODE_ID: NodeId = 65534;

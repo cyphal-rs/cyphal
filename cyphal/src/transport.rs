@@ -1,7 +1,16 @@
-use crate::{CyphalResult, Message, Request, Router};
+use crate::{CyphalResult, Message, NodeId, Request, Router, ServiceId, SubjectId};
 
 /// Trait representing the Cyphal transport
 pub trait Transport {
+    /// Maximim Subject ID
+    const MAX_SUBJECT_ID: SubjectId;
+
+    /// Maximim Subject ID
+    const MAX_SERVICE_ID: ServiceId;
+
+    /// Maximim Subject ID
+    const MAX_NODE_ID: NodeId;
+
     /// Publishes a message
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where

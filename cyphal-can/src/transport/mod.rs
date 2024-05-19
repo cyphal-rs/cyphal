@@ -8,13 +8,14 @@ extern crate alloc;
 
 use crate::{
     Can, CanId, CanTransferId, Frame, MessageCanId, ServiceCanId, CLASSIC_PAYLOAD_SIZE,
-    FD_PAYLOAD_SIZE, MAX_NODE_ID, MAX_SERVICE_ID, MAX_SUBJECT_ID,
+    FD_PAYLOAD_SIZE,
 };
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 use crc::Crc;
 use cyphal::{
-    CyphalError, CyphalResult, Message, Request, Response, Router, TransferId, Transport,
+    CyphalError, CyphalResult, Message, NodeId, Request, Response, Router, ServiceId, SubjectId,
+    TransferId, Transport,
 };
 
 const CRC16: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_IBM_3740);
@@ -185,11 +186,21 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> CanTransport<PAYLOAD_SIZE,
 }
 
 impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport<PAYLOAD_SIZE, C> {
+    /// Maximim Subject ID
+    const MAX_SUBJECT_ID: SubjectId = 8191;
+
+    /// Maximim Subject ID
+    const MAX_SERVICE_ID: ServiceId = 511;
+
+    /// Maximim Subject ID
+    const MAX_NODE_ID: NodeId = 127;
+
     async fn publish<M>(&mut self, message: &M) -> CyphalResult<()>
     where
         M: Message,
     {
-        if message.subject() > MAX_SUBJECT_ID || message.source().is_some_and(|id| id > MAX_NODE_ID)
+        if message.subject() > Self::MAX_SUBJECT_ID
+            || message.source().is_some_and(|id| id > Self::MAX_NODE_ID)
         {
             return Err(CyphalError::OutOfRange);
         }
@@ -212,9 +223,9 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
     where
         R: Request,
     {
-        if request.service() > MAX_SERVICE_ID
-            || request.source() > MAX_NODE_ID
-            || request.destination() > MAX_NODE_ID
+        if request.service() > Self::MAX_SERVICE_ID
+            || request.source() > Self::MAX_NODE_ID
+            || request.destination() > Self::MAX_NODE_ID
         {
             return Err(CyphalError::OutOfRange);
         }
