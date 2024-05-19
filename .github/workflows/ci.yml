@@ -32,7 +32,7 @@ jobs:
       matrix:
         toolchain:
           - 1.78
-          - stable
+          # - stable
           - nightly
         target:
           - thumbv7em-none-eabi
@@ -64,7 +64,7 @@ jobs:
       matrix:
         toolchain:
           - 1.78
-          - stable
+          # - stable
           - nightly
         target:
           - armv7-unknown-linux-gnueabihf
