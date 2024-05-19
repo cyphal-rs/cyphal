@@ -1,7 +1,7 @@
 use crate::{DsdlError, DsdlResult};
 
 /// Represents and Expression
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Expression {
     value: String,
 }

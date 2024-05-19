@@ -84,7 +84,7 @@ jobs:
         target: ${{ matrix.target }}
 
     - name: Check
-      run: cargo check
+      run: cargo check --all-targets
 
     - name: Run tests
       run: cargo test

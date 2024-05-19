@@ -80,7 +80,7 @@ mod test {
     #[test]
     #[ignore = "not implemented"]
     fn test_7509_heartbeat_1_0() {
-        let dsdl = "test/assets/public_regulated_data_types/uavcan/node/7509.Heartbeat.1.0.dsdl";
+        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/7509.Heartbeat.1.0.dsdl";
 
         let result = parse_dsdl(dsdl);
         assert!(result.is_ok());
@@ -91,7 +91,7 @@ mod test {
 
     #[test]
     fn test_health_1_0() {
-        let dsdl = "test/assets/public_regulated_data_types/uavcan/node/Health.1.0.dsdl";
+        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Health.1.0.dsdl";
 
         let result = parse_dsdl(dsdl);
         assert!(result.is_ok());
@@ -102,7 +102,7 @@ mod test {
 
     #[test]
     fn test_mode_1_0() {
-        let dsdl = "test/assets/public_regulated_data_types/uavcan/node/Mode.1.0.dsdl";
+        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Mode.1.0.dsdl";
         let result = parse_dsdl(dsdl);
 
         assert!(result.is_ok());
@@ -113,7 +113,7 @@ mod test {
 
     #[test]
     fn test_version_1_0() {
-        let dsdl = "test/assets/public_regulated_data_types/uavcan/node/Version.1.0.dsdl";
+        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Version.1.0.dsdl";
         let result = parse_dsdl(dsdl);
 
         assert!(result.is_ok());

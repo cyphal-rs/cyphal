@@ -1,7 +1,7 @@
 use crate::{Composite, Directive, Primitive};
 
 /// Represents a DSDL statement
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     /// Represents a comment
     Comment(String),

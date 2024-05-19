@@ -1,7 +1,7 @@
 use crate::{Comment, DsdlError, DsdlResult, Name};
 
 /// Represents the primitive's type
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Primitive {
     /// bool
     Bolean(BoolPrimitive),
@@ -183,7 +183,7 @@ fn parse_uint_value(line: &str) -> DsdlResult<(Option<u64>, Option<&str>)> {
 }
 
 /// Represents a bolean Primitive Type
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BoolPrimitive {
     name: Name,
     value: Option<bool>,
@@ -217,7 +217,7 @@ impl BoolPrimitive {
 }
 
 /// Represents a integer Primitive Type
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IntPrimitive {
     bits: u8,
     name: Name,
@@ -278,7 +278,7 @@ impl IntPrimitive {
 }
 
 /// Represents a unsigned integer Primitive Type
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UintPrimitive {
     bits: u8,
     name: Name,
@@ -339,7 +339,7 @@ impl UintPrimitive {
 }
 
 /// Represents a floating point Primitive Type
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FloatPrimitive {
     bits: u8,
     name: Name,
@@ -398,5 +398,42 @@ impl FloatPrimitive {
     /// Returns the comment if it has one
     pub fn comment(&self) -> Option<String> {
         self.comment.clone()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::Primitive;
+
+    #[test]
+    #[ignore = "not implemented"]
+    fn test_int_enum() {
+        let int8 = "int8 name";
+        let result = Primitive::parse(&int8);
+        assert!(result.is_ok());
+
+        let primitive = result.unwrap();
+        assert!(matches!(primitive, Primitive::Int { .. }));
+    }
+
+    #[test]
+    fn test_uint_enum() {
+        let uint8 = "uint8 name";
+        let result = Primitive::parse(&uint8);
+        assert!(result.is_ok());
+
+        let primitive = result.unwrap();
+        assert!(matches!(primitive, Primitive::Uint { .. }));
+    }
+
+    #[test]
+    #[ignore = "not implemented"]
+    fn test_float_enum() {
+        let float = "float16 name";
+        let result = Primitive::parse(&float);
+        assert!(result.is_ok());
+
+        let primitive = result.unwrap();
+        assert!(matches!(primitive, Primitive::Float { .. }));
     }
 }

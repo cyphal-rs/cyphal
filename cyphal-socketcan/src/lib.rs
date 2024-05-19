@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
-#![warn(missing_docs)]
+#![forbid(unsafe_code)]
+#![forbid(missing_docs)]
 #![allow(async_fn_in_trait)]
 
 mod can_socket;
