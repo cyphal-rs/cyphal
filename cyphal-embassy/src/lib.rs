@@ -1,12 +1,8 @@
 #![doc = include_str!("../README.md")]
-// #![forbid(missing_docs)]
+#![forbid(missing_docs)]
 
-use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned};
-use syn::spanned::Spanned;
-use syn::{
-    parse_macro_input, parse_quote, Data, DeriveInput, Fields, GenericParam, Generics, Index,
-};
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
 
 /// Macro from Embassy Bxcan interfaces
 #[proc_macro_derive(Bxcan)]
@@ -17,9 +13,7 @@ pub fn embassy_bxcan_derive(input: proc_macro::TokenStream) -> proc_macro::Token
     // Used in the quasi-quotation below as `#name`.
     let name = input.ident;
 
-    // Add a bound `T: HeapSize` to every type parameter T.
-    let generics = add_trait_bounds(input.generics);
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let expanded = quote! {
         impl #impl_generics cyphal_can::Can<8> for #name #ty_generics #where_clause{
@@ -81,14 +75,4 @@ pub fn embassy_bxcan_derive(input: proc_macro::TokenStream) -> proc_macro::Token
     };
 
     proc_macro::TokenStream::from(expanded)
-}
-
-// Add a bound `T: HeapSize` to every type parameter T.
-fn add_trait_bounds(mut generics: Generics) -> Generics {
-    for param in &mut generics.params {
-        if let GenericParam::Type(ref mut type_param) = *param {
-            type_param.bounds.push(parse_quote!(cyphal_can::Can));
-        }
-    }
-    generics
 }

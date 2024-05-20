@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = [
     "cyphal",
     "cyphal-bxcan",
@@ -12,7 +13,6 @@ members = [
     "cyphal-udpsocket",
     "dsdl",
 ]
-resolver = "2"
 
 [workspace.package]
 edition = "2021"
