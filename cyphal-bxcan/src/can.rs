@@ -2,7 +2,7 @@ use crate::Frame;
 use bxcan::{Can as BxCan, Instance};
 use cyphal_can::{Can as CyphalCan, CanError, CLASSIC_PAYLOAD_SIZE};
 
-/// /// Represents a CAN 2.0 BXCAN interface
+/// Represents a CAN 2.0 BXCAN interface
 pub struct Can<I: Instance> {
     bxcan: BxCan<I>,
 }

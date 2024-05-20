@@ -1,10 +1,16 @@
 [package]
 name = "cyphal-embassy"
-description = "Open Cyphal CAN Transport implementation for embassy]"
+description = "Open Cyphal CAN Transport macros for embassy"
 edition.workspace = true
 readme.workspace = true
 repository.workspace = true
 license.workspace = true
-version = "0.0.0"
+version.workspace = true
+
+[lib]
+proc-macro = true
 
 [dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = "2"
