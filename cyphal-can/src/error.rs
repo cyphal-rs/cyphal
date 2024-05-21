@@ -29,6 +29,9 @@ pub enum CanError {
 
     /// A different error occurred. The original error may contain more information.
     Other,
+
+    /// Invalid CAN ID
+    InvalidId,
 }
 
 impl Display for CanError {
@@ -50,6 +53,7 @@ impl Display for CanError {
                 f,
                 "A different error occurred. The original error may contain more information"
             ),
+            Self::InvalidId => write!(f, "Invalid CAN ID"),
         }
     }
 }

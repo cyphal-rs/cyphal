@@ -1,6 +1,6 @@
-use crate::{MessageCanId, ServiceCanId};
+use crate::{CanError, CanResult, MessageCanId, ServiceCanId};
 use core::cmp::Ordering;
-use cyphal::{CyphalResult, Priority};
+use cyphal::Priority;
 
 /// Represents an Extended CAN ID
 #[derive(Debug, Copy, Clone)]
@@ -14,7 +14,7 @@ pub enum CanId {
 
 impl CanId {
     /// Constructs a new `CanID`
-    pub fn new(id: u32) -> CyphalResult<CanId> {
+    pub fn new(id: u32) -> CanResult<CanId> {
         // check bit 25 to see what type of Id this is
         if (id & 0x0200_0000) == 0 {
             match MessageCanId::try_from(id) {
@@ -57,6 +57,14 @@ impl From<ServiceCanId> for CanId {
     #[inline]
     fn from(id: ServiceCanId) -> Self {
         CanId::Service(id)
+    }
+}
+
+impl TryFrom<u32> for CanId {
+    type Error = CanError;
+
+    fn try_from(value: u32) -> CanResult<Self> {
+        CanId::new(value)
     }
 }
 

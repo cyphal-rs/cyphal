@@ -377,6 +377,7 @@ dependencies = [
  "async-std",
  "crc",
  "cyphal",
+ "embedded-can",
 ]
 
 [[package]]

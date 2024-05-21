@@ -1,5 +1,5 @@
-use crate::CanResult;
-use cyphal::{CyphalError, CyphalResult, NodeId, Priority, ServiceId};
+use crate::{CanError, CanResult};
+use cyphal::{NodeId, Priority, ServiceId};
 
 /// Represents an extended CAN ID used for services
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
@@ -78,22 +78,22 @@ impl ServiceCanId {
 }
 
 impl TryFrom<u32> for ServiceCanId {
-    type Error = CyphalError;
+    type Error = CanError;
 
-    fn try_from(value: u32) -> CyphalResult<Self> {
+    fn try_from(value: u32) -> CanResult<Self> {
         // make sure it's a service id
         if (value & 0x0200_0000) == 0 {
-            return Err(CyphalError::OutOfRange);
+            return Err(CanError::InvalidId);
         }
 
         // make sure reserved bit 23 is set to zero
         if (value & 0x0080_0000) > 0 {
-            return Err(CyphalError::OutOfRange);
+            return Err(CanError::InvalidId);
         }
 
         let priority = match Priority::try_from((value >> 26) as u8) {
             Ok(p) => p,
-            Err(_) => return Err(CyphalError::OutOfRange),
+            Err(_) => return Err(CanError::InvalidId),
         };
         let is_request = (value & 0x0100_0000) > 0;
         let service_id = ((value >> 14) & 0x01FF) as ServiceId;
