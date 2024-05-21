@@ -13,7 +13,6 @@ members = [
     "cyphal-udpsocket",
     "dsdl",
 ]
-exclude = ["examples/embassy-stm32f1", "examples/embassy-stm32g4"]
 
 [workspace.package]
 edition = "2021"
