@@ -1,4 +1,4 @@
-use cyphal::{Message, NodeId, Priority, SubjectId};
+use cyphal::{CyphalResult, Message, NodeId, Priority, SubjectId};
 
 const HEARTBEAT_MESSAGE_SIZE: usize = 65;
 const HEARTBEAT_PORT_ID: SubjectId = 7509;
@@ -8,11 +8,12 @@ pub struct HeartbeatMessage {
     payload: [u8; HEARTBEAT_MESSAGE_SIZE],
 }
 
-// impl HeartbeatMessage {
-//     pub fn new(source: NodeId, payload: [u8; HEARTBEAT_MESSAGE_SIZE]) -> CyphalResult<Self> {
-//         Ok(Self { source, payload })
-//     }
-// }
+impl HeartbeatMessage {
+    pub fn new(source: NodeId, payload: [u8; HEARTBEAT_MESSAGE_SIZE]) -> CyphalResult<Self> {
+        let heartbeat_message = Ok(Self { source, payload });
+        heartbeat_message
+    }
+}
 
 impl Message for HeartbeatMessage {
     const SIZE: usize = HEARTBEAT_MESSAGE_SIZE;
