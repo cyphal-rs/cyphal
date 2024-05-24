@@ -2,11 +2,9 @@
 resolver = "2"
 members = [
     "cyphal",
-    "cyphal-bxcan",
     "cyphal-can",
     "cyphal-dsdl",
     "cyphal-embassy",
-    "cyphal-fdcan",
     "cyphal-serial",
     "cyphal-socketcan",
     "cyphal-udp",
