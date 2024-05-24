@@ -110,12 +110,6 @@ jobs:
     - name: Publish cyphal-can package
       run: cargo publish --package cyphal-can --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-    - name: Publish cyphal-bxcan package
-      run: cargo publish --package cyphal-bxcan --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-    - name: Publish cyphal-fdcan package
-      run: cargo publish --package cyphal-fdcan --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
     - name: Publish cyphal-socketcan package
       run: cargo publish --package cyphal-socketcan --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
