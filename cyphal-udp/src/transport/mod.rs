@@ -54,7 +54,7 @@ impl<const MAX_PAYLOAD_SIZE: usize, U: Udp<MAX_PAYLOAD_SIZE>> Transport
         todo!()
     }
 
-    async fn listen<R>(&mut self, _router: R) -> CyphalResult<()>
+    async fn serve<R>(&mut self, _router: R) -> CyphalResult<()>
     where
         R: Router,
     {

@@ -894,6 +894,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "socketcan-service"
+version = "0.0.9"
+dependencies = [
+ "async-std",
+ "cyphal",
+ "cyphal-can",
+ "cyphal-socketcan",
+]
+
+[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

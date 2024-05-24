@@ -1,38 +1,33 @@
 use cyphal::{CyphalError, CyphalResult, NodeId, Priority, Request, Response, ServiceId};
 
-pub const TEST_REQUEST_SIZE: usize = 0;
-pub const TEST_RESPONSE_SIZE: usize = 2;
+pub const GET_INFO_PORT_ID: ServiceId = 430;
+const GET_INFO_REQUEST_SIZE: usize = 0;
+const GET_INFO_RESPONSE_SIZE: usize = 2;
 
-pub struct TestRequest {
-    priority: Priority,
-    service: ServiceId,
+pub struct GetInfoRequest {
     destination: NodeId,
     source: NodeId,
-    data: [u8; TEST_REQUEST_SIZE],
+    data: [u8; GET_INFO_REQUEST_SIZE],
 }
 
-impl TestRequest {
-    pub fn new(
-        priority: Priority,
-        service: ServiceId,
-        destination: NodeId,
-        source: NodeId,
-        data: [u8; TEST_REQUEST_SIZE],
-    ) -> CyphalResult<Self> {
-        Ok(Self {
-            priority,
-            service,
-            destination,
-            source,
-            data,
-        })
-    }
-}
+// impl GetInfoRequest {
+//     pub fn new(
+//         destination: NodeId,
+//         source: NodeId,
+//         data: [u8; GET_INFO_REQUEST_SIZE],
+//     ) -> CyphalResult<Self> {
+//         Ok(Self {
+//             destination,
+//             source,
+//             data,
+//         })
+//     }
+// }
 
-impl Request for TestRequest {
-    const SIZE: usize = TEST_REQUEST_SIZE;
+impl Request for GetInfoRequest {
+    const SIZE: usize = GET_INFO_REQUEST_SIZE;
 
-    type Response = TestResponse;
+    type Response = GetInfoResponse;
 
     fn new_raw(
         _priority: Priority,
@@ -45,11 +40,11 @@ impl Request for TestRequest {
     }
 
     fn priority(&self) -> Priority {
-        self.priority
+        Priority::Nominal
     }
 
     fn service(&self) -> ServiceId {
-        self.service
+        GET_INFO_PORT_ID
     }
 
     fn destination(&self) -> NodeId {
@@ -65,16 +60,20 @@ impl Request for TestRequest {
     }
 }
 
-pub struct TestResponse {
-    priority: Priority,
-    service: ServiceId,
-    source: NodeId,
+pub struct GetInfoResponse {
     destination: NodeId,
-    data: [u8; TEST_RESPONSE_SIZE],
+    source: NodeId,
+    data: [u8; GET_INFO_RESPONSE_SIZE],
 }
 
-impl Response for TestResponse {
-    const SIZE: usize = TEST_RESPONSE_SIZE;
+impl GetInfoResponse {
+    pub fn new(_source: NodeId, _destination: NodeId) -> CyphalResult<Self> {
+        todo!()
+    }
+}
+
+impl Response for GetInfoResponse {
+    const SIZE: usize = GET_INFO_RESPONSE_SIZE;
 
     fn new_raw(
         priority: Priority,
@@ -83,7 +82,8 @@ impl Response for TestResponse {
         destination: NodeId,
         data: &[u8],
     ) -> CyphalResult<Self> {
-        if data.len() != Self::SIZE {
+        if priority != Priority::Nominal || service != GET_INFO_PORT_ID || data.len() != Self::SIZE
+        {
             return Err(CyphalError::OutOfRange);
         }
 
@@ -91,8 +91,6 @@ impl Response for TestResponse {
         d.copy_from_slice(data);
 
         Ok(Self {
-            priority,
-            service,
             destination,
             source,
             data: d,
@@ -100,11 +98,11 @@ impl Response for TestResponse {
     }
 
     fn priority(&self) -> Priority {
-        self.priority
+        Priority::Nominal
     }
 
     fn service(&self) -> ServiceId {
-        self.service
+        GET_INFO_PORT_ID
     }
 
     fn destination(&self) -> NodeId {

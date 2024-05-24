@@ -7,8 +7,8 @@ pub struct ServiceCanId {
     priority: Priority,
     is_request: bool,
     service: ServiceId,
-    destination: NodeId,
     source: NodeId,
+    destination: NodeId,
 }
 
 impl ServiceCanId {
@@ -17,8 +17,8 @@ impl ServiceCanId {
         priority: Priority,
         is_request: bool,
         service: ServiceId,
-        destination: NodeId,
         source: NodeId,
+        destination: NodeId,
     ) -> CanResult<Self> {
         Ok(ServiceCanId {
             priority,

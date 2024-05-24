@@ -6,11 +6,11 @@ pub trait Response: Sized {
     const SIZE: usize;
 
     /// Constructs a new response
-    fn new(
+    fn new_raw(
         priority: Priority,
         service: ServiceId,
-        destination: NodeId,
         source: NodeId,
+        destination: NodeId,
         data: &[u8],
     ) -> CyphalResult<Self>;
 

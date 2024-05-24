@@ -31,6 +31,16 @@ impl Request for TestRequest {
     const SIZE: usize = TEST_REQUEST_SIZE;
     type Response = TestResponse;
 
+    fn new_raw(
+        _priority: Priority,
+        _service: ServiceId,
+        _source: NodeId,
+        _destination: NodeId,
+        _data: &[u8],
+    ) -> CyphalResult<Self> {
+        todo!()
+    }
+
     fn priority(&self) -> Priority {
         self.priority
     }

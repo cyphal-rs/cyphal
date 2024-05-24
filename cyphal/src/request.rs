@@ -1,4 +1,4 @@
-use crate::{NodeId, Priority, Response, ServiceId};
+use crate::{CyphalResult, NodeId, Priority, Response, ServiceId};
 
 /// Represents a resquest sent to a service
 pub trait Request: Sized {
@@ -7,6 +7,15 @@ pub trait Request: Sized {
 
     /// Type representing the response returned by the service
     type Response: Response;
+
+    /// Constructs a new request
+    fn new_raw(
+        priority: Priority,
+        service: ServiceId,
+        source: NodeId,
+        destination: NodeId,
+        data: &[u8],
+    ) -> CyphalResult<Self>;
 
     /// Returns the priority level of the request
     fn priority(&self) -> Priority;

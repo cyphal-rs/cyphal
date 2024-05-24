@@ -9,7 +9,7 @@ members = [
     "cyphal-socketcan",
     "cyphal-udp",
     "cyphal-udpsocket",
-    "dsdl",
+    "dsdl", "examples/socketcan-service",
 ]
 
 [workspace.package]

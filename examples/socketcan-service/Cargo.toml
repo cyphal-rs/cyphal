@@ -1,0 +1,14 @@
+[package]
+name = "socketcan-service"
+description = "SocketCAN powered service"
+edition.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+async-std = { workspace = true, features = ["attributes"] }
+cyphal = { version = "0.0.9", path = "../../cyphal" }
+cyphal-can = { version = "0.0.9", path = "../../cyphal-can" }
+cyphal-socketcan = { version = "0.0.9", path = "../../cyphal-socketcan" }

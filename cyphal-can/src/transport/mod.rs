@@ -234,8 +234,8 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
             request.priority(),
             true,
             request.service(),
-            request.destination(),
             request.source(),
+            request.destination(),
         )
         .unwrap();
 
@@ -275,11 +275,11 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         payload.push(*value);
                     }
 
-                    return R::Response::new(
+                    return R::Response::new_raw(
                         id.priority(),
                         id.service(),
-                        id.destination(),
                         id.source(),
+                        id.destination(),
                         &payload,
                     );
                 } else {
@@ -311,11 +311,11 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         return Err(CyphalError::Transport);
                     }
 
-                    return R::Response::new(
+                    return R::Response::new_raw(
                         id.priority(),
                         id.service(),
-                        id.destination(),
                         id.source(),
+                        id.destination(),
                         &payload,
                     );
                 }
@@ -325,7 +325,7 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
         Err(CyphalError::Transport)
     }
 
-    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    async fn serve<R>(&mut self, router: R) -> CyphalResult<()>
     where
         R: Router,
     {
@@ -369,16 +369,17 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         }
                     }
 
-                    router
+                    //TODO: do something with result
+                    let _result = router
                         .process_message(id.priority(), id.subject(), id.source(), &payload)
                         .await;
                 }
             }
 
             if let Some(requests) = self.inbound_queue.get_request_frames() {
+                let mut payload: Vec<u8> = Vec::new();
                 for kvp in requests {
                     let mut queue = kvp.1;
-                    let mut payload: Vec<u8> = Vec::new();
                     let first_frame = queue.pop_front().unwrap();
                     let id = match first_frame.id() {
                         CanId::Message(_) => return Err(CyphalError::Transport),
@@ -416,7 +417,8 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                         }
                     }
 
-                    router
+                    //TODO: do something with result
+                    if let Ok(Some(response)) = router
                         .process_request(
                             id.priority(),
                             id.service(),
@@ -424,7 +426,19 @@ impl<const PAYLOAD_SIZE: usize, C: Can<PAYLOAD_SIZE>> Transport for CanTransport
                             id.destination(),
                             &payload,
                         )
-                        .await;
+                        .await
+                    {
+                        let id = ServiceCanId::new(
+                            response.priority(),
+                            false,
+                            response.service(),
+                            response.destination(),
+                            response.source(),
+                        )
+                        .unwrap();
+
+                        self.enqueue_frames(id.into(), response.data())?;
+                    }
                 }
             }
         }

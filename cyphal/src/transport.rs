@@ -22,7 +22,7 @@ pub trait Transport {
         R: Request;
 
     /// Listen to incoming traffic
-    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    async fn serve<R>(&mut self, router: R) -> CyphalResult<()>
     where
         R: Router;
 }
@@ -75,7 +75,7 @@ mod test {
         let router = TestRouter {};
 
         let mut transport = TestTransport::new();
-        let result = transport.listen(router).await;
+        let result = transport.serve(router).await;
 
         assert!(result.is_ok())
     }

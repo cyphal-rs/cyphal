@@ -53,16 +53,16 @@ impl Transport for TestTransport {
             data.push(i + 1);
         }
 
-        Ok(R::Response::new(
+        Ok(R::Response::new_raw(
             request.priority(),
             request.service(),
-            request.destination(),
             request.source(),
+            request.destination(),
             &data,
         )?)
     }
 
-    async fn listen<R>(&mut self, router: R) -> CyphalResult<()>
+    async fn serve<R>(&mut self, router: R) -> CyphalResult<()>
     where
         R: Router,
     {

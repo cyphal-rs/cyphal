@@ -4,19 +4,19 @@ use crate::{CyphalError, CyphalResult, NodeId, Priority, Response, ServiceId};
 pub struct TestResponse {
     priority: Priority,
     service: ServiceId,
-    destination: NodeId,
     source: NodeId,
+    destination: NodeId,
     data: [u8; TEST_RESPONSE_SIZE],
 }
 
 impl Response for TestResponse {
     const SIZE: usize = TEST_RESPONSE_SIZE;
 
-    fn new(
+    fn new_raw(
         priority: Priority,
         service: ServiceId,
-        destination: NodeId,
         source: NodeId,
+        destination: NodeId,
         data: &[u8],
     ) -> CyphalResult<Self> {
         if data.len() != Self::SIZE {
