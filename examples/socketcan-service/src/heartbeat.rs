@@ -10,8 +10,7 @@ pub struct HeartbeatMessage {
 
 impl HeartbeatMessage {
     pub fn new(source: NodeId, payload: [u8; HEARTBEAT_MESSAGE_SIZE]) -> CyphalResult<Self> {
-        let heartbeat_message = Ok(Self { source, payload });
-        heartbeat_message
+        Ok(Self { source, payload })
     }
 }
 
