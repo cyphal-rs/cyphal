@@ -1,10 +1,10 @@
-use crate::{DsdlResult, File, Statement};
-use std::{collections::HashMap, path::Path};
+use crate::{DsdlResult, File};
+use std::{collections::HashMap, fs, path::Path};
 
 /// Represents a DSDL parser
 #[derive(Debug)]
 pub struct Parser {
-    files: HashMap<File, Vec<Statement>>,
+    files: HashMap<String, File>,
 }
 
 impl Parser {
@@ -16,69 +16,97 @@ impl Parser {
     }
 
     /// Reads a DSDL file
-    pub fn parse_dsdl(&mut self, path: &Path) -> DsdlResult<Vec<Statement>> {
-        let tuple = File::parse(path)?;
-        self.files.insert(tuple.0, tuple.1.clone());
+    pub fn parse_dsdl(&mut self, path: &Path) -> DsdlResult<&File> {
+        let path = fs::canonicalize(path)?;
+        let file = File::parse(&path)?;
+        let path = file.path().to_string();
+        self.files.insert(path.clone(), file);
 
-        Ok(tuple.1)
+        Ok(self.files.get(&path).unwrap())
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{DsdlResult, Parser, Statement};
+    use crate::Parser;
     use std::path::PathBuf;
+
+    const UAVCAN: &str = "tests/assets/public_regulated_data_types/uavcan";
 
     #[test]
     #[ignore = "not implemented"]
     fn test_7509_heartbeat_1_0() {
-        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/7509.Heartbeat.1.0.dsdl";
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(UAVCAN);
+        path.push("node/7509.Heartbeat.1.0.dsdl");
 
-        let result = parse_dsdl(dsdl);
+        let mut parser = Parser::new().expect("Could not construct parser");
+        let result = parser.parse_dsdl(&path);
         assert!(result.is_ok());
 
-        let statements = result.unwrap();
-        assert_eq!(statements.len(), 37);
+        let file = result.unwrap();
+        assert_eq!(file.name(), "Heartbeat");
+        assert_eq!(file.major(), 1);
+        assert_eq!(file.minor(), 0);
+        assert_eq!(file.port(), Some(&7509));
+        assert_eq!(file.path(), path.to_str().unwrap());
+        assert_eq!(file.statements().len(), 37);
     }
 
     #[test]
     fn test_health_1_0() {
-        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Health.1.0.dsdl";
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(UAVCAN);
+        path.push("node/Health.1.0.dsdl");
 
-        let result = parse_dsdl(dsdl);
+        let mut parser = Parser::new().expect("Could not construct parser");
+        let result = parser.parse_dsdl(&path);
         assert!(result.is_ok());
 
-        let statements = result.unwrap();
-        assert_eq!(statements.len(), 22);
+        let file = result.unwrap();
+        assert_eq!(file.name(), "Health");
+        assert_eq!(file.major(), 1);
+        assert_eq!(file.minor(), 0);
+        assert_eq!(file.port(), None);
+        assert_eq!(file.path(), path.to_str().unwrap());
+        assert_eq!(file.statements().len(), 22);
     }
 
     #[test]
     fn test_mode_1_0() {
-        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Mode.1.0.dsdl";
-        let result = parse_dsdl(dsdl);
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(UAVCAN);
+        path.push("node/Mode.1.0.dsdl");
 
+        let mut parser = Parser::new().expect("Could not construct parser");
+        let result = parser.parse_dsdl(&path);
         assert!(result.is_ok());
 
-        let statements = result.unwrap();
-        assert_eq!(statements.len(), 18);
+        let file = result.unwrap();
+        assert_eq!(file.name(), "Mode");
+        assert_eq!(file.major(), 1);
+        assert_eq!(file.minor(), 0);
+        assert_eq!(file.port(), None);
+        assert_eq!(file.path(), path.to_str().unwrap());
+        assert_eq!(file.statements().len(), 18);
     }
 
     #[test]
     fn test_version_1_0() {
-        let dsdl = "tests/assets/public_regulated_data_types/uavcan/node/Version.1.0.dsdl";
-        let result = parse_dsdl(dsdl);
-
-        assert!(result.is_ok());
-
-        let statements = result.unwrap();
-        assert_eq!(statements.len(), 7);
-    }
-
-    fn parse_dsdl(dsdl: &str) -> DsdlResult<Vec<Statement>> {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        path.push(dsdl);
+        path.push(UAVCAN);
+        path.push("node/Version.1.0.dsdl");
 
         let mut parser = Parser::new().expect("Could not construct parser");
-        parser.parse_dsdl(&path)
+        let result = parser.parse_dsdl(&path);
+        assert!(result.is_ok());
+
+        let file = result.unwrap();
+        assert_eq!(file.name(), "Version");
+        assert_eq!(file.major(), 1);
+        assert_eq!(file.minor(), 0);
+        assert_eq!(file.port(), None);
+        assert_eq!(file.path(), path.to_str().unwrap());
+        assert_eq!(file.statements().len(), 7);
     }
 }

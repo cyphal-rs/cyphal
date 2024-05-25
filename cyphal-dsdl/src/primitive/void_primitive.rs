@@ -25,8 +25,8 @@ impl VoidPrimitive {
     }
 
     /// Returns the comment if it has one
-    pub fn comment(&self) -> &Option<Comment> {
-        &self.comment
+    pub fn comment(&self) -> Option<&Comment> {
+        self.comment.as_ref()
     }
 
     pub(crate) fn parse(_line: &str) -> DsdlResult<Self> {

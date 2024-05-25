@@ -53,12 +53,12 @@ impl FloatPrimitive {
     }
 
     /// Returns the value if it has one
-    pub fn value(&self) -> &Option<f64> {
-        &self.value
+    pub fn value(&self) -> Option<&f64> {
+        self.value.as_ref()
     }
 
     /// Returns the comment if it has one
-    pub fn comment(&self) -> &Option<Comment> {
-        &self.comment
+    pub fn comment(&self) -> Option<&Comment> {
+        self.comment.as_ref()
     }
 }

@@ -25,9 +25,24 @@ pub struct Generate {
 
 impl Generate {
     pub fn execute(&self) -> ClapResult<()> {
-        let _parser = match Parser::new() {
+        let mut parser = match Parser::new() {
             Ok(p) => p,
-            Err(_) => return Err(Error::raw(ErrorKind::Io, "Could not create parser")),
+            Err(e) => {
+                return Err(Error::raw(
+                    ErrorKind::Io,
+                    format!("Could not create parser: {}", e),
+                ))
+            }
+        };
+
+        let file = match parser.parse_dsdl(&self.path) {
+            Ok(s) => s,
+            Err(e) => {
+                return Err(Error::raw(
+                    ErrorKind::Io,
+                    format!("Could not parse DSDL file: {}", e),
+                ))
+            }
         };
 
         let generator = MessageGenerator::new(self.name.clone())?;

@@ -57,8 +57,8 @@ impl Composite {
     }
 
     /// Returns an optional comment
-    pub fn comment(&self) -> &Option<Comment> {
-        &self.comment
+    pub fn comment(&self) -> Option<&Comment> {
+        self.comment.as_ref()
     }
 
     pub(crate) fn parse(line: &str) -> DsdlResult<Composite> {

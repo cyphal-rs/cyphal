@@ -13,18 +13,48 @@ const ERROR_MAJOR_VERSION: &str = "Could not parse the DSDL file name major vers
 const ERROR_MINOR_VERSION: &str = "Could not parse the DSDL file name minor version number";
 
 /// Represents a file
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug)]
 pub struct File {
     port: Option<u16>,
     name: String,
     major: u8,
     minor: u8,
     path: String,
+    statements: Vec<Statement>,
 }
 
 impl File {
-    /// Constructs a new file
-    pub fn new(path: &Path) -> DsdlResult<Self> {
+    /// Returns the port id if one exists
+    pub fn port(&self) -> Option<&u16> {
+        self.port.as_ref()
+    }
+
+    /// Returns the file name
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Returns the major version
+    pub fn major(&self) -> u8 {
+        self.major
+    }
+
+    /// Returns the minor version
+    pub fn minor(&self) -> u8 {
+        self.minor
+    }
+
+    /// Returns the path
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    /// Returns the DSDL statements
+    pub fn statements(&self) -> &[Statement] {
+        &self.statements
+    }
+
+    pub(crate) fn parse(path: &Path) -> DsdlResult<Self> {
         // Make sure it's not a directory
         if path.is_dir() {
             return Err(DsdlError::File(ERROR_DIECTORY.to_string()));
@@ -89,38 +119,6 @@ impl File {
             Ok(value) => value,
             Err(_) => return Err(DsdlError::File(ERROR_MINOR_VERSION.to_string())),
         };
-
-        Ok(File {
-            port: port_id,
-            name: short_name,
-            major,
-            minor,
-            path: path.to_str().unwrap().to_string(),
-        })
-    }
-
-    /// Returns the port id if one exists
-    pub fn port(&self) -> &Option<u16> {
-        &self.port
-    }
-
-    /// Returns the file name
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Returns the major version
-    pub fn major(&self) -> u8 {
-        self.major
-    }
-
-    /// Returns the minor version
-    pub fn minor(&self) -> u8 {
-        self.minor
-    }
-
-    pub(crate) fn parse(path: &Path) -> DsdlResult<(Self, Vec<Statement>)> {
-        let file = Self::new(path)?;
 
         let target = std::fs::File::open(path)?;
         let mut reader = BufReader::new(target);
@@ -195,7 +193,14 @@ impl File {
             return Err(DsdlError::Parse("File is empty".to_string()));
         }
 
-        Ok((file, statements))
+        Ok(File {
+            port: port_id,
+            name: short_name,
+            major,
+            minor,
+            path: path.to_str().unwrap().to_string(),
+            statements,
+        })
     }
 }
 
@@ -223,7 +228,7 @@ mod test {
     fn test_directory() {
         let target = Path::new("/");
 
-        let result = File::new(target);
+        let result = File::parse(target);
 
         assert!(result.is_err());
         let err = result.err().unwrap();
@@ -234,7 +239,7 @@ mod test {
     fn test_invalid_extention() {
         let target = Path::new("432.GetInfo.1.0.bad");
 
-        let result = File::new(target);
+        let result = File::parse(target);
 
         assert!(result.is_err());
         let err = result.err().unwrap();
@@ -249,7 +254,7 @@ mod test {
         ];
 
         for target in targets.iter() {
-            let result = File::new(target);
+            let result = File::parse(target);
 
             assert!(result.is_err());
             let err = result.err().unwrap();
@@ -261,7 +266,7 @@ mod test {
     fn test_invalid_port() {
         let target = Path::new("4O2.GetInfo.1.0.dsdl");
 
-        let result = File::new(target);
+        let result = File::parse(target);
 
         assert!(result.is_err());
         let err = result.err().unwrap();
@@ -272,7 +277,7 @@ mod test {
     fn test_invalid_major_version() {
         let target = Path::new("432.GetInfo.a.0.dsdl");
 
-        let result = File::new(target);
+        let result = File::parse(target);
 
         assert!(result.is_err());
         let err = result.err().unwrap();
@@ -283,7 +288,7 @@ mod test {
     fn test_invalid_minor_version() {
         let target = Path::new("432.GetInfo.1.a.dsdl");
 
-        let result = File::new(target);
+        let result = File::parse(target);
 
         assert!(result.is_err());
         let err = result.err().unwrap();
