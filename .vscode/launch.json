@@ -141,6 +141,23 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}/dsdl"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "SocketCAN Service",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--package=socketcan-service"
+                ],
+                "filter": {
+                    "name": "socketcan-service",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/examples/socketcan-service"
         }
     ]
 }
